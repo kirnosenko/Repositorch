@@ -1,6 +1,6 @@
 using System;
 
-namespace Repositorch.Data
+namespace Repositorch.Data.Entities
 {
 	public interface IDataStore
 	{

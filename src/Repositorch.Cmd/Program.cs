@@ -1,8 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using Repositorch.Data;
+using System.Diagnostics;
 using Repositorch.Data.Entities;
+using Repositorch.Data.Entities.Mapping;
+using Repositorch.Data.VersionControl;
+using Repositorch.Data.VersionControl.Git;
 
 namespace Repositorch
 {
@@ -10,13 +11,35 @@ namespace Repositorch
 	{
 		static void Main(string[] args)
 		{
-			IDataStore data = new SqlCeDataStore("d:/123.sdf");
-			using (var s = data.OpenSession())
-			{
-				s.Add(new Branch());
-				s.SubmitChanges();
-			}
+			Mapping();
 			Console.ReadKey();
+		}
+		static void Mapping()
+		{
+			string repo = "D:/src/git/.git";
+
+			SqlCeDataStore data = new SqlCeDataStore("d:/123.sdf");
+			IGitClient gitClient = new CommandLineGitClient(repo);
+			IVcsData vcsData = new GitData(gitClient);
+
+			DataMapper mapping = new DataMapper(vcsData);
+			var commitMapper = new CommitMapper(vcsData);
+			mapping.RegisterMapper(commitMapper);
+			var bugFixMapper = new BugFixMapper(vcsData, new BugFixDetectorBasedOnLogMessage());
+			mapping.RegisterMapper(bugFixMapper);
+			mapping.CreateDataBase = true;
+			mapping.StopRevision = "8f41523fc1a8cd127ff39fa111b3b5bb5105cc84";
+
+			using (ConsoleTimeLogger.Start("mapping time"))
+			{
+				mapping.OnRevisionMapping += (r, n) => Console.WriteLine(
+					"mapping of revision {0}{1}",
+					r,
+					r != n ? string.Format(" ({0})", n) : ""
+				);
+
+				mapping.Map(data);
+			}
 		}
 	}
 }

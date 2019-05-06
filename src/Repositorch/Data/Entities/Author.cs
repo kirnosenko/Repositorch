@@ -4,14 +4,14 @@ using System.Collections.Generic;
 namespace Repositorch.Data.Entities
 {
 	/// <summary>
-	/// Branch that was non-fast-forward merged.
+	/// Author that made commits.
 	/// </summary>
 	/*
-	public class Branch
+	public class Author
 	{
 		public int Id { get; set; }
-		public int Mask { get; set; }
-		public int Offset { get; set; }
+		public string Name { get; set; }
+		public string Mail { get; set; }
 
 		public List<Commit> Commits { get; set; }
 	}*/
