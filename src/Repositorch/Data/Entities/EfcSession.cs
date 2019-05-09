@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Repositorch.Data.Entities
 {
-	public class EfSession : DbContext, ISession
+	public class EfcSession : DbContext, ISession
 	{
 		//public DbSet<Author> Authors { get; set; }
 		//public DbSet<Branch> Branches { get; set; }
@@ -15,7 +15,7 @@ namespace Repositorch.Data.Entities
 		private Action<DbContextOptionsBuilder> config;
 		private Dictionary<Type, object> tables;
 
-		public EfSession(Action<DbContextOptionsBuilder> config)
+		public EfcSession(Action<DbContextOptionsBuilder> config)
 			: base()
 		{
 			this.config = config;

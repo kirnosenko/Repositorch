@@ -13,7 +13,7 @@ namespace Repositorch.Data.Entities
 		}
 		ISession IDataStore.OpenSession(bool readOnly)
 		{
-			return new EfSession(c =>
+			return new EfcSession(c =>
 			{
 				c.UseSqlCe(string.Format("Data Source={0}", fileName));
 			})
