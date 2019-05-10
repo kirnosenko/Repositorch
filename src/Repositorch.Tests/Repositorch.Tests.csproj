@@ -134,6 +134,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\Entities\BaseRepositoryTest.cs" />
+    <Compile Include="Data\Entities\DSL\Mapping\BugFixMappingExpressionTest.cs" />
+    <Compile Include="Data\Entities\DSL\Mapping\CommitMappingExpressionTest.cs" />
+    <Compile Include="Data\Entities\DSL\Mapping\RepositoryMappingExpressionTest.cs" />
+    <Compile Include="Data\Entities\DSL\Selection\BugFixSelectionExpressionTest.cs" />
+    <Compile Include="Data\Entities\DSL\Selection\CommitSelectionExpressionTest.cs" />
     <Compile Include="Data\Entities\InMemoryDataStore.cs" />
     <Compile Include="Data\Entities\InMemoryDataStoreTest.cs" />
     <Compile Include="Data\Entities\InMemorySession.cs" />
@@ -142,6 +147,8 @@
     <Compile Include="Data\Entities\Mapping\BugFixMapperTest.cs" />
     <Compile Include="Data\Entities\Mapping\CommitMapperTest.cs" />
     <Compile Include="Data\Entities\Mapping\DataMapperTest.cs" />
+    <Compile Include="Data\VersionControl\GitDataTest.cs" />
+    <Compile Include="Data\VersionControl\GitLogTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -157,9 +164,7 @@
       <Name>Repositorch</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Data\VersionControl\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
