@@ -29,7 +29,7 @@ namespace Repositorch.Data.VersionControl.Git
 				return null;
 			}
 		}
-		public ILog Log(string revision)
+		public Log Log(string revision)
 		{
 			using (var log = git.Log(revision))
 			{

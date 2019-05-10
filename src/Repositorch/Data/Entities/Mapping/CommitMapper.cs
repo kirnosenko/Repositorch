@@ -20,7 +20,7 @@ namespace Repositorch.Data.Entities.Mapping
 		}
 		protected virtual CommitMappingExpression ExpressionFor(RepositoryMappingExpression expression)
 		{
-			ILog log = vcsData.Log(expression.Revision);
+			Log log = vcsData.Log(expression.Revision);
 
 			return expression.AddCommit(log.Revision)
 				.By(log.Author)

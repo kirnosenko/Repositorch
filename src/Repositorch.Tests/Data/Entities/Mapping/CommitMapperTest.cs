@@ -2,8 +2,6 @@
 using System.Linq;
 using Xunit;
 using NSubstitute;
-using Repositorch.Data.VersionControl;
-using Repositorch.Data.Entities.DSL.Mapping;
 
 namespace Repositorch.Data.Entities.Mapping
 {
@@ -18,7 +16,7 @@ namespace Repositorch.Data.Entities.Mapping
 		[Fact]
 		public void Should_add_commit()
 		{
-			var log = CreateLog("1", "Ivan", DateTime.Today, "none");
+			var log = new TestLog("1", "Ivan", DateTime.Today, "none");
 			vcsData.Log(Arg.Is<string>("1")).Returns(log);
 			
 			mappingDSL.Revision = "1";

@@ -10,6 +10,6 @@ namespace Repositorch.Data.VersionControl
 	{
 		string RevisionByNumber(int revisionNumber);
 
-		ILog Log(string revision);
+		Log Log(string revision);
 	}
 }

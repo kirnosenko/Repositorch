@@ -62,11 +62,10 @@ M	tests/regressiontests/staticfiles_tests/tests.py".Replace("'", "\"");
 		[Fact]
 		public void Should_keep_alphabetically_sorted_list_of_touched_paths()
 		{
-			/*
 			log = new GitLog(log_1.ToStream());
-			
-			log.TouchedFiles.Select(x => x.Path).ToArray()
-				.Should().Have.SameSequenceAs(new string[]
+
+			Assert.Equal(
+				new string[]
 				{
 					"/cache.h",
 					"/init-db.c",
@@ -74,67 +73,69 @@ M	tests/regressiontests/staticfiles_tests/tests.py".Replace("'", "\"");
 					"/read-tree.c",
 					"/README",
 					"/update-cache.c"
-				});*/
+				},
+				log.TouchedFiles.Select(x => x.Path));
 		}
 		[Fact]
 		public void Should_interpret_renamed_file_as_deleted_and_added()
 		{
-			/*
 			log = new GitLog(log_2.ToStream());
-			
-			log.TouchedFiles
-				.Where(x => x.Action == TouchedFile.TouchedFileAction.DELETED)
-				.Select(x => x.Path).ToArray()
-					.Should().Have.SameValuesAs(new string[]
-					{
-						"/show-diff.c",
-						"/git-export.c",
-						"/git-mktag.c"
-					});
-			log.TouchedFiles
-				.Where(x => x.Action == TouchedFile.TouchedFileAction.ADDED)
-				.Select(x => x.Path).ToArray()
-					.Should().Have.SameValuesAs(new string[]
-					{
-						"/diff-files.c",
-						"/export.c",
-						"/mktag.c"
-					});*/
+
+			Assert.Equal(
+				new string[]
+				{
+					"/git-export.c",
+					"/git-mktag.c",
+					"/show-diff.c"
+				},
+				log.TouchedFiles
+					.Where(x => x.Action == TouchedFile.TouchedFileAction.DELETED)
+					.Select(x => x.Path));
+
+			Assert.Equal(
+				new string[]
+				{
+					"/diff-files.c",
+					"/export.c",
+					"/mktag.c"
+				},
+				log.TouchedFiles
+					.Where(x => x.Action == TouchedFile.TouchedFileAction.ADDED)
+					.Select(x => x.Path));
 		}
 		[Fact]
 		public void Should_keep_source_path_for_renamed_path()
-		{/*
+		{
 			log = new GitLog(log_2.ToStream());
-			
-			log.TouchedFiles
-				.Single(x => x.Path == "/export.c")
-				.Satisfy(x =>
-					x.SourcePath == "/git-export.c"
-					&&
-					x.SourceRevision == null
-				);*/
+
+			Assert.Equal(
+				"/git-export.c",
+				log.TouchedFiles
+					.Single(x => x.Path == "/export.c")
+					.SourcePath);
 		}
 		[Fact]
 		public void Should_keep_information_about_copied_paths()
-		{/*
+		{
 			log = new GitLog(log_3.ToStream());
 
-			log.TouchedFiles.Count()
-				.Should().Be(2);
-			log.TouchedFiles
-				.Where(x => x.Action == TouchedFile.TouchedFileAction.ADDED)
-				.Count()
-					.Should().Be(2);*/
+			Assert.Equal(
+				2,
+				log.TouchedFiles.Count());
+			Assert.Equal(
+				2,
+				log.TouchedFiles
+					.Where(x => x.Action == TouchedFile.TouchedFileAction.ADDED)
+					.Count());
 		}
 		[Fact]
 		public void Should_parse_filename_with_special_symbols()
-		{/*
+		{
 			log = new GitLog(log_4.ToStream());
-			
-			log.TouchedFiles
-				.Where(x => x.Path == "/tests/regressiontests/staticfiles_tests/apps/test/static/test/spec\\314\\247ial.txt")
-				.Count()
-					.Should().Be(1);*/
+
+			Assert.Single(
+				log.TouchedFiles
+					.Where(x => x.Path == "/tests/regressiontests/staticfiles_tests/apps/test/static/test/spec\\314\\247ial.txt"));
 		}
 	}
 }
