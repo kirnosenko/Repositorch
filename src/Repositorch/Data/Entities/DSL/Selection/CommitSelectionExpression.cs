@@ -60,11 +60,14 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			{
 				return this;
 			}
+			var revisionNumber = Queryable<Commit>()
+					.Single(x => x.Revision == revision)
+					.OrderedNumber;
 			return Reselect(s =>
 				from c in s
-				let revisionNumber = Queryable<Commit>()
-					.Single(x => x.Revision == revision)
-					.OrderedNumber
+				//let revisionNumber = Queryable<Commit>()
+				//	.Single(x => x.Revision == revision)
+				//	.OrderedNumber
 				where
 					c.OrderedNumber < revisionNumber
 				select c
@@ -85,11 +88,14 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			{
 				return this;
 			}
+			var revisionNumber = Queryable<Commit>()
+					.Single(x => x.Revision == revision)
+					.OrderedNumber;
 			return Reselect(s =>
 				from c in s
-				let revisionNumber = Queryable<Commit>()
-					.Single(x => x.Revision == revision)
-					.OrderedNumber
+				//let revisionNumber = Queryable<Commit>()
+				//	.Single(x => x.Revision == revision)
+				//	.OrderedNumber
 				where
 					c.OrderedNumber <= revisionNumber
 				select c
@@ -110,11 +116,14 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			{
 				return this;
 			}
+			var revisionNumber = Queryable<Commit>()
+					.Single(x => x.Revision == revision)
+					.OrderedNumber;
 			return Reselect(s =>
 				from c in s
-				let revisionNumber = Queryable<Commit>()
-					.Single(x => x.Revision == revision)
-					.OrderedNumber
+				//let revisionNumber = Queryable<Commit>()
+				//	.Single(x => x.Revision == revision)
+				//	.OrderedNumber
 				where
 					c.OrderedNumber >= revisionNumber
 				select c
@@ -135,11 +144,14 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			{
 				return this;
 			}
+			var revisionNumber = Queryable<Commit>()
+					.Single(x => x.Revision == revision)
+					.OrderedNumber;
 			return Reselect(s =>
 				from c in s
-				let revisionNumber = Queryable<Commit>()
-					.Single(x => x.Revision == revision)
-					.OrderedNumber
+				//let revisionNumber = Queryable<Commit>()
+				//	.Single(x => x.Revision == revision)
+				//	.OrderedNumber
 				where
 					c.OrderedNumber > revisionNumber
 				select c
