@@ -8,33 +8,6 @@ namespace Repositorch.Data.Entities.DSL.Selection
 	public class CommitSelectionExpressionTest : BaseRepositoryTest
 	{
 		[Fact]
-		public void Should_select_commits_by_author()
-		{
-			mappingDSL
-				.AddCommit("1").By("alan")
-			.Submit()
-				.AddCommit("2").By("bob")
-			.Submit()
-				.AddCommit("3").By("alan")
-			.Submit();
-
-			Assert.Equal(
-				new string[] { "1", "3" },
-				selectionDSL
-					.Commits().AuthorIs("alan")
-					.Select(c => c.Revision));
-			Assert.Equal(
-				new string[] { "2" },
-				selectionDSL
-					.Commits().AuthorIs("bob")
-					.Select(c => c.Revision));
-			Assert.Equal(
-				new string[] { "2" },
-				selectionDSL
-					.Commits().AuthorIsNot("alan")
-					.Select(c => c.Revision));
-		}
-		[Fact]
 		public void Should_select_commits_by_date()
 		{
 			mappingDSL

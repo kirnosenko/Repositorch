@@ -9,9 +9,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Data\Entities\DSL\Mapping\" />
-    <Folder Include="Data\Entities\DSL\Selection\" />
-    <Folder Include="Data\Entities\Mapping\" />
     <Folder Include="Data\VersionControl\Git\" />
     <Folder Include="Utils\Diagnostics\" />
   </ItemGroup>

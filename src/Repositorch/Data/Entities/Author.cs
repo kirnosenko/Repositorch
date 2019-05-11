@@ -6,13 +6,12 @@ namespace Repositorch.Data.Entities
 	/// <summary>
 	/// Author that made commits.
 	/// </summary>
-	/*
 	public class Author
 	{
 		public int Id { get; set; }
 		public string Name { get; set; }
-		public string Mail { get; set; }
+		public string Email { get; set; }
 
-		public List<Commit> Commits { get; set; }
-	}*/
+		public List<Commit> Commits { get; set; } = new List<Commit>();
+	}
 }

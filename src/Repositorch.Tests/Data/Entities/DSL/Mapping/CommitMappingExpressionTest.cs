@@ -11,7 +11,6 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		{
 			mappingDSL
 				.AddCommit("1")
-					.By("alan")
 					.At(DateTime.Today)
 					.WithMessage("log")
 			.Submit();
@@ -19,7 +18,6 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			Assert.Equal(1, Get<Commit>().Count());
 			var c = Get<Commit>().Single();
 			Assert.Equal("1", c.Revision);
-			Assert.Equal("alan", c.Author);
 			Assert.Equal(DateTime.Today, c.Date);
 			Assert.Equal("log", c.Message);
 		}
@@ -29,13 +27,13 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			mappingDSL
 				.AddCommit("1")
 			.Submit()
-				.Commit("1").By("alan")
+				.Commit("1").WithMessage("message")
 			.Submit();
 
 			Assert.Equal(1, Get<Commit>().Count());
 			var c = Get<Commit>().Single();
 			Assert.Equal("1", c.Revision);
-			Assert.Equal("alan", c.Author);
+			Assert.Equal("message", c.Message);
 		}
 		[Fact]
 		public void Should_add_commit_with_incremental_order_number()

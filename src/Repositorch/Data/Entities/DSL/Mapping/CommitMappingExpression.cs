@@ -38,11 +38,6 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		{
 			entity = commit;
 		}
-		public CommitMappingExpression By(string author)
-		{
-			entity.Author = author;
-			return this;
-		}
 		public CommitMappingExpression WithMessage(string message)
 		{
 			entity.Message = message;

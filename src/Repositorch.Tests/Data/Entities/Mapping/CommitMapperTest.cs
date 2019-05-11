@@ -26,7 +26,6 @@ namespace Repositorch.Data.Entities.Mapping
 			Assert.Equal(1, Get<Commit>().Count());
 			var commit = Get<Commit>().Single();
 			Assert.Equal(log.Revision, commit.Revision);
-			Assert.Equal(log.Author, commit.Author);
 			Assert.Equal(log.Date, commit.Date);
 			Assert.Equal(log.Message, commit.Message);
 		}

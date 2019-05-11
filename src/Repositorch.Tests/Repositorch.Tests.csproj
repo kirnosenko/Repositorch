@@ -134,14 +134,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\Entities\BaseRepositoryTest.cs" />
+    <Compile Include="Data\Entities\DSL\Mapping\AuthorMappingExpressionTest.cs" />
     <Compile Include="Data\Entities\DSL\Mapping\BugFixMappingExpressionTest.cs" />
     <Compile Include="Data\Entities\DSL\Mapping\CommitMappingExpressionTest.cs" />
     <Compile Include="Data\Entities\DSL\Mapping\RepositoryMappingExpressionTest.cs" />
+    <Compile Include="Data\Entities\DSL\Selection\AuthorSelectionExpressionTest.cs" />
     <Compile Include="Data\Entities\DSL\Selection\BugFixSelectionExpressionTest.cs" />
     <Compile Include="Data\Entities\DSL\Selection\CommitSelectionExpressionTest.cs" />
     <Compile Include="Data\Entities\InMemoryDataStore.cs" />
     <Compile Include="Data\Entities\InMemoryDataStoreTest.cs" />
     <Compile Include="Data\Entities\InMemorySession.cs" />
+    <Compile Include="Data\Entities\Mapping\AuthorMapperTest.cs" />
     <Compile Include="Data\Entities\Mapping\BaseMapperTest.cs" />
     <Compile Include="Data\Entities\Mapping\BugFixDetectorBasedOnLogMessageTest.cs" />
     <Compile Include="Data\Entities\Mapping\BugFixMapperTest.cs" />

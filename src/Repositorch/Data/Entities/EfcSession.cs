@@ -7,7 +7,7 @@ namespace Repositorch.Data.Entities
 {
 	public class EfcSession : DbContext, ISession
 	{
-		//public DbSet<Author> Authors { get; set; }
+		public DbSet<Author> Authors { get; set; }
 		//public DbSet<Branch> Branches { get; set; }
 		public DbSet<Commit> Commits { get; set; }
 		public DbSet<BugFix> BugFixes { get; set; }
@@ -23,7 +23,7 @@ namespace Repositorch.Data.Entities
 			ReadOnly = false;
 
 			Database.EnsureCreated();
-			//tables.Add(typeof(Author), Authors);
+			tables.Add(typeof(Author), Authors);
 			//tables.Add(typeof(Branch), Branches);
 			tables.Add(typeof(Commit), Commits);
 			tables.Add(typeof(BugFix), BugFixes);
@@ -84,12 +84,12 @@ namespace Repositorch.Data.Entities
 		}
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
-			/*
 			modelBuilder.Entity<Author>()
-				.HasMany(b => b.Commits)
+				.HasMany(a => a.Commits)
 				.WithOne(c => c.Author)
 				.HasForeignKey(c => c.AuthorId);
-			modelBuilder.Entity<Branch>()
+			
+			/*modelBuilder.Entity<Branch>()
 				.HasMany(b => b.Commits)
 				.WithOne(c => c.Branch)
 				.HasForeignKey(c => c.BranchId);

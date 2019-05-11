@@ -23,7 +23,6 @@ namespace Repositorch.Data.Entities.Mapping
 			Log log = vcsData.Log(expression.Revision);
 
 			return expression.AddCommit(log.Revision)
-				.By(log.Author)
 				.At(log.Date)
 				.WithMessage(log.Message);
 		}

@@ -25,6 +25,8 @@ namespace Repositorch
 			DataMapper mapping = new DataMapper(vcsData);
 			var commitMapper = new CommitMapper(vcsData);
 			mapping.RegisterMapper(commitMapper);
+			var authorMapper = new AuthorMapper(vcsData);
+			mapping.RegisterMapper(authorMapper);
 			var bugFixMapper = new BugFixMapper(vcsData, new BugFixDetectorBasedOnLogMessage());
 			mapping.RegisterMapper(bugFixMapper);
 			mapping.CreateDataBase = true;

@@ -17,14 +17,6 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			: base(parentExp)
 		{
 		}
-		public CommitSelectionExpression AuthorIs(string author)
-		{
-			return Reselect(s => s.Where(x => x.Author == author));
-		}
-		public CommitSelectionExpression AuthorIsNot(string author)
-		{
-			return Reselect(s => s.Where(x => x.Author != author));
-		}
 		public CommitSelectionExpression RevisionIs(string revision)
 		{
 			return Reselect(s => s.Where(x => x.Revision == revision));
