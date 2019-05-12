@@ -150,8 +150,9 @@
     <Compile Include="Data\Entities\Mapping\BugFixMapperTest.cs" />
     <Compile Include="Data\Entities\Mapping\CommitMapperTest.cs" />
     <Compile Include="Data\Entities\Mapping\DataMapperTest.cs" />
-    <Compile Include="Data\VersionControl\GitDataTest.cs" />
-    <Compile Include="Data\VersionControl\GitLogTest.cs" />
+    <Compile Include="Data\VersionControl\Git\GitDataTest.cs" />
+    <Compile Include="Data\VersionControl\Git\GitLogTest.cs" />
+    <Compile Include="Data\VersionControl\VcsDataCachedTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

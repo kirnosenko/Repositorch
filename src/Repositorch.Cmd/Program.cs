@@ -20,7 +20,7 @@ namespace Repositorch
 
 			SqlCeDataStore data = new SqlCeDataStore("d:/123.sdf");
 			IGitClient gitClient = new CommandLineGitClient(repo);
-			IVcsData vcsData = new GitData(gitClient);
+			IVcsData vcsData = new VcsDataCached(new GitData(gitClient), 1);
 
 			DataMapper mapping = new DataMapper(vcsData);
 			var commitMapper = new CommitMapper(vcsData);
