@@ -10,11 +10,13 @@ namespace Repositorch.Data.Entities
 	{
 		protected RepositoryMappingExpression mappingDSL;
 		protected RepositorySelectionExpression selectionDSL;
+		private InMemoryDataStore data;
 		private ISession session;
 
 		public BaseRepositoryTest()
 		{
-			session = new InMemorySession(Guid.NewGuid().ToString());
+			data = new InMemoryDataStore(Guid.NewGuid().ToString());
+			session = data.OpenSession();
 			mappingDSL = session.MappingDSL();
 			selectionDSL = session.SelectionDSL();
 		}

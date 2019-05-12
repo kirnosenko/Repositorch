@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.EntityFrameworkCore;
 
 namespace Repositorch.Data.Entities
 {
@@ -12,7 +13,7 @@ namespace Repositorch.Data.Entities
 		}
 		public ISession OpenSession(bool readOnly = false)
 		{
-			return new InMemorySession(name);
+			return new EfcSession(c => c.UseInMemoryDatabase(name));
 		}
 	}
 }

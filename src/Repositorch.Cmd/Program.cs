@@ -18,7 +18,7 @@ namespace Repositorch
 		{
 			string repo = "D:/src/git/.git";
 
-			SqlCeDataStore data = new SqlCeDataStore("d:/123.sdf");
+			SqliteDataStore data = new SqliteDataStore("d:/123.db");
 			IGitClient gitClient = new CommandLineGitClient(repo);
 			IVcsData vcsData = new VcsDataCached(new GitData(gitClient), 1);
 

@@ -143,7 +143,6 @@
     <Compile Include="Data\Entities\DSL\Selection\CommitSelectionExpressionTest.cs" />
     <Compile Include="Data\Entities\InMemoryDataStore.cs" />
     <Compile Include="Data\Entities\InMemoryDataStoreTest.cs" />
-    <Compile Include="Data\Entities\InMemorySession.cs" />
     <Compile Include="Data\Entities\Mapping\AuthorMapperTest.cs" />
     <Compile Include="Data\Entities\Mapping\BaseMapperTest.cs" />
     <Compile Include="Data\Entities\Mapping\BugFixDetectorBasedOnLogMessageTest.cs" />
