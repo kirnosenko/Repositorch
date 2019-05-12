@@ -4,6 +4,6 @@ namespace Repositorch.Data.Entities
 {
 	public interface IDataStore
 	{
-		ISession OpenSession(bool readOnly = false);
+		ISession OpenSession();
 	}
 }

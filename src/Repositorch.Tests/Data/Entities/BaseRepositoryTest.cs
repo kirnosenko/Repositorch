@@ -23,11 +23,15 @@ namespace Repositorch.Data.Entities
 		public void Dispose()
 		{
 		}
-		public ISession OpenSession(bool readOnly)
+		public ISession OpenSession()
 		{
 			return this;
 		}
 		public IQueryable<T> Get<T>() where T : class
+		{
+			return session.Get<T>();
+		}
+		public IQueryable<T> GetReadOnly<T>() where T : class
 		{
 			return session.Get<T>();
 		}

@@ -20,7 +20,6 @@ namespace Repositorch.Data.Entities
 		{
 			this.config = config;
 			this.tables = new Dictionary<Type, object>();
-			ReadOnly = false;
 
 			Database.EnsureCreated();
 			tables.Add(typeof(Author), Authors);
@@ -28,53 +27,32 @@ namespace Repositorch.Data.Entities
 			tables.Add(typeof(Commit), Commits);
 			tables.Add(typeof(BugFix), BugFixes);
 		}
-		public bool ReadOnly
-		{
-			get; set;
-		}
 
 		IQueryable<T> IRepository.Get<T>()
 		{
-			var dbset = (DbSet<T>)tables[typeof(T)];
-			if (ReadOnly)
-			{
-				return dbset.AsNoTracking();
-			}
-			return dbset;
+			return (DbSet<T>)tables[typeof(T)];
+		}
+		IQueryable<T> IRepository.GetReadOnly<T>()
+		{
+			return ((DbSet<T>)tables[typeof(T)]).AsNoTracking();
 		}
 		void IRepository.Add<T>(T entity)
 		{
-			if (ReadOnly)
-			{
-				return;
-			}
 			var dbset = (DbSet<T>)tables[typeof(T)];
 			dbset.Add(entity);
 		}
 		void IRepository.AddRange<T>(IEnumerable<T> entities)
 		{
-			if (ReadOnly)
-			{
-				return;
-			}
 			var dbset = (DbSet<T>)tables[typeof(T)];
 			dbset.AddRange(entities);
 		}
 		void IRepository.Delete<T>(T entity)
 		{
-			if (ReadOnly)
-			{
-				return;
-			}
 			var dbset = (DbSet<T>)tables[typeof(T)];
 			dbset.Remove(entity);
 		}
 		void ISession.SubmitChanges()
 		{
-			if (ReadOnly)
-			{
-				return;
-			}
 			SaveChanges();
 		}
 

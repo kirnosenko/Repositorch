@@ -10,7 +10,8 @@ namespace Repositorch.Data.Entities.Mapping
 	{
 		public static bool RevisionExists(this ISession s, string revision)
 		{
-			return s.Get<Commit>().SingleOrDefault(c => c.Revision == revision) != null;
+			return s.Get<Commit>()
+				.SingleOrDefault(c => c.Revision == revision) != null;
 		}
 		public static int MappingStartRevision(this ISession s)
 		{
@@ -49,7 +50,7 @@ namespace Repositorch.Data.Entities.Mapping
 			int nextRevisionNumber;
 			string nextRevision;
 
-			using (var s = data.OpenSession(true))
+			using (var s = data.OpenSession())
 			{
 				if (StartRevision == null)
 				{

@@ -11,7 +11,7 @@ namespace Repositorch.Data.Entities
 		{
 			this.fileName = fileName;
 		}
-		public ISession OpenSession(bool readOnly = false)
+		public ISession OpenSession()
 		{
 			return new EfcSession(c => c.UseSqlite(string.Format("Data Source={0}", fileName)));
 		}

@@ -17,6 +17,10 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		{
 			return parentExp.Get<T>();
 		}
+		public IQueryable<T> GetReadOnly<T>() where T : class
+		{
+			return parentExp.GetReadOnly<T>();
+		}
 		public void Add<T>(T entity) where T : class
 		{
 			parentExp.Add(entity);

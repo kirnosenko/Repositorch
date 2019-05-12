@@ -23,6 +23,10 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		{
 			return session.Get<T>();
 		}
+		public IQueryable<T> GetReadOnly<T>() where T : class
+		{
+			return session.GetReadOnly<T>();
+		}
 		public void Add<T>(T entity) where T : class
 		{
 			session.Add(entity);

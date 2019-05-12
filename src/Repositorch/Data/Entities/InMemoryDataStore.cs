@@ -11,7 +11,7 @@ namespace Repositorch.Data.Entities
 		{
 			this.name = name;
 		}
-		public ISession OpenSession(bool readOnly = false)
+		public ISession OpenSession()
 		{
 			return new EfcSession(c => c.UseInMemoryDatabase(name));
 		}
