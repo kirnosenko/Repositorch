@@ -8,15 +8,17 @@ using Repositorch.Data.Entities.DSL.Mapping;
 
 namespace Repositorch.Data.Entities.Mapping
 {
-	public class DataMapperTest : BaseRepositoryTest
+	public class DataMapperTest
 	{
-		private DataMapper mapper;
+		private IDataStore data;
 		private IVcsData vcsData;
+		private DataMapper mapper;
 		private CommitMapper commitMapper;
 		private BugFixMapper bugFixMapper;
 		
 		public DataMapperTest()
 		{
+			data = new InMemoryDataStore(Guid.NewGuid().ToString());
 			vcsData = Substitute.For<IVcsData>();
 			mapper = new DataMapper(vcsData);
 			commitMapper = Substitute.For<CommitMapper>((IVcsData)null);
@@ -30,7 +32,7 @@ namespace Repositorch.Data.Entities.Mapping
 				.Returns(Enumerable.Empty<CommitMappingExpression>());
 			
 			mapper.RegisterMapper(commitMapper);
-			mapper.Map(this, "1");
+			mapper.Map(data, "1");
 
 			commitMapper
 				.Map(Arg.Is<RepositoryMappingExpression>(e => e != null))
@@ -44,7 +46,7 @@ namespace Repositorch.Data.Entities.Mapping
 				.Returns(Enumerable.Empty<CommitMappingExpression>());
 				
 			mapper.RegisterMapper(commitMapper);
-			mapper.Map(this, "10");
+			mapper.Map(data, "10");
 
 			commitMapper
 				.Map(Arg.Is<RepositoryMappingExpression>(e => e.Revision == "10"))
@@ -53,7 +55,8 @@ namespace Repositorch.Data.Entities.Mapping
 		[Fact]
 		public void Should_use_output_expression_for_registered_mapper()
 		{
-			CommitMappingExpression commitExp = mappingDSL.AddCommit("1");
+			CommitMappingExpression commitExp = data.UsingSession(
+				s => s.MappingDSL().AddCommit("1"));
 			commitMapper
 				.Map(Arg.Any<RepositoryMappingExpression>())
 				.Returns(new CommitMappingExpression[] { commitExp });
@@ -63,7 +66,7 @@ namespace Repositorch.Data.Entities.Mapping
 			
 			mapper.RegisterMapper(commitMapper);
 			mapper.RegisterMapper(bugFixMapper);
-			mapper.Map(this, "1");
+			mapper.Map(data, "1");
 
 			bugFixMapper
 				.Map(Arg.Is(commitExp))
@@ -95,14 +98,15 @@ namespace Repositorch.Data.Entities.Mapping
 		[Fact]
 		public void Should_not_keep_expressions_between_sessions()
 		{
-			CommitMappingExpression commitExp = mappingDSL.AddCommit("1");
+			CommitMappingExpression commitExp = data.UsingSession(
+				s => s.MappingDSL().AddCommit("1"));
 			commitMapper
 				.Map(Arg.Any<RepositoryMappingExpression>())
 				.Returns(new CommitMappingExpression[] { commitExp });
 			
 			mapper.RegisterMapper(commitMapper);
-			mapper.Map(this, "1");
-			mapper.Map(this, "1");
+			mapper.Map(data, "1");
+			mapper.Map(data, "1");
 
 			commitMapper
 				.Map(Arg.Any<RepositoryMappingExpression>())
@@ -243,7 +247,7 @@ namespace Repositorch.Data.Entities.Mapping
 			mapper.RegisterMapper(commitMapper2);
 			mapper.RegisterMapper(commitMapper);
 
-			mapper.Map(this, "1");
+			mapper.Map(data, "1");
 
 			commitMapper
 				.Map(Arg.Any<RepositoryMappingExpression>())

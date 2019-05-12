@@ -6,7 +6,7 @@ using Repositorch.Data.Entities.DSL.Selection;
 
 namespace Repositorch.Data.Entities
 {
-	public class BaseRepositoryTest : IDataStore, ISession
+	public abstract class BaseRepositoryTest : ISession
 	{
 		protected RepositoryMappingExpression mappingDSL;
 		protected RepositorySelectionExpression selectionDSL;
@@ -22,10 +22,7 @@ namespace Repositorch.Data.Entities
 		}
 		public void Dispose()
 		{
-		}
-		public ISession OpenSession()
-		{
-			return this;
+			session.Dispose();
 		}
 		public IQueryable<T> Get<T>() where T : class
 		{
