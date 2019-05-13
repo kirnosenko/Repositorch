@@ -13,6 +13,9 @@ namespace Repositorch.Data.Entities
 		}
 	}
 
+	/// <summary>
+	/// Abstraction of persistent data store.
+	/// </summary>
 	public interface IDataStore
 	{
 		ISession OpenSession();

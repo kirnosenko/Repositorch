@@ -7,11 +7,6 @@ namespace Repositorch.Data.Entities
 {
 	public class EfcSession : DbContext, ISession
 	{
-		public DbSet<Author> Authors { get; set; }
-		//public DbSet<Branch> Branches { get; set; }
-		public DbSet<Commit> Commits { get; set; }
-		public DbSet<BugFix> BugFixes { get; set; }
-
 		private Action<DbContextOptionsBuilder> config;
 		private Dictionary<Type, object> tables;
 
@@ -21,11 +16,12 @@ namespace Repositorch.Data.Entities
 			this.config = config;
 			this.tables = new Dictionary<Type, object>();
 
+			tables.Add(typeof(Commit), Set<Commit>());
+			tables.Add(typeof(Author), Set<Author>());
+			tables.Add(typeof(BugFix), Set<BugFix>());
+			tables.Add(typeof(Modification), Set<Modification>());
+			tables.Add(typeof(CodeFile), Set<CodeFile>());
 			Database.EnsureCreated();
-			tables.Add(typeof(Author), Authors);
-			//tables.Add(typeof(Branch), Branches);
-			tables.Add(typeof(Commit), Commits);
-			tables.Add(typeof(BugFix), BugFixes);
 		}
 
 		IQueryable<T> IRepository.Get<T>()
@@ -38,18 +34,15 @@ namespace Repositorch.Data.Entities
 		}
 		void IRepository.Add<T>(T entity)
 		{
-			var dbset = (DbSet<T>)tables[typeof(T)];
-			dbset.Add(entity);
+			((DbSet<T>)tables[typeof(T)]).Add(entity);
 		}
 		void IRepository.AddRange<T>(IEnumerable<T> entities)
 		{
-			var dbset = (DbSet<T>)tables[typeof(T)];
-			dbset.AddRange(entities);
+			((DbSet<T>)tables[typeof(T)]).AddRange(entities);
 		}
 		void IRepository.Delete<T>(T entity)
 		{
-			var dbset = (DbSet<T>)tables[typeof(T)];
-			dbset.Remove(entity);
+			((DbSet<T>)tables[typeof(T)]).Remove(entity);
 		}
 		void ISession.SubmitChanges()
 		{
@@ -76,6 +69,22 @@ namespace Repositorch.Data.Entities
 				.HasOne(bf => bf.Commit)
 				.WithOne()
 				.HasForeignKey<BugFix>(bf => bf.CommitID);
+			modelBuilder.Entity<CodeFile>()
+				.HasOne(f => f.AddedInCommit)
+				.WithOne()
+				.HasForeignKey<CodeFile>(f => f.AddedInCommitID);
+			modelBuilder.Entity<CodeFile>()
+				.HasOne(f => f.DeletedInCommit)
+				.WithOne()
+				.HasForeignKey<CodeFile>(f => f.DeletedInCommitID);
+			modelBuilder.Entity<Modification>()
+				.HasOne(m => m.Commit)
+				.WithOne()
+				.HasForeignKey<Modification>(m => m.CommitID);
+			modelBuilder.Entity<Modification>()
+				.HasOne(m => m.File)
+				.WithOne()
+				.HasForeignKey<Modification>(m => m.FileID);
 		}
 	}
 }

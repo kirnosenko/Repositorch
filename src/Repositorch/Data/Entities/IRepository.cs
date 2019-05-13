@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace Repositorch.Data.Entities
 {
+	/// <summary>
+	/// Abstraction to access entities in data store.
+	/// </summary>
 	public interface IRepository
 	{
 		IQueryable<T> Get<T>() where T : class;
