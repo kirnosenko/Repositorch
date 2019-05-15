@@ -13,7 +13,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			return parentExp.Reselect(s =>
 				from c in s
-				join bf in parentExp.Queryable<BugFix>() on c.Id equals bf.CommitID
+				join bf in parentExp.Queryable<BugFix>() on c.Id equals bf.CommitId
 				select c
 			);
 		}
@@ -21,7 +21,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			return parentExp.Reselect(s =>
 				from c in s
-				join bf in parentExp.Queryable<BugFix>() on c.Id equals bf.CommitID into j
+				join bf in parentExp.Queryable<BugFix>() on c.Id equals bf.CommitId into j
 				from x in j.DefaultIfEmpty()
 				where
 					x == null
@@ -40,7 +40,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			return Reselect((s) =>
 				from bf in s
-				join c in Selection<Commit>() on bf.CommitID equals c.Id
+				join c in Selection<Commit>() on bf.CommitId equals c.Id
 				select bf
 			);
 		}

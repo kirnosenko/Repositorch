@@ -39,5 +39,11 @@ namespace Repositorch.Data.VersionControl
 		/// Null for a file created from scratch.
 		/// </summary>
 		public string SourcePath;
+		/// <summary>
+		/// The source revision for a copied file.
+		/// Null for a file created from scratch.
+		/// Null for a file copied from the previous revision.
+		/// </summary>
+		public string SourceRevision;
 	}
 }

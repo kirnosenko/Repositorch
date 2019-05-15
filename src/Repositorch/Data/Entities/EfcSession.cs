@@ -57,9 +57,9 @@ namespace Repositorch.Data.Entities
 		{
 			modelBuilder.Entity<Author>()
 				.HasMany(a => a.Commits)
-				.WithOne(c => c.Author)
+				.WithOne((string)null)
 				.HasForeignKey(c => c.AuthorId);
-			
+
 			/*modelBuilder.Entity<Branch>()
 				.HasMany(b => b.Commits)
 				.WithOne(c => c.Branch)
@@ -67,24 +67,24 @@ namespace Repositorch.Data.Entities
 			*/
 			modelBuilder.Entity<BugFix>()
 				.HasOne(bf => bf.Commit)
-				.WithOne()
-				.HasForeignKey<BugFix>(bf => bf.CommitID);
+				.WithOne((string)null)
+				.HasForeignKey<BugFix>(bf => bf.CommitId);
 			modelBuilder.Entity<CodeFile>()
 				.HasOne(f => f.AddedInCommit)
-				.WithOne()
-				.HasForeignKey<CodeFile>(f => f.AddedInCommitID);
+				.WithMany((string)null)
+				.HasForeignKey(f => f.AddedInCommitId);
 			modelBuilder.Entity<CodeFile>()
 				.HasOne(f => f.DeletedInCommit)
-				.WithOne()
-				.HasForeignKey<CodeFile>(f => f.DeletedInCommitID);
+				.WithMany((string)null)
+				.HasForeignKey(f => f.DeletedInCommitId);
 			modelBuilder.Entity<Modification>()
 				.HasOne(m => m.Commit)
-				.WithOne()
-				.HasForeignKey<Modification>(m => m.CommitID);
+				.WithMany((string)null)
+				.HasForeignKey(m => m.CommitId);
 			modelBuilder.Entity<Modification>()
 				.HasOne(m => m.File)
-				.WithOne()
-				.HasForeignKey<Modification>(m => m.FileID);
+				.WithMany((string)null)
+				.HasForeignKey(m => m.FileId);
 		}
 	}
 }

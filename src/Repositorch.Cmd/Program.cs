@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Diagnostics;
 using Repositorch.Data.Entities;
 using Repositorch.Data.Entities.Mapping;
@@ -11,24 +12,35 @@ namespace Repositorch
 	{
 		static void Main(string[] args)
 		{
-			Mapping();
+			SqliteDataStore data = new SqliteDataStore("d:/123.db");
+
+			//Selection(data);
+			Mapping(data);
 			Console.ReadKey();
 		}
-		static void Mapping()
+		static void Selection(IDataStore data)
 		{
-			string repo = "D:/src/git/.git";
-
-			SqliteDataStore data = new SqliteDataStore("d:/123.db");
-			IGitClient gitClient = new CommandLineGitClient(repo);
+			using (ConsoleTimeLogger.Start("selection time"))
+			{
+			
+			}
+		}
+		static void Mapping(IDataStore data)
+		{
+			IGitClient gitClient = new CommandLineGitClient("D:/src/git/.git");
 			IVcsData vcsData = new VcsDataCached(new GitData(gitClient), 1);
 
 			DataMapper mapping = new DataMapper(vcsData);
-			var commitMapper = new CommitMapper(vcsData);
-			mapping.RegisterMapper(commitMapper);
-			var authorMapper = new AuthorMapper(vcsData);
-			mapping.RegisterMapper(authorMapper);
-			var bugFixMapper = new BugFixMapper(vcsData, new BugFixDetectorBasedOnLogMessage());
-			mapping.RegisterMapper(bugFixMapper);
+			mapping.RegisterMapper(
+				new CommitMapper(vcsData));
+			mapping.RegisterMapper(
+				new AuthorMapper(vcsData));
+			mapping.RegisterMapper(
+				new BugFixMapper(vcsData, new BugFixDetectorBasedOnLogMessage()));
+			mapping.RegisterMapper(
+				new CodeFileMapper(vcsData));
+			mapping.RegisterMapper(
+				new ModificationMapper(vcsData));
 			mapping.CreateDataBase = true;
 			mapping.StopRevision = "8f41523fc1a8cd127ff39fa111b3b5bb5105cc84";
 

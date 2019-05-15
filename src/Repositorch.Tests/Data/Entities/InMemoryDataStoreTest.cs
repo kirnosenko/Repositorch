@@ -63,7 +63,7 @@ namespace Repositorch.Data.Entities
 				bf.Commit = c;
 				s.SubmitChanges();
 
-				Assert.Equal(c.Id, bf.CommitID);
+				Assert.Equal(c.Id, bf.CommitId);
 			}
 		}
 		[Fact]
@@ -83,8 +83,8 @@ namespace Repositorch.Data.Entities
 				bf.Commit = c2;
 				s.SubmitChanges();
 
-				Assert.NotEqual(c1.Id, bf.CommitID);
-				Assert.Equal(c2.Id, bf.CommitID);
+				Assert.NotEqual(c1.Id, bf.CommitId);
+				Assert.Equal(c2.Id, bf.CommitId);
 			}
 		}
 		[Fact]

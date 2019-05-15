@@ -50,6 +50,10 @@ namespace Repositorch.Data.VersionControl
 		{
 			return innerData.RevisionByNumber(revisionNumber);
 		}
+		public string[] ParentRevisions(string revision)
+		{
+			return innerData.ParentRevisions(revision);
+		}
 		public Log Log(string revision)
 		{
 			return logs.GetData(revision);

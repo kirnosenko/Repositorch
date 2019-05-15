@@ -28,8 +28,7 @@ namespace Repositorch.Data.Entities
 		/// Author of the commit.
 		/// </summary>
 		public int AuthorId { get; set; }
-		public Author Author { get; set; }
-
+		
 		//public int BranchId { get; set; }
 		//public Branch Branch { get; set; }
 	}

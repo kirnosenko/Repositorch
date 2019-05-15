@@ -12,7 +12,7 @@ namespace Repositorch.Data.Entities
 		/// <summary>
 		/// Commit that clissified as a bugfix.
 		/// </summary>
-		public int CommitID { get; set; }
+		public int CommitId { get; set; }
 		public Commit Commit { get; set; }
 	}
 }

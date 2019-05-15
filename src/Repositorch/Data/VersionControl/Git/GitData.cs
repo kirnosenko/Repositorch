@@ -29,6 +29,10 @@ namespace Repositorch.Data.VersionControl.Git
 				return null;
 			}
 		}
+		public string[] ParentRevisions(string revision)
+		{
+			throw new NotImplementedException();
+		}
 		public Log Log(string revision)
 		{
 			using (var log = git.Log(revision))

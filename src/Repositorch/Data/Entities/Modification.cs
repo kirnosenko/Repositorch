@@ -11,12 +11,12 @@ namespace Repositorch.Data.Entities
 		/// <summary>
 		/// Commit that contains modification.
 		/// </summary>
-		public int CommitID { get; set; }
+		public int CommitId { get; set; }
 		public Commit Commit { get; set; }
 		/// <summary>
 		/// File touched by modification.
 		/// </summary>
-		public int FileID { get; set; }
+		public int FileId { get; set; }
 		public CodeFile File { get; set; }
 	}
 }
