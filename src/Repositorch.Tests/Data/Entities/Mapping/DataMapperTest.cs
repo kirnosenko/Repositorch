@@ -4,6 +4,7 @@ using System.Linq;
 using Xunit;
 using NSubstitute;
 using Repositorch.Data.VersionControl;
+using Repositorch.Data.Entities.EF;
 using Repositorch.Data.Entities.DSL.Mapping;
 
 namespace Repositorch.Data.Entities.Mapping

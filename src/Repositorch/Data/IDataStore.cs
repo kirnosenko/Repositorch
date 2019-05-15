@@ -1,6 +1,6 @@
 using System;
 
-namespace Repositorch.Data.Entities
+namespace Repositorch.Data
 {
 	public static class DataStoreExtension
 	{

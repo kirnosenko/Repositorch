@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Repositorch.Data.Entities
+namespace Repositorch.Data
 {
 	/// <summary>
 	/// Abstraction to access entities in data store.

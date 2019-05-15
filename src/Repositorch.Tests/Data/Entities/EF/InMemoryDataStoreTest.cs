@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using Xunit;
 
-namespace Repositorch.Data.Entities
+namespace Repositorch.Data.Entities.EF
 {
 	public class InMemoryDataStoreTest
 	{

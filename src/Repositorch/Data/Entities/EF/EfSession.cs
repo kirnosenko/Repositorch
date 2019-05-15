@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 
-namespace Repositorch.Data.Entities
+namespace Repositorch.Data.Entities.EF
 {
-	public class EfcSession : DbContext, ISession
+	public class EfSession : DbContext, ISession
 	{
 		private Action<DbContextOptionsBuilder> config;
 		private Dictionary<Type, object> tables;
 
-		public EfcSession(Action<DbContextOptionsBuilder> config)
+		public EfSession(Action<DbContextOptionsBuilder> config)
 			: base()
 		{
 			this.config = config;
@@ -19,8 +19,10 @@ namespace Repositorch.Data.Entities
 			tables.Add(typeof(Commit), Set<Commit>());
 			tables.Add(typeof(Author), Set<Author>());
 			tables.Add(typeof(BugFix), Set<BugFix>());
-			tables.Add(typeof(Modification), Set<Modification>());
 			tables.Add(typeof(CodeFile), Set<CodeFile>());
+			tables.Add(typeof(Modification), Set<Modification>());
+			tables.Add(typeof(CodeBlock), Set<CodeBlock>());
+
 			Database.EnsureCreated();
 		}
 
@@ -85,6 +87,18 @@ namespace Repositorch.Data.Entities
 				.HasOne(m => m.File)
 				.WithMany((string)null)
 				.HasForeignKey(m => m.FileId);
+			modelBuilder.Entity<CodeBlock>()
+				.HasOne(cb => cb.Modification)
+				.WithMany((string)null)
+				.HasForeignKey(cb => cb.ModificationID);
+			modelBuilder.Entity<CodeBlock>()
+				.HasOne(cb => cb.AddedInitiallyInCommit)
+				.WithMany((string)null)
+				.HasForeignKey(cb => cb.AddedInitiallyInCommitID);
+			modelBuilder.Entity<CodeBlock>()
+				.HasOne(cb => cb.TargetCodeBlock)
+				.WithMany((string)null)
+				.HasForeignKey(cb => cb.TargetCodeBlockID);
 		}
 	}
 }

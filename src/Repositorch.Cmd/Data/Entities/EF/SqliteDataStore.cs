@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 
-namespace Repositorch.Data.Entities
+namespace Repositorch.Data.Entities.EF
 {
 	public class SqliteDataStore : IDataStore
 	{
@@ -13,7 +13,7 @@ namespace Repositorch.Data.Entities
 		}
 		public ISession OpenSession()
 		{
-			return new EfcSession(c => c.UseSqlite(string.Format("Data Source={0}", fileName)));
+			return new EfSession(c => c.UseSqlite(string.Format("Data Source={0}", fileName)));
 		}
 	}
 }

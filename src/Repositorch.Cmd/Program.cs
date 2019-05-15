@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Diagnostics;
-using Repositorch.Data.Entities;
+using Repositorch.Data;
+using Repositorch.Data.Entities.EF;
 using Repositorch.Data.Entities.Mapping;
 using Repositorch.Data.VersionControl;
 using Repositorch.Data.VersionControl.Git;
