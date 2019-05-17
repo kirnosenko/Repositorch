@@ -41,7 +41,7 @@ namespace Repositorch.Data.VersionControl.Git
 		}
 		public IBlame Blame(string revision, string filePath)
 		{
-			using (var blame = git.Log(revision))
+			using (var blame = git.Blame(revision, filePath))
 			{
 				return new GitBlame(blame);
 			}
