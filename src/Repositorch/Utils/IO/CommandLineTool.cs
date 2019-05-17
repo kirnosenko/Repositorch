@@ -1,8 +1,6 @@
-﻿using System;
-using System.Diagnostics;
-using System.IO;
+﻿using System.Diagnostics;
 
-namespace Repositorch.Data
+namespace System.IO
 {
 	public abstract class CommandLineTool
 	{

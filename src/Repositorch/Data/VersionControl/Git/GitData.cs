@@ -7,8 +7,7 @@ namespace Repositorch.Data.VersionControl.Git
 	public class GitData : IVcsData
 	{
 		private IGitClient git;
-		
-		public List<string> revisions;
+		private List<string> revisions;
 		
 		public GitData(IGitClient git)
 		{
@@ -40,7 +39,14 @@ namespace Repositorch.Data.VersionControl.Git
 				return new GitLog(log);
 			}
 		}
-		
+		public IBlame Blame(string revision, string filePath)
+		{
+			using (var blame = git.Log(revision))
+			{
+				return new GitBlame(blame);
+			}
+		}
+
 		private void GetAllRevisions()
 		{
 			revisions = new List<string>();

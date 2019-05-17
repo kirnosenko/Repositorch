@@ -25,6 +25,13 @@ namespace Repositorch.Data.VersionControl.Git
 				revision
 			);
 		}
+		public Stream Blame(string revision, string filePath)
+		{
+			return RunCommand(
+				"blame -l -s --root --incremental {0} -- {1}",
+				revision, ToGitPath(filePath)
+			);
+		}
 
 		public string RepositoryPath
 		{

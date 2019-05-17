@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Repositorch.Data.VersionControl
 {
@@ -12,5 +8,6 @@ namespace Repositorch.Data.VersionControl
 		string[] ParentRevisions(string revision);
 
 		Log Log(string revision);
+		IBlame Blame(string revision, string filePath);
 	}
 }

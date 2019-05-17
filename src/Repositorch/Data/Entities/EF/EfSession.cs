@@ -90,15 +90,15 @@ namespace Repositorch.Data.Entities.EF
 			modelBuilder.Entity<CodeBlock>()
 				.HasOne(cb => cb.Modification)
 				.WithMany((string)null)
-				.HasForeignKey(cb => cb.ModificationID);
+				.HasForeignKey(cb => cb.ModificationId);
 			modelBuilder.Entity<CodeBlock>()
 				.HasOne(cb => cb.AddedInitiallyInCommit)
 				.WithMany((string)null)
-				.HasForeignKey(cb => cb.AddedInitiallyInCommitID);
+				.HasForeignKey(cb => cb.AddedInitiallyInCommitId);
 			modelBuilder.Entity<CodeBlock>()
 				.HasOne(cb => cb.TargetCodeBlock)
 				.WithMany((string)null)
-				.HasForeignKey(cb => cb.TargetCodeBlockID);
+				.HasForeignKey(cb => cb.TargetCodeBlockId);
 		}
 	}
 }

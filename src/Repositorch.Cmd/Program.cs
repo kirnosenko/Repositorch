@@ -29,7 +29,7 @@ namespace Repositorch
 		static void Mapping(IDataStore data)
 		{
 			IGitClient gitClient = new CommandLineGitClient("D:/src/git/.git");
-			IVcsData vcsData = new VcsDataCached(new GitData(gitClient), 1);
+			IVcsData vcsData = new VcsDataCached(new GitData(gitClient), 1, 1000);
 
 			DataMapper mapping = new DataMapper(vcsData);
 			mapping.RegisterMapper(
@@ -42,6 +42,8 @@ namespace Repositorch
 				new CodeFileMapper(vcsData));
 			mapping.RegisterMapper(
 				new ModificationMapper(vcsData));
+			mapping.RegisterMapper(
+				new CodeBlockMapper(vcsData));
 			mapping.CreateDataBase = true;
 			mapping.StopRevision = "8f41523fc1a8cd127ff39fa111b3b5bb5105cc84";
 
