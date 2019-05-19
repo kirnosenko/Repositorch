@@ -19,8 +19,6 @@ namespace Repositorch.Data.Entities.Mapping
 			vcsData
 				.Log(Arg.Is<string>("10"))
 				.Returns(new TestLog("10", "alan", DateTime.Today, "text", touchedFiles));
-			vcsData.ParentRevisions(Arg.Is<string>("10"))
-				.Returns(new string[] { "9" });
 			mapper = new CodeFileMapper(vcsData);
 		}
 		[Fact]

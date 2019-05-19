@@ -43,7 +43,9 @@ namespace Repositorch.Data.Entities.Mapping
 				{
 					if (touchedFile.SourceRevision == null)
 					{
-						touchedFile.SourceRevision = vcsData.ParentRevisions(revision).Single();
+						touchedFile.SourceRevision = expression.Get<Commit>()
+							.Single(c => c.OrderedNumber == expression.CurrentEntity<Commit>().OrderedNumber - 1)
+							.Revision;
 					}
 					fileExp.CopiedFrom(touchedFile.SourcePath, touchedFile.SourceRevision);
 				}

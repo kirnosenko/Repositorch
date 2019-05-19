@@ -51,10 +51,8 @@ namespace Repositorch.Web.Controllers
 						Authors().OfCommits().Count()
 					let totalAuthorsCount = totalCommits
 						.Authors().OfCommits().Count()
-					let lastRevision = commitsCount > 0 ? 
-						commits.Single(c => c.OrderedNumber == commits.Max(x => x.OrderedNumber)).Revision
-						:
-						null
+					let lastRevision = commits
+						.SingleOrDefault(c => c.OrderedNumber == commits.Max(x => x.OrderedNumber))?.Revision
 					select new {
 						title = string.Format("{0}-{1:00}", period.start.Year, period.start.Month),
 						commits = string.Format("{0} ({1})",
@@ -65,8 +63,8 @@ namespace Repositorch.Web.Controllers
 							authorsCount,
 							totalAuthorsCount
 						),
-						files = s.SelectionDSL().Files()
-							.ExistInRevision(lastRevision).Count(),
+						files = lastRevision == null ? 0 : s.SelectionDSL()
+							.Files().ExistInRevision(lastRevision).Count(),
 						locAdded = string.Format("{0} ({1})",
 							code.Added().CalculateLOC(),
 							totalCode.Added().CalculateLOC()
