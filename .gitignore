@@ -6,5 +6,4 @@ packages/
 *.user
 *.suo
 *.cachefile
-TestResult.xml
-*VisualState.xml
+*.min.*

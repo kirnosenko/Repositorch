@@ -1,0 +1,31 @@
+﻿@{
+	ViewData["Title"] = "Activity";
+}
+
+<h2>@ViewData["Title"]</h2>
+<p>
+	<table class="activity sortable" id="activity">
+		<tr>
+			<th>Period</th>
+			<th>Commits (total)</th>
+			<th>Authors (total)</th>
+			<th>Files</th>
+			<th>Added LOC (total)</th>
+			<th>Removed LOC (total)</th>
+			<th>LOC</th>
+		</tr>
+		@foreach (dynamic period in ViewBag.Periods)
+		{
+			<tr>
+				<td>@period.title</td>
+				<td>@period.commits</td>
+				<td>@period.authors</td>
+				<td>@period.files</td>
+				<td>@period.locAdded</td>
+				<td>@period.locRemoved</td>
+				<td>@period.loc</td>
+			</tr>
+		}
+	</table>
+</p>
+

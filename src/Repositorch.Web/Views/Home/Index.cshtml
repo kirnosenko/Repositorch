@@ -1,0 +1,23 @@
+﻿@{
+	ViewData["Title"] = "Summary";
+}
+
+<h2>@ViewData["Title"]</h2>
+<p>
+	Generation date: @DateTime.Now
+	<br>
+	Statistics period: from @ViewData["periodFrom"] to @ViewData["periodTo"]
+	(@ViewData["periodDays"] days @ViewData["periodYears"] years)
+	<br>
+	Number of authors: @ViewData["authors"]
+	<br>
+	Number of commits: @ViewData["commits"]
+	<br>
+	Number of fix commits: @ViewData["commitsFix"] (@ViewData["commitsFixPercent"] %)
+	<br>
+	Number of refactoring commits: @ViewData["commitsRefactoring"] (@ViewData["commitsRefactoringPercent"] %)
+	<br>
+	Number of files: @ViewData["files"] (@ViewData["filesAdded"] added, @ViewData["filesRemoved"] removed)
+	<br>
+	Number of LOC: @ViewData["loc"] (@ViewData["locAdded"] added, @ViewData["locRemoved"] removed)
+</p>

@@ -1,0 +1,47 @@
+﻿@{
+	ViewData["Title"] = "Files";
+}
+
+<h2>@ViewData["Title"]</h2>
+<p>
+	<table class="exts sortable" id="exts">
+		<tr>
+			<th>Extension</th>
+			<th>Number of files (%)</th>
+			<th>Added LOC</th>
+			<th>Removed LOC</th>
+			<th>Remain LOC</th>
+		</tr>
+		@foreach (dynamic ext in ViewBag.Extensions)
+		{
+			<tr>
+				<td>@ext.name</td>
+				<td>@ext.files</td>
+				<td>@ext.addedLoc</td>
+				<td>@ext.removedLoc</td>
+				<td>@ext.remainLoc</td>
+			</tr>
+		}
+	</table>
+</p>
+<p>
+	<table class="dirs sortable" id="dirs">
+		<tr>
+			<th>Directory</th>
+			<th>Number of files (%)</th>
+			<th>Added LOC</th>
+			<th>Removed LOC</th>
+			<th>Remain LOC</th>
+		</tr>
+		@foreach (dynamic dir in ViewBag.Directories)
+		{
+			<tr>
+				<td>@dir.name</td>
+				<td>@dir.files</td>
+				<td>@dir.addedLoc</td>
+				<td>@dir.removedLoc</td>
+				<td>@dir.remainLoc</td>
+			</tr>
+		}
+	</table>
+</p>

@@ -1,0 +1,38 @@
+﻿@{
+	ViewData["Title"] = "Authors";
+}
+
+<h2>@ViewData["Title"]</h2>
+<p>
+	<table class="authors sortable" id="authors">
+		<tr>
+			<th>Author</th>
+			<th>Commits (%)</th>
+			<th>Fix commits (%)</th>
+			<th>Refactoring commits (%)</th>
+			<th>Added LOC</th>
+			<th>Removed LOC</th>
+			<th>Remain LOC</th>
+			<th>Contribution %</th>
+			<th>Specialization %</th>
+			<th>Unique specialization %</th>
+			<th>Demand for code %</th>
+		</tr>
+		@foreach (dynamic author in ViewBag.Authors)
+		{
+			<tr>
+				<td>@author.name</td>
+				<td>@author.commits</td>
+				<td>@author.fixes</td>
+				<td>@author.refactorings</td>
+				<td>@author.addedLoc</td>
+				<td>@author.removedLoc</td>
+				<td>@author.remainLoc</td>
+				<td>@author.contribution</td>
+				<td>@author.specialization</td>
+				<td>@author.uniqueSpecialization</td>
+				<td>@author.demandForCode</td>
+			</tr>
+		}
+	</table>
+</p>
