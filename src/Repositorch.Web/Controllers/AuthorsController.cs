@@ -38,16 +38,19 @@ namespace Repositorch.Web.Controllers
 					{
 						Name = author.Name,
 						AddedCode = s.SelectionDSL()
-							.Commits().AuthorIs(author.Name)
+							.Authors().NameIs(author.Name)
+							.Commits().ByAuthors()
 							.CodeBlocks().AddedInitiallyInCommits()
 							.Fixed(),
 						RemovedCode = s.SelectionDSL()
-							.Commits().AuthorIs(author.Name)
+							.Authors().NameIs(author.Name)
+							.Commits().ByAuthors()
 							.Modifications().InCommits()
 							.CodeBlocks().InModifications().Deleted()
 							.Fixed(),
 						TouchedFiles = s.SelectionDSL()
-							.Commits().AuthorIs(author.Name)
+							.Authors().NameIs(author.Name)
+							.Commits().ByAuthors()
 							.Files().Exist().TouchedInCommits()
 					}).ToList();
 
@@ -60,7 +63,8 @@ namespace Repositorch.Web.Controllers
 					let authorCurrentLoc = authorAddedLoc + a.AddedCode.ModifiedBy().CalculateLOC()
 					let authorTouchedFiles = a.TouchedFiles.Count()
 					let authorFilesTouchedByOtherAuthors = a.TouchedFiles
-						.Commits().AuthorIsNot(a.Name)
+						.Authors().NameIs(a.Name)
+						.Commits().NotByAuthors()
 						.Files().Again().TouchedInCommits().Count()
 					select new
 					{

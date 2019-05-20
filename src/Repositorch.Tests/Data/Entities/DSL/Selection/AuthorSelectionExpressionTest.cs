@@ -17,6 +17,8 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				.AddCommit("3").AuthorIs("alan")
 			.Submit()
 				.AddCommit("4").AuthorIs("alan")
+			.Submit()
+				.AddCommit("5").AuthorIs("chris")
 			.Submit();
 		}
 		[Fact]
@@ -28,7 +30,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 					.Commits().RevisionIs("1")
 					.Authors().OfCommits().Select(a => a.Name));
 			Assert.Equal(
-				new string[] { "bob", "alan" },
+				new string[] { "bob", "alan", "chris" },
 				selectionDSL
 					.Commits().AfterRevision("1")
 					.Authors().OfCommits().Select(a => a.Name));
@@ -39,7 +41,15 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			Assert.Equal(
 				new string[] { "alan" },
 				selectionDSL
-					.Authors().WithName("alan").Select(a => a.Name));
+					.Authors().NameIs("alan").Select(a => a.Name));
+		}
+		[Fact]
+		public void Should_select_authors_by_name_list()
+		{
+			Assert.Equal(
+				new string[] { "alan", "bob" },
+				selectionDSL
+					.Authors().NameIsOneOf("alan", "bob", "ivan").Select(a => a.Name));
 		}
 		[Fact]
 		public void Should_select_authors_by_email()
@@ -47,7 +57,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			Assert.Equal(
 				new string[] { "bob" },
 				selectionDSL
-					.Authors().WithEmail("bob@bob.com").Select(a => a.Name));
+					.Authors().EmailIs("bob@bob.com").Select(a => a.Name));
 		}
 		[Fact]
 		public void Should_select_commits_by_author()
@@ -55,19 +65,18 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			Assert.Equal(
 				new string[] { "2" },
 				selectionDSL
-					.Commits().AuthorIs("bob").Select(c => c.Revision));
+					.Authors().NameIs("bob")
+					.Commits().ByAuthors().Select(c => c.Revision));
 			Assert.Equal(
 				new string[] { "1", "3", "4" },
 				selectionDSL
-					.Commits().AuthorIs("alan").Select(c => c.Revision));
+					.Authors().NameIs("alan")
+					.Commits().ByAuthors().Select(c => c.Revision));
 			Assert.Equal(
-				new string[] { "1", "3", "4" },
+				new string[] { "1", "3", "4", "5" },
 				selectionDSL
-					.Commits().AuthorIsNot("bob").Select(c => c.Revision));
-			Assert.Equal(
-				4,
-				selectionDSL
-					.Commits().AuthorsAre("alan", "bob", "ivan").Count());
+					.Authors().NameIs("bob")
+					.Commits().NotByAuthors().Select(c => c.Revision));
 		}
 	}
 }

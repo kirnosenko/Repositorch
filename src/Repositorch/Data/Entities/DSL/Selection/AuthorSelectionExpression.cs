@@ -9,36 +9,23 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			return new AuthorSelectionExpression(parentExp);
 		}
-		public static CommitSelectionExpression AuthorIs(
-			this CommitSelectionExpression parentExp,
-			string name)
+		public static CommitSelectionExpression ByAuthors(
+			this CommitSelectionExpression parentExp)
 		{
 			return parentExp.Reselect(s =>
 				from c in s
-				join a in parentExp.Queryable<Author>() on c.AuthorId equals a.Id
-				where a.Name == name
+				join a in parentExp.Selection<Author>() on c.AuthorId equals a.Id
 				select c
 			);
 		}
-		public static CommitSelectionExpression AuthorsAre(
-			this CommitSelectionExpression parentExp,
-			params string[] names)
+		public static CommitSelectionExpression NotByAuthors(
+			this CommitSelectionExpression parentExp)
 		{
 			return parentExp.Reselect(s =>
 				from c in s
-				join a in parentExp.Queryable<Author>() on c.AuthorId equals a.Id
-				where names.Contains(a.Name)
-				select c
-			);
-		}
-		public static CommitSelectionExpression AuthorIsNot(
-			this CommitSelectionExpression parentExp,
-			string name)
-		{
-			return parentExp.Reselect(s =>
-				from c in s
-				join a in parentExp.Queryable<Author>() on c.AuthorId equals a.Id
-				where a.Name != name
+				join a in parentExp.Selection<Author>() on c.AuthorId equals a.Id into agroup
+				from author in agroup.DefaultIfEmpty()
+				where author == null
 				select c
 			);
 		}
@@ -58,7 +45,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				select a).Distinct()
 			);
 		}
-		public AuthorSelectionExpression WithName(string name)
+		public AuthorSelectionExpression NameIs(string name)
 		{
 			return Reselect((s) =>
 				from a in s
@@ -66,7 +53,15 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				select a
 			);
 		}
-		public AuthorSelectionExpression WithEmail(string email)
+		public AuthorSelectionExpression NameIsOneOf(params string[] names)
+		{
+			return Reselect((s) =>
+				from a in s
+				where names.Contains(a.Name)
+				select a
+			);
+		}
+		public AuthorSelectionExpression EmailIs(string email)
 		{
 			return Reselect((s) =>
 				from a in s

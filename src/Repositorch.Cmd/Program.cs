@@ -18,7 +18,7 @@ namespace Repositorch
 		static void Main(string[] args)
 		{
 			SqliteDataStore data = new SqliteDataStore("d:/123.db");
-			IGitClient gitClient = new CommandLineGitClient("D:/dev/msr-tools/.git");
+			IGitClient gitClient = new CommandLineGitClient("D:/src/git/.git");
 			IVcsData vcsData = new VcsDataCached(new GitData(gitClient), 1, 1000);
 
 			//Selection(data);
