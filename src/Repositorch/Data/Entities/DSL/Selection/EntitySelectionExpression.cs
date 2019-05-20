@@ -43,10 +43,6 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			return Reselect(selector(selection));
 		}
-		public Exp Are(IQueryable<E> selection)
-		{
-			return Reselect(selection);
-		}
 		public Exp Again()
 		{
 			return Reselect(parentExp.Selection<E>());
