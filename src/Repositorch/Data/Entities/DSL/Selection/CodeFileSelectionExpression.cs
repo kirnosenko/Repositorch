@@ -9,8 +9,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			return new CodeFileSelectionExpression(parentExp);
 		}
-		/*
-		public static ProjectFileSelectionExpression DefectiveFiles(
+		public static CodeFileSelectionExpression DefectiveFiles(
 			this CodeBlockSelectionExpression parentExp,
 			string detectAfterRevision,
 			string detectTillRevision)
@@ -26,7 +25,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				.Files()
 					.TouchedInCommits()
 				.Reselect(x => x.Distinct());
-		}*/
+		}
 	}
 
 	public class CodeFileSelectionExpression : EntitySelectionExpression<CodeFile,CodeFileSelectionExpression>

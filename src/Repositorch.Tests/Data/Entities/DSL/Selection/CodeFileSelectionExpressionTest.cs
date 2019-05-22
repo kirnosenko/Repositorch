@@ -177,7 +177,6 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			Assert.Equal(4, selectionDSL
 				.Files().InDirectory("/").Count());
 		}
-		/*
 		[Fact]
 		public void Should_get_defective_files()
 		{
@@ -213,64 +212,45 @@ namespace Repositorch.Data.Entities.DSL.Selection
 						.Code(-10).ForCodeAddedInitiallyInRevision("2")
 						.Code(10)
 			.Submit();
-			
-			selectionDSL
-				.Commits()
-					.TillRevision("2")
-				.Modifications()
-					.InCommits()
+
+			Assert.Equal(new string[] { "file1" }, selectionDSL
+				.Commits().TillRevision("2")
+				.Modifications().InCommits()
 				.CodeBlocks()
 					.InModifications().DefectiveFiles(null, null)
-						.Select(x => x.Path).ToArray()
-							.Should().Have.SameValuesAs(new string[]
-							{
-								"file1"
-							});
-			selectionDSL
+						.Select(x => x.Path));
+			Assert.Equal(new string[] { "file1" }, selectionDSL
 				.Commits()
 					.TillRevision("2")
 				.Modifications()
 					.InCommits()
 				.CodeBlocks()
 					.InModifications().DefectiveFiles(null, "2")
-						.Select(x => x.Path).ToArray()
-							.Should().Have.SameValuesAs(new string[]
-							{
-								"file1"
-							});
-			selectionDSL
+						.Select(x => x.Path));
+			Assert.Equal(new string[] { "file1" }, selectionDSL
 				.Commits()
 					.TillRevision("2")
 				.Modifications()
 					.InCommits()
 				.CodeBlocks()
 					.InModifications().DefectiveFiles("2", null)
-						.Select(x => x.Path).ToArray()
-							.Should().Have.SameValuesAs(new string[]
-							{
-								"file1"
-							});
-			selectionDSL
+						.Select(x => x.Path));
+			Assert.Equal(new string[] {}, selectionDSL
 				.Commits()
 					.TillRevision("2")
 				.Modifications()
 					.InCommits()
 				.CodeBlocks()
 					.InModifications().DefectiveFiles("2", "4")
-						.Select(x => x.Path).ToArray()
-							.Should().Be.Empty();
-			selectionDSL
+						.Select(x => x.Path));
+			Assert.Equal(new string[] { "file3" }, selectionDSL
 				.Commits()
 					.TillRevision("3")
 				.Modifications()
 					.InCommits()
 				.CodeBlocks()
 					.InModifications().DefectiveFiles("3", "4")
-						.Select(x => x.Path).ToArray()
-							.Should().Have.SameSequenceAs(new string[]
-							{
-								"file3"
-							});
-		}*/
+						.Select(x => x.Path));
+		}
 	}
 }
