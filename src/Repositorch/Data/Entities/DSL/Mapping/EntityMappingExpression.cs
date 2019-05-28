@@ -29,9 +29,13 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		{
 			parentExp.AddRange(entities);
 		}
-		public void Delete<T>(T entity) where T : class
+		public void Remove<T>(T entity) where T : class
 		{
-			parentExp.Delete(entity);
+			parentExp.Remove(entity);
+		}
+		public void RemoveRange<T>(IEnumerable<T> entities) where T : class
+		{
+			parentExp.RemoveRange(entities);
 		}
 		public IRepositoryMappingExpression Submit()
 		{

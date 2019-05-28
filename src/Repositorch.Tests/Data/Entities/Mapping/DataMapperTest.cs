@@ -22,7 +22,7 @@ namespace Repositorch.Data.Entities.Mapping
 		{
 			data = new InMemoryDataStore(Guid.NewGuid().ToString());
 			vcsData = Substitute.For<IVcsData>();
-			mapper = new DataMapper(vcsData);
+			mapper = new DataMapper(data, vcsData);
 			commitMapper = Substitute.For<CommitMapper>((IVcsData)null);
 			bugFixMapper = Substitute.For<BugFixMapper>(null, null);
 			fileMapper = Substitute.For<CodeFileMapper>((IVcsData)null);
@@ -35,7 +35,7 @@ namespace Repositorch.Data.Entities.Mapping
 				.Returns(Enumerable.Empty<CommitMappingExpression>());
 			
 			mapper.RegisterMapper(commitMapper);
-			mapper.Map(data, "1");
+			mapper.MapRevision("1");
 
 			commitMapper
 				.Received(1)
@@ -49,7 +49,7 @@ namespace Repositorch.Data.Entities.Mapping
 				.Returns(Enumerable.Empty<CommitMappingExpression>());
 				
 			mapper.RegisterMapper(commitMapper);
-			mapper.Map(data, "10");
+			mapper.MapRevision("10");
 
 			commitMapper
 				.Received(1)
@@ -69,7 +69,7 @@ namespace Repositorch.Data.Entities.Mapping
 			
 			mapper.RegisterMapper(commitMapper);
 			mapper.RegisterMapper(bugFixMapper);
-			mapper.Map(data, "1");
+			mapper.MapRevision("1");
 
 			bugFixMapper
 				.Received(1)
@@ -95,7 +95,7 @@ namespace Repositorch.Data.Entities.Mapping
 			mapper.RegisterMapper(bugFixMapper);
 			mapper.RegisterMapper(fileMapper);
 
-			mapper.Map(data, "1");
+			mapper.MapRevision("1");
 
 			fileMapper
 				.Received(1)
@@ -111,8 +111,8 @@ namespace Repositorch.Data.Entities.Mapping
 				.Returns(new CommitMappingExpression[] { commitExp });
 			
 			mapper.RegisterMapper(commitMapper);
-			mapper.Map(data, "1");
-			mapper.Map(data, "1");
+			mapper.MapRevision("1");
+			mapper.MapRevision("1");
 
 			commitMapper
 				.Received(2)
@@ -127,10 +127,8 @@ namespace Repositorch.Data.Entities.Mapping
 				.RevisionByNumber(Arg.Any<int>())
 				.Returns(x => x[0].ToString());
 				
-			mapper.StopRevision = "5";
-			mapper.OnRevisionMapping += (r, n) => revisions.Add(r);
-
-			mapper.Map(data);
+			mapper.OnRevisionProcessing += (r, n) => revisions.Add(r);
+			mapper.MapRevisions(stopRevision: "5");
 
 			Assert.Equal(new string[] { "1", "2", "3", "4", "5" }, revisions);
 		}
@@ -143,10 +141,8 @@ namespace Repositorch.Data.Entities.Mapping
 				.RevisionByNumber(Arg.Any<int>())
 				.Returns(x => (int)x[0] == 6 ? null : x[0].ToString());
 			
-			mapper.StopRevision = null;
-			mapper.OnRevisionMapping += (r, n) => revisions.Add(r);
-
-			mapper.Map(data);
+			mapper.OnRevisionProcessing += (r, n) => revisions.Add(r);
+			mapper.MapRevisions(stopRevision: null);
 
 			Assert.Equal(new string[] { "1", "2", "3", "4", "5" }, revisions);
 		}
@@ -156,8 +152,9 @@ namespace Repositorch.Data.Entities.Mapping
 			List<string> revisions = new List<string>();
 
 			data.UsingSession(s =>
-				s.MappingDSL().AddCommit("1")
-					.AddFile("file1").Modified()
+				s.MappingDSL()
+					.AddCommit("1")
+						.AddFile("file1").Modified()
 				.Submit()
 					.AddCommit("2")
 						.AddFile("file2").Modified()
@@ -169,10 +166,8 @@ namespace Repositorch.Data.Entities.Mapping
 				.RevisionByNumber(Arg.Any<int>())
 				.Returns(x => x[0].ToString());
 				
-			mapper.StartRevision = "2";
-			mapper.OnRevisionMapping += (r, n) => revisions.Add(r);
-
-			mapper.Map(data);
+			mapper.OnRevisionProcessing += (r, n) => revisions.Add(r);
+			mapper.MapRevisions(startRevision: "2");
 
 			Assert.Equal(new string[] { "2", "3" }, revisions);
 		}
@@ -183,7 +178,7 @@ namespace Repositorch.Data.Entities.Mapping
 			mapper.RegisterMapper(commitMapper2);
 			mapper.RegisterMapper(commitMapper);
 
-			mapper.Map(data, "1");
+			mapper.MapRevision("1");
 
 			commitMapper
 				.Received(1)
@@ -191,6 +186,73 @@ namespace Repositorch.Data.Entities.Mapping
 			commitMapper2
 				.DidNotReceive()
 				.Map(Arg.Any<RepositoryMappingExpression>());
+		}
+		[Fact]
+		public void Should_truncate_last_mapped_commits()
+		{
+			data.UsingSession(s =>
+				s.MappingDSL()
+					.AddCommit("1")
+				.Submit()
+					.AddCommit("2")
+				.Submit()
+					.AddCommit("3")
+				.Submit());
+			
+			mapper.Truncate(1);
+
+			data.UsingSession(s =>
+			{
+				Assert.Equal(1, s.Get<Commit>().Count());
+			});
+		}
+		[Fact]
+		public void Should_truncate_linked_data_with_commits()
+		{
+			data.UsingSession(s =>
+				s.MappingDSL()
+					.AddCommit("1")
+						.AddFile("file1").Modified().Code(100)
+				.Submit()
+					.AddCommit("2").IsBugFix()
+						.File("file1").Modified().Code(-10)
+						.AddFile("file2").Modified().Code(10)
+				.Submit()
+					.AddCommit("3")
+						.File("file2").Modified().Code(20)
+				.Submit());
+			
+			mapper.Truncate(1);
+
+			data.UsingSession(s =>
+			{
+				Assert.Equal(1, s.Get<Commit>().Count());
+				Assert.Equal(0, s.Get<BugFix>().Count());
+				Assert.Equal(new string[] { "file1" },
+					s.Get<CodeFile>().Select(f => f.Path));
+				Assert.Equal(1, s.Get<Modification>().Count());
+				Assert.Equal(new double[] { 100 },
+					s.Get<CodeBlock>().Select(x => x.Size));
+			});
+		}
+		[Fact]
+		public void Should_clear_file_removing_flag_during_truncate()
+		{
+			data.UsingSession(s =>
+				s.MappingDSL()
+					.AddCommit("1")
+						.AddFile("file1").Modified().Code(100)
+				.Submit()
+					.AddCommit("2")
+						.File("file1").Delete()
+				.Submit());
+			
+			mapper.Truncate(1);
+
+			data.UsingSession(s =>
+			{
+				Assert.Null(s.Get<CodeFile>().Single().DeletedInCommitId);
+			});
 		}
 	}
 }

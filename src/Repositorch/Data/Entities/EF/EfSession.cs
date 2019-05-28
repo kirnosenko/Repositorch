@@ -40,11 +40,23 @@ namespace Repositorch.Data.Entities.EF
 		}
 		void IRepository.AddRange<T>(IEnumerable<T> entities)
 		{
+			if (!entities.Any())
+			{
+				return;
+			}
 			((DbSet<T>)tables[typeof(T)]).AddRange(entities);
 		}
-		void IRepository.Delete<T>(T entity)
+		void IRepository.Remove<T>(T entity)
 		{
 			((DbSet<T>)tables[typeof(T)]).Remove(entity);
+		}
+		void IRepository.RemoveRange<T>(IEnumerable<T> entities)
+		{
+			if (!entities.Any())
+			{
+				return;
+			}
+			((DbSet<T>)tables[typeof(T)]).RemoveRange(entities);
 		}
 		void ISession.SubmitChanges()
 		{

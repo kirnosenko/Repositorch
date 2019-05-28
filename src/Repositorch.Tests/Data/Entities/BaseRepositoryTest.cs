@@ -41,9 +41,13 @@ namespace Repositorch.Data.Entities
 		{
 			session.AddRange(entities);
 		}
-		public void Delete<T>(T entity) where T : class
+		public void Remove<T>(T entity) where T : class
 		{
-			session.Delete(entity);
+			session.Remove(entity);
+		}
+		public void RemoveRange<T>(IEnumerable<T> entities) where T : class
+		{
+			session.RemoveRange(entities);
 		}
 		public void SubmitChanges()
 		{

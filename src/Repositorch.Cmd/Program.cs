@@ -17,13 +17,15 @@ namespace Repositorch
 	{
 		static void Main(string[] args)
 		{
-			SqliteDataStore data = new SqliteDataStore("d:/123.db");
-			IGitClient gitClient = new CommandLineGitClient("D:/src/git/.git");
-			IVcsData vcsData = new VcsDataCached(new GitData(gitClient), 1, 1000);
+			var data = new SqliteDataStore("d:/123.db");
+			var gitClient = new CommandLineGitClient("D:/src/git/.git");
+			var vcsData = new VcsDataCached(new GitData(gitClient), 1, 1000);
+			var mapper = CreateDataMapper(data, vcsData);
 
 			//Selection(data);
-			Mapping(data, vcsData);
-			//Check(data, vcsData);
+			//Mapping(data, vcsData, 200);
+			//Truncate(data, vcsData, 124);
+			Check(data, vcsData, 100);
 			Console.ReadKey();
 		}
 		static void Selection(IDataStore data)
@@ -33,42 +35,60 @@ namespace Repositorch
 			
 			}
 		}
-		static void Mapping(IDataStore data, IVcsData vcsData)
+		static DataMapper CreateDataMapper(IDataStore data, IVcsData vcsData)
 		{
-			DataMapper mapping = new DataMapper(vcsData);
-			mapping.RegisterMapper(
+			DataMapper dataMapper = new DataMapper(data, vcsData);
+			dataMapper.RegisterMapper(
 				new CommitMapper(vcsData));
-			mapping.RegisterMapper(
+			dataMapper.RegisterMapper(
 				new AuthorMapper(vcsData));
-			mapping.RegisterMapper(
+			dataMapper.RegisterMapper(
 				new BugFixMapper(vcsData, new BugFixDetectorBasedOnLogMessage()));
-			mapping.RegisterMapper(
+			dataMapper.RegisterMapper(
 				new CodeFileMapper(vcsData));
-			mapping.RegisterMapper(
+			dataMapper.RegisterMapper(
 				new ModificationMapper(vcsData));
-			mapping.RegisterMapper(
+			dataMapper.RegisterMapper(
 				new CodeBlockMapper(vcsData));
-			mapping.CreateDataBase = true;
-			mapping.StopRevision = "8f41523fc1a8cd127ff39fa111b3b5bb5105cc84";
-
+			return dataMapper;
+		}
+		static void Map(IDataStore data, IVcsData vcsData, int revisions)
+		{
+			DataMapper mapper = CreateDataMapper(data, vcsData);
+			
 			using (ConsoleTimeLogger.Start("mapping time"))
 			{
-				mapping.OnRevisionMapping += (r, n) => Console.WriteLine(
+				mapper.OnRevisionProcessing += (r, n) => Console.WriteLine(
 					"mapping of revision {0}{1}",
 					r,
 					r != n ? string.Format(" ({0})", n) : ""
 				);
 
-				mapping.Map(data);
+				mapper.MapRevisions(stopRevision: vcsData.RevisionByNumber(revisions));
 			}
 		}
-		public static void Check(IDataStore data, IVcsData vcsData)
+		static void Truncate(IDataStore data, IVcsData vcsData, int revisionsToKeep)
+		{
+			DataMapper mapper = CreateDataMapper(data, vcsData);
+			
+			using (ConsoleTimeLogger.Start("truncating time"))
+			{
+				mapper.OnRevisionProcessing += (r, n) => Console.WriteLine(
+					"truncating of revision {0}{1}",
+					r,
+					r != n ? string.Format(" ({0})", n) : ""
+				);
+
+				mapper.Truncate(revisionsToKeep);
+			}
+		}
+		public static void Check(IDataStore data, IVcsData vcsData, int skipRevisions = 0)
 		{
 			using (ConsoleTimeLogger.Start("checking time"))
 			using (var s = data.OpenSession())
 			{
-				int counter = 1;
-				foreach (var revision in s.Get<Commit>().Select(c => c.Revision))
+				int counter = 1 + skipRevisions;
+				foreach (var revision in s.Get<Commit>().Skip(skipRevisions).Select(c => c.Revision))
 				{
 					Console.WriteLine("checking of revision ({0}) {1}", revision, counter++);
 

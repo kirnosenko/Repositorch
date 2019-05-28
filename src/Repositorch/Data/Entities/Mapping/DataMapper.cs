@@ -33,78 +33,18 @@ namespace Repositorch.Data.Entities.Mapping
 
 	public class DataMapper : IMappingHost
 	{
-		public event Action<string, string> OnRevisionMapping;
+		public event Action<string, string> OnRevisionProcessing;
 
+		private IDataStore data;
 		private IVcsData vcsData;
 
 		private List<object> availableExpressions;
 		private Dictionary<Type, Action> mappers = new Dictionary<Type, Action>();
 
-		public DataMapper(IVcsData vcsData)
+		public DataMapper(IDataStore data, IVcsData vcsData)
 		{
+			this.data = data;
 			this.vcsData = vcsData;
-			CreateDataBase = false;
-		}
-		public void Map(IDataStore data)
-		{
-			int nextRevisionNumber;
-			string nextRevision;
-
-			using (var s = data.OpenSession())
-			{
-				if (StartRevision == null)
-				{
-					if (CreateDataBase)
-					{
-						//CreateSchema(data);
-					}
-					else if (s.RevisionExists(StopRevision))
-					{
-						return;
-					}
-					nextRevisionNumber = s.MappingStartRevision();
-					nextRevision = vcsData.RevisionByNumber(nextRevisionNumber);
-				}
-				else
-				{
-					StopRevision = s.LastMappedRevision();
-					nextRevision = StartRevision;
-					nextRevisionNumber = s.NumberOfRevision(StartRevision);
-				}
-			}
-
-			do
-			{
-				if (OnRevisionMapping != null)
-				{
-					OnRevisionMapping(nextRevision, nextRevisionNumber.ToString());
-				}
-				Map(data, nextRevision);
-				nextRevision = nextRevision == StopRevision ?
-					null
-					:
-					vcsData.RevisionByNumber(++nextRevisionNumber);
-			} while (nextRevision != null);
-		}
-		public void Map(IDataStore data, string revision)
-		{
-			using (var s = data.OpenSession())
-			{
-				availableExpressions = new List<object>()
-				{ 
-					new RepositoryMappingExpression(s)
-					{
-						Revision = revision
-					}
-				};
-
-				foreach (var mapper in mappers)
-				{
-					mapper.Value();
-				}
-
-				s.SubmitChanges();
-			}
 		}
 		public void RegisterMapper<T, IME, OME>(EntityMapper<T, IME, OME> mapper)
 		{
@@ -130,35 +70,98 @@ namespace Repositorch.Data.Entities.Mapping
 				}
 			});
 		}
-		public void KeepOnlyMappers(Type[] mapperTypesToKeep)
+		public void MapRevisions(string startRevision = null, string stopRevision = null)
 		{
-			var mappersToRemove = mappers.Where(x => !mapperTypesToKeep.Contains(x.Key)).ToList();
-			foreach (var mapper in mappersToRemove)
+			int nextRevisionNumber;
+			string nextRevision;
+
+			using (var s = data.OpenSession())
 			{
-				mappers.Remove(mapper.Key);
-			}
-		}
-		public IMapper[] Mappers
-		{
-			set
-			{
-				foreach (var mapper in value)
+				if (startRevision == null)
 				{
-					mapper.RegisterHost(this);
+					if (s.RevisionExists(stopRevision))
+					{
+						return;
+					}
+					nextRevisionNumber = s.MappingStartRevision();
+					nextRevision = vcsData.RevisionByNumber(nextRevisionNumber);
+				}
+				else
+				{
+					stopRevision = s.LastMappedRevision();
+					nextRevision = startRevision;
+					nextRevisionNumber = s.NumberOfRevision(startRevision);
 				}
 			}
+
+			do
+			{
+				OnRevisionProcessing?.Invoke(nextRevision, nextRevisionNumber.ToString());
+				MapRevision(nextRevision);
+				nextRevision = nextRevision == stopRevision ?
+					null
+					:
+					vcsData.RevisionByNumber(++nextRevisionNumber);
+			} while (nextRevision != null);
 		}
-		public bool CreateDataBase
+		public void MapRevision(string revision)
 		{
-			get; set;
+			using (var s = data.OpenSession())
+			{
+				availableExpressions = new List<object>()
+				{ 
+					new RepositoryMappingExpression(s)
+					{
+						Revision = revision
+					}
+				};
+
+				foreach (var mapper in mappers)
+				{
+					mapper.Value();
+				}
+
+				s.SubmitChanges();
+			}
 		}
-		public string StartRevision
+		public void Truncate(int revisionsToKeep)
 		{
-			get; set;
-		}
-		public string StopRevision
-		{
-			get; set;
+			using (var s = data.OpenSession())
+			{
+				var commitsToRemove = s.Get<Commit>()
+					.Skip(revisionsToKeep)
+					.OrderByDescending(x => x.OrderedNumber)
+					.ToArray();
+				
+				foreach (var c in commitsToRemove)
+				{
+					OnRevisionProcessing?.Invoke(c.Revision, c.OrderedNumber.ToString());
+
+					var modificationsToRemove = s.Get<Modification>()
+						.Where(m => m.CommitId == c.Id);
+					var codeToRemove =
+						from m in modificationsToRemove
+						join cb in s.Get<CodeBlock>() on m.Id equals cb.ModificationId
+						select cb;
+					s.RemoveRange(codeToRemove);
+					s.RemoveRange(modificationsToRemove);
+					var filesToRemove = s.Get<CodeFile>()
+						.Where(x => x.AddedInCommitId == c.Id);
+					s.RemoveRange(filesToRemove);
+					foreach (var f in s.Get<CodeFile>().Where(x => x.DeletedInCommitId == c.Id))
+					{
+						f.DeletedInCommit = null;
+					}
+					var fixToRemove = s.Get<BugFix>().SingleOrDefault(x => x.CommitId == c.Id);
+					if (fixToRemove != null)
+					{
+						s.Remove(fixToRemove);
+					}
+					s.Remove(c);
+					
+					s.SubmitChanges();
+				}
+			}
 		}
 	}
 }

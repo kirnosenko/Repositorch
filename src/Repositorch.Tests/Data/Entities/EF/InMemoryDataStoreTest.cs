@@ -156,7 +156,7 @@ namespace Repositorch.Data.Entities.EF
 			}
 			using (var s = data.OpenSession())
 			{
-				s.Delete(c);
+				s.Remove(c);
 			}
 			using (var s = data.OpenSession())
 			{
@@ -164,7 +164,43 @@ namespace Repositorch.Data.Entities.EF
 			}
 			using (var s = data.OpenSession())
 			{
-				s.Delete(c);
+				s.Remove(c);
+				s.SubmitChanges();
+			}
+			using (var s = data.OpenSession())
+			{
+				Assert.Equal(0, s.Get<Commit>().Count());
+			}
+		}
+		[Fact]
+		public void Should_allow_to_precess_entity_range()
+		{
+			var commits = new Commit[]
+			{
+				new Commit(), new Commit(),
+			};
+			using (var s = data.OpenSession())
+			{
+				s.AddRange(commits);
+				s.SubmitChanges();
+			}
+			using (var s = data.OpenSession())
+			{
+				commits = s.Get<Commit>().ToArray();
+				Assert.Equal(2, commits.Length);
+				s.RemoveRange(commits);
+				s.SubmitChanges();
+			}
+			using (var s = data.OpenSession())
+			{
+				Assert.Equal(0, s.Get<Commit>().Count());
+				s.AddRange(Enumerable.Empty<Commit>());
+				s.SubmitChanges();
+			}
+			using (var s = data.OpenSession())
+			{
+				Assert.Equal(0, s.Get<Commit>().Count());
+				s.RemoveRange(Enumerable.Empty<Commit>());
 				s.SubmitChanges();
 			}
 			using (var s = data.OpenSession())
