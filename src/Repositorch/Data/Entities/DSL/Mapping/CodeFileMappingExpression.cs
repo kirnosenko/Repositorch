@@ -34,7 +34,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 				Path = filePath,
 				AddedInCommit = CurrentEntity<Commit>()
 			};
-			AddEntity();
+			Add(entity);
 		}
 		public CodeFileMappingExpression(IRepositoryMappingExpression parentExp, CodeFile file)
 			: base(parentExp)

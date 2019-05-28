@@ -41,10 +41,6 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		{
 			return parentExp.Submit();
 		}
-		public void AddEntity()
-		{
-			Add(entity);
-		}
 		public virtual T CurrentEntity<T>() where T : class
 		{
 			if (typeof(T) == typeof(E))

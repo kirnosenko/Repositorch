@@ -24,7 +24,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 				Commit = CurrentEntity<Commit>(),
 				File = CurrentEntity<CodeFile>()
 			};
-			AddEntity();
+			Add(entity);
 		}
 	}
 }

@@ -31,7 +31,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			entity = new Commit();
 			entity.OrderedNumber = Get<Commit>().Count() + 1;
 			entity.Revision = revision;
-			AddEntity();
+			Add(entity);
 		}
 		public CommitMappingExpression(IRepositoryMappingExpression parentExp, Commit commit)
 			: base(parentExp)

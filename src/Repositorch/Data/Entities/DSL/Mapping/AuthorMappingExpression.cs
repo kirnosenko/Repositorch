@@ -30,7 +30,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 				{
 					Name = name,
 				};
-				AddEntity();
+				Add(entity);
 			}
 			entity.Commits.Add(CurrentEntity<Commit>());
 		}

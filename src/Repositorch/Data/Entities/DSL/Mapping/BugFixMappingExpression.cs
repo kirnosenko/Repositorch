@@ -22,7 +22,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			{
 				Commit = CurrentEntity<Commit>()
 			};
-			AddEntity();
+			Add(entity);
 		}
 	}
 }

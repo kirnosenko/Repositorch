@@ -108,7 +108,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			{
 				entity.AddedInitiallyInCommit = CurrentEntity<Commit>();
 			}
-			AddEntity();
+			Add(entity);
 		}
 		public ICodeBlockMappingExpression CopiedFrom(string revision)
 		{
