@@ -18,6 +18,7 @@ namespace Repositorch.Data.Entities.EF
 
 			tables.Add(typeof(Commit), Set<Commit>());
 			tables.Add(typeof(Author), Set<Author>());
+			tables.Add(typeof(Branch), Set<Branch>());
 			tables.Add(typeof(BugFix), Set<BugFix>());
 			tables.Add(typeof(CodeFile), Set<CodeFile>());
 			tables.Add(typeof(Modification), Set<Modification>());
@@ -73,12 +74,10 @@ namespace Repositorch.Data.Entities.EF
 				.HasMany(a => a.Commits)
 				.WithOne((string)null)
 				.HasForeignKey(c => c.AuthorId);
-
-			/*modelBuilder.Entity<Branch>()
+			modelBuilder.Entity<Branch>()
 				.HasMany(b => b.Commits)
-				.WithOne(c => c.Branch)
+				.WithOne((string)null)
 				.HasForeignKey(c => c.BranchId);
-			*/
 			modelBuilder.Entity<BugFix>()
 				.HasOne(bf => bf.Commit)
 				.WithOne((string)null)
