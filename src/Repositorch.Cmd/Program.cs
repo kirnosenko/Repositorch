@@ -23,9 +23,10 @@ namespace Repositorch
 			var mapper = CreateDataMapper(data, vcsData);
 
 			//Selection(data);
+			//Dump(vcsData);
 			//Mapping(data, vcsData, 200);
-			//Truncate(data, vcsData, 124);
-			Check(data, vcsData, 100);
+			//Truncate(data, vcsData, 122);
+			Check(data, vcsData, 120, false);
 			Console.ReadKey();
 		}
 		static void Selection(IDataStore data)
@@ -33,6 +34,20 @@ namespace Repositorch
 			using (ConsoleTimeLogger.Start("selection time"))
 			{
 			
+			}
+		}
+		static void Dump(IVcsData vcsData)
+		{
+			using (ConsoleTimeLogger.Start("dump time"))
+			{
+				var r1 = vcsData.RevisionByNumber(123);
+				var r2 = vcsData.RevisionByNumber(124);
+
+				var blame1 = vcsData.Blame(r1, "/Makefile");
+				var blame2 = vcsData.Blame(r2, "/Makefile");
+				var diff = blame1.Diff(blame2);
+
+				Console.WriteLine();
 			}
 		}
 		static DataMapper CreateDataMapper(IDataStore data, IVcsData vcsData)
@@ -82,7 +97,7 @@ namespace Repositorch
 				mapper.Truncate(revisionsToKeep);
 			}
 		}
-		public static void Check(IDataStore data, IVcsData vcsData, int skipRevisions = 0)
+		public static void Check(IDataStore data, IVcsData vcsData, int skipRevisions = 0, bool touchedOnly = true)
 		{
 			using (ConsoleTimeLogger.Start("checking time"))
 			using (var s = data.OpenSession())
@@ -94,7 +109,9 @@ namespace Repositorch
 
 					var touchedFiles = s.SelectionDSL()
 						.Commits().RevisionIs(revision)
-						.Files().TouchedInCommits().ExistInRevision(revision);
+						.Files().Reselect(
+							e => touchedOnly ? e.TouchedInCommits() : e)
+						.ExistInRevision(revision);
 
 					foreach (var touchedFile in touchedFiles)
 					{
