@@ -7,27 +7,26 @@ namespace Repositorch.Data.VersionControl.Git
 	public class GitData : IVcsData
 	{
 		private IGitClient git;
-		private List<string> revisions;
+		private GitRevisions revisions;
 		
 		public GitData(IGitClient git)
 		{
 			this.git = git;
+			revisions = new GitRevisions(git.RevList());
 		}
-		public string RevisionByNumber(int revisionNumber)
+		public string GetRevisionByNumber(int number)
 		{
-			if (revisions == null)
-			{
-				GetAllRevisions();
-			}
-			if (revisionNumber - 1 < revisions.Count)
-			{
-				return revisions[revisionNumber - 1];
-			}
-			else
-			{
-				return null;
-			}
+			return revisions.GetRevisionByNumber(number);
 		}
+		public IEnumerable<string> GetRevisionParents(string revision)
+		{
+			return revisions.GetRevisionParents(revision);
+		}
+		public IEnumerable<string> GetRevisionChildren(string revision)
+		{
+			return revisions.GetRevisionChildren(revision);
+		}
+		
 		public Log Log(string revision)
 		{
 			using (var log = git.Log(revision))
@@ -40,22 +39,6 @@ namespace Repositorch.Data.VersionControl.Git
 			using (var blame = git.Blame(revision, filePath))
 			{
 				return new GitBlame(blame);
-			}
-		}
-
-		private void GetAllRevisions()
-		{
-			revisions = new List<string>();
-			
-			using (var revlist = git.RevList())
-			{
-				TextReader reader = new StreamReader(revlist);
-				
-				string line;
-				while ((line = reader.ReadLine()) != null)
-				{
-					revisions.Add(line);
-				}
 			}
 		}
 	}

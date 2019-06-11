@@ -124,7 +124,7 @@ namespace Repositorch.Data.Entities.Mapping
 			List<string> revisions = new List<string>();
 
 			vcsData
-				.RevisionByNumber(Arg.Any<int>())
+				.GetRevisionByNumber(Arg.Any<int>())
 				.Returns(x => x[0].ToString());
 				
 			mapper.OnRevisionProcessing += (r, n) => revisions.Add(r);
@@ -138,7 +138,7 @@ namespace Repositorch.Data.Entities.Mapping
 			List<string> revisions = new List<string>();
 
 			vcsData
-				.RevisionByNumber(Arg.Any<int>())
+				.GetRevisionByNumber(Arg.Any<int>())
 				.Returns(x => (int)x[0] == 6 ? null : x[0].ToString());
 			
 			mapper.OnRevisionProcessing += (r, n) => revisions.Add(r);
@@ -163,7 +163,7 @@ namespace Repositorch.Data.Entities.Mapping
 						.AddFile("file3").Modified()
 				.Submit());
 			vcsData
-				.RevisionByNumber(Arg.Any<int>())
+				.GetRevisionByNumber(Arg.Any<int>())
 				.Returns(x => x[0].ToString());
 				
 			mapper.OnRevisionProcessing += (r, n) => revisions.Add(r);

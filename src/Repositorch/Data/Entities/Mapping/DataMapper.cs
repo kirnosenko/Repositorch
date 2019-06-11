@@ -84,7 +84,7 @@ namespace Repositorch.Data.Entities.Mapping
 						return;
 					}
 					nextRevisionNumber = s.MappingStartRevision();
-					nextRevision = vcsData.RevisionByNumber(nextRevisionNumber);
+					nextRevision = vcsData.GetRevisionByNumber(nextRevisionNumber);
 				}
 				else
 				{
@@ -101,7 +101,7 @@ namespace Repositorch.Data.Entities.Mapping
 				nextRevision = nextRevision == stopRevision ?
 					null
 					:
-					vcsData.RevisionByNumber(++nextRevisionNumber);
+					vcsData.GetRevisionByNumber(++nextRevisionNumber);
 			} while (nextRevision != null);
 		}
 		public void MapRevision(string revision)

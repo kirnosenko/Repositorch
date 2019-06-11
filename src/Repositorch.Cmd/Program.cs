@@ -40,8 +40,8 @@ namespace Repositorch
 		{
 			using (ConsoleTimeLogger.Start("dump time"))
 			{
-				var r1 = vcsData.RevisionByNumber(123);
-				var r2 = vcsData.RevisionByNumber(124);
+				var r1 = vcsData.GetRevisionByNumber(123);
+				var r2 = vcsData.GetRevisionByNumber(124);
 
 				var blame1 = vcsData.Blame(r1, "/Makefile");
 				var blame2 = vcsData.Blame(r2, "/Makefile");
@@ -79,7 +79,7 @@ namespace Repositorch
 					r != n ? string.Format(" ({0})", n) : ""
 				);
 
-				mapper.MapRevisions(stopRevision: vcsData.RevisionByNumber(revisions));
+				mapper.MapRevisions(stopRevision: vcsData.GetRevisionByNumber(revisions));
 			}
 		}
 		static void Truncate(IDataStore data, IVcsData vcsData, int revisionsToKeep)

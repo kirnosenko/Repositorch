@@ -9,6 +9,11 @@ namespace Repositorch.Data.Entities
 	/// </summary>
 	public class Branch
 	{
+		/// <summary>
+		/// Size of mask in bits.
+		/// </summary>
+		public const int MaskSize = 32;
+
 		public int Id { get; set; }
 		/// <summary>
 		/// Mask to distinguish parent branches.

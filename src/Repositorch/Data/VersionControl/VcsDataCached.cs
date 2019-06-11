@@ -17,10 +17,19 @@ namespace Repositorch.Data.VersionControl
 				blamesLimit, k => innerData.Blame(k.revision, k.path));
 		}
 
-		public string RevisionByNumber(int revisionNumber)
+		public string GetRevisionByNumber(int number)
 		{
-			return innerData.RevisionByNumber(revisionNumber);
+			return innerData.GetRevisionByNumber(number);
 		}
+		public IEnumerable<string> GetRevisionParents(string revision)
+		{
+			return innerData.GetRevisionParents(revision);
+		}
+		public IEnumerable<string> GetRevisionChildren(string revision)
+		{
+			return innerData.GetRevisionChildren(revision);
+		}
+		
 		public Log Log(string revision)
 		{
 			return logs.GetData(revision);

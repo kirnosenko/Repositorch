@@ -12,20 +12,18 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		public static CommitSelectionExpression OnBranch(
 			this CommitSelectionExpression parentExp, uint mask, uint maskOffset = 0)
 		{
-			int maskSizeInBits = 32;
-			
 			return parentExp.Reselect(s =>
 				from c in s
 				join br in parentExp.Queryable<Branch>() on c.BranchId equals br.Id
 				let offset_delta = (int)(maskOffset - br.MaskOffset)
 				let max = 0xFFFFFFFF
-				let right_shifted_mask = offset_delta < 0 ? ((mask >> -offset_delta) | (max << (maskSizeInBits + offset_delta))) : 0
-				let left_shifted_mask = offset_delta > 0 ? ((mask << offset_delta) | (max >> (maskSizeInBits - offset_delta))) : 0
+				let right_shifted_mask = offset_delta < 0 ? ((mask >> -offset_delta) | (max << (Branch.MaskSize + offset_delta))) : 0
+				let left_shifted_mask = offset_delta > 0 ? ((mask << offset_delta) | (max >> (Branch.MaskSize - offset_delta))) : 0
 				where
-					offset_delta >= maskSizeInBits
+					offset_delta >= Branch.MaskSize
 					||
 					(
-						offset_delta < maskSizeInBits
+						offset_delta < Branch.MaskSize
 						&&
 						(
 							(offset_delta == 0 && (br.Mask | mask) == mask)
