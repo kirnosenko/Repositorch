@@ -13,6 +13,10 @@ namespace Repositorch.Data.Entities
 		/// Size of mask in bits.
 		/// </summary>
 		public const int MaskSize = 32;
+		/// <summary>
+		/// Max value of mask.
+		/// </summary>
+		public const uint MaskMax = uint.MaxValue;
 
 		public int Id { get; set; }
 		/// <summary>
