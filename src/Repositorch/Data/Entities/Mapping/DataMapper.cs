@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using Repositorch.Data.Entities.DSL.Mapping;
+using Repositorch.Data.Entities.DSL.Selection;
+using Repositorch.Data.Entities.DSL.Selection.Metrics;
 using Repositorch.Data.VersionControl;
 
 namespace Repositorch.Data.Entities.Mapping
@@ -34,6 +36,7 @@ namespace Repositorch.Data.Entities.Mapping
 	public class DataMapper : IMappingHost
 	{
 		public event Action<string, string> OnRevisionProcessing;
+		public event Action<string> OnError;
 
 		private IDataStore data;
 		private IVcsData vcsData;
@@ -162,6 +165,129 @@ namespace Repositorch.Data.Entities.Mapping
 					s.SubmitChanges();
 				}
 			}
+		}
+		public bool CheckRevision(string revision, bool touchedOnly = true)
+		{
+			bool result = true;
+
+			using (var s = data.OpenSession())
+			{
+				OnRevisionProcessing?.Invoke(revision, s.NumberOfRevision(revision).ToString());
+				
+				var touchedFiles = s.SelectionDSL()
+					.Commits().RevisionIs(revision)
+					.Files().Reselect(
+						e => touchedOnly ? e.TouchedInCommits() : e)
+					.ExistInRevision(revision);
+
+				foreach (var touchedFile in touchedFiles)
+				{
+					result &= CheckLinesContent(s, revision, touchedFile);
+				}
+			}
+
+			return result;
+		}
+		private bool CheckLinesContent(ISession s, string revision, CodeFile file)
+		{
+			IBlame fileBlame = null;
+			try
+			{
+				fileBlame = vcsData.Blame(revision, file.Path);
+			}
+			catch
+			{
+			}
+			if (fileBlame == null)
+			{
+				OnError(string.Format("Could not get blame for file {0} in revision {1}.",
+					file.Path, revision));
+				return false;
+			}
+
+			double currentLOC = s.SelectionDSL()
+				.Commits().TillRevision(revision)
+				.Files().IdIs(file.Id)
+				.Modifications().InCommits().InFiles()
+				.CodeBlocks().InModifications()
+				.CalculateLOC();
+
+			bool correct = currentLOC == fileBlame.Count;
+
+			if (!correct)
+			{
+				OnError(string.Format("Incorrect number of lines in file {0}. {1} should be {2}",
+					file.Path, currentLOC, fileBlame.Count));
+				return false;
+			}
+
+			SmartDictionary<string, int> linesByRevision = new SmartDictionary<string, int>(x => 0);
+			foreach (var line in fileBlame)
+			{
+				linesByRevision[line.Value]++;
+			}
+
+			var codeBySourceRevision =
+			(
+				from f in s.Get<CodeFile>()
+				join m in s.Get<Modification>() on f.Id equals m.FileId
+				join cb in s.Get<CodeBlock>() on m.Id equals cb.ModificationId
+				join c in s.Get<Commit>() on m.CommitId equals c.Id
+				let addedCodeBlock = s.Get<CodeBlock>()
+					.Single(x => x.Id == (cb.Size < 0 ? cb.TargetCodeBlockId : cb.Id))
+				let codeAddedInitiallyInRevision = s.Get<Commit>()
+					.Single(x => x.Id == addedCodeBlock.AddedInitiallyInCommitId)
+					.Revision
+				let testRevisionNumber = s.Get<Commit>()
+					.Single(x => x.Revision == revision)
+					.OrderedNumber
+				where
+					f.Id == file.Id
+					&&
+					c.OrderedNumber <= testRevisionNumber
+				group cb.Size by codeAddedInitiallyInRevision into g
+				select new
+				{
+					FromRevision = g.Key,
+					CodeSize = g.Sum()
+				}
+			).Where(x => x.CodeSize != 0).ToList();
+
+			var errorCode =
+				(
+					from codeFromRevision in codeBySourceRevision
+					where
+						codeFromRevision.CodeSize != linesByRevision[codeFromRevision.FromRevision]
+					select new
+					{
+						SourceRevision = codeFromRevision.FromRevision,
+						CodeSize = codeFromRevision.CodeSize,
+						RealCodeSize = linesByRevision[codeFromRevision.FromRevision]
+					}
+				).ToList();
+
+			correct =
+				correct
+				&&
+				codeBySourceRevision.Count() == linesByRevision.Count
+				&&
+				errorCode.Count == 0;
+
+			if (codeBySourceRevision.Count() != linesByRevision.Count)
+			{
+				OnError(string.Format("Number of revisions file {0} contains code from is incorrect. {1} should be {2}",
+					file.Path, codeBySourceRevision.Count(), linesByRevision.Count));
+			}
+			foreach (var error in errorCode)
+			{
+				OnError(string.Format("Incorrect number of lines in file {0} from revision {1}. {2} should be {3}",
+					file.Path,
+					error.SourceRevision,
+					error.CodeSize,
+					error.RealCodeSize));
+			}
+
+			return correct;
 		}
 	}
 }

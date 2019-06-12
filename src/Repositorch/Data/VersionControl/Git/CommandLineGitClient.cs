@@ -14,7 +14,7 @@ namespace Repositorch.Data.VersionControl.Git
 		public Stream RevList()
 		{
 			return RunCommand(
-				"rev-list {0} --topo-order --reverse",
+				"rev-list {0} --topo-order --reverse --parents",
 				Branch
 			);
 		}
