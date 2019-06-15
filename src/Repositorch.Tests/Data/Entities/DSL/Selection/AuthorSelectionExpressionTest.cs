@@ -32,7 +32,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			Assert.Equal(
 				new string[] { "bob", "alan", "chris" },
 				selectionDSL
-					.Commits().AfterRevision("1")
+					.Commits().RevisionIsNot("1")
 					.Authors().OfCommits().Select(a => a.Name));
 		}
 		[Fact]

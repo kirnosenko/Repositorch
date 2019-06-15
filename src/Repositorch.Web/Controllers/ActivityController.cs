@@ -33,14 +33,14 @@ namespace Repositorch.Web.Controllers
 				ViewBag.Periods =
 					(from period in periods
 					let commits = s.SelectionDSL().Commits()
-						.DateIsGreaterOrEquelThan(period.start)
-						.DateIsLesserThan(period.end)
+						.FromDate(period.start)
+						.BeforeDate(period.end)
 						.Fixed()
 					let code = commits
 						.Modifications().InCommits()
 						.CodeBlocks().InModifications().Fixed()
 					let totalCommits = s.SelectionDSL().Commits()
-						.DateIsLesserThan(period.end)
+						.BeforeDate(period.end)
 						.Fixed()
 					let totalCode = totalCommits
 						.Modifications().InCommits()

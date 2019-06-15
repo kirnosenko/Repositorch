@@ -21,99 +21,47 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			Assert.Equal(
 				1,
 				selectionDSL
-					.Commits().DateIsGreaterThan(DateTime.Today.AddDays(-8)).Count());
+					.Commits().AfterDate(DateTime.Today.AddDays(-8)).Count());
 			Assert.Equal(
 				2,
 				selectionDSL
-					.Commits().DateIsGreaterOrEquelThan(DateTime.Today.AddDays(-8)).Count());
+					.Commits().FromDate(DateTime.Today.AddDays(-8)).Count());
 			Assert.Equal(
 				1,
 				selectionDSL
-					.Commits().DateIsLesserThan(DateTime.Today.AddDays(-8)).Count());
+					.Commits().BeforeDate(DateTime.Today.AddDays(-8)).Count());
 			Assert.Equal(
 				2,
 				selectionDSL
-					.Commits().DateIsLesserOrEquelThan(DateTime.Today.AddDays(-8)).Count());
+					.Commits().TillDate(DateTime.Today.AddDays(-8)).Count());
 		}
 		[Fact]
 		public void Should_select_commits_relatively_specified()
 		{
 			mappingDSL
-				.AddCommit("abc")
+				.AddCommit("1")
 			.Submit()
-				.AddCommit("abcd")
+				.AddCommit("2")
 			.Submit()
-				.AddCommit("abcde")
+				.AddCommit("3")
 			.Submit();
 
-			Assert.Equal(
-				0,
-				selectionDSL.Commits().BeforeRevision(1).Count());
-			Assert.Equal(
-				0,
-				selectionDSL.Commits().BeforeRevision("abc").Count());
-			Assert.Equal(
-				1,
-				selectionDSL.Commits().BeforeRevision(2).Count());
-			Assert.Equal(
-				1,
-				selectionDSL.Commits().BeforeRevision("abcd").Count());
-			Assert.Equal(
-				1,
-				selectionDSL.Commits().TillRevision(1).Count());
-			Assert.Equal(
-				1,
-				selectionDSL.Commits().TillRevision("abc").Count());
-			Assert.Equal(
-				3,
-				selectionDSL.Commits().TillRevision(3).Count());
-			Assert.Equal(
-				3,
-				selectionDSL.Commits().TillRevision("abcde").Count());
-			Assert.Equal(
-				2,
-				selectionDSL.Commits().FromRevision(2).Count());
-			Assert.Equal(
-				2,
-				selectionDSL.Commits().FromRevision("abcd").Count());
-			Assert.Equal(
-				1,
-				selectionDSL.Commits().FromRevision(3).Count());
-			Assert.Equal(
-				1,
-				selectionDSL.Commits().FromRevision("abcde").Count());
-			Assert.Equal(
-				2,
-				selectionDSL.Commits().AfterRevision(1).Count());
-			Assert.Equal(
-				2,
-				selectionDSL.Commits().AfterRevision("abc").Count());
-			Assert.Equal(
-				0,
-				selectionDSL.Commits().AfterRevision(3).Count());
-			Assert.Equal(
-				0,
-				selectionDSL.Commits().AfterRevision("abcde").Count());
-		}
-		[Fact]
-		public void Should_ignore_null_values_for_commit_relative_selection()
-		{
-			mappingDSL
-				.AddCommit("abc")
-			.Submit()
-				.AddCommit("abcd")
-			.Submit()
-				.AddCommit("abcde")
-			.Submit();
-
-			Assert.Equal(
-				3,
-				selectionDSL.Commits()
-					.AfterRevision(null)
-					.FromRevision(null)
-					.TillRevision(null)
-					.BeforeRevision(null)
-					.Count());
+			Assert.Equal(0, selectionDSL
+				.Commits().BeforeNumber(1).Count());
+			Assert.Equal(1, selectionDSL
+				.Commits().BeforeNumber(2).Count());
+			Assert.Equal(1, selectionDSL
+				.Commits().TillNumber(1).Count());
+			Assert.Equal(3, selectionDSL
+				.Commits().TillNumber(3).Count());
+			Assert.Equal(2, selectionDSL
+				.Commits().FromNumber(2).Count());
+			Assert.Equal(1, selectionDSL
+				.Commits().FromNumber(3).Count());
+			Assert.Equal(2, selectionDSL
+				.Commits().AfterNumber(1).Count());
+			Assert.Equal(0, selectionDSL
+				.Commits().AfterNumber(3).Count());
 		}
 	}
 }

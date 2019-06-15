@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Linq.Expressions;
 
 namespace Repositorch.Data.Entities.DSL.Selection
 {
@@ -58,6 +59,94 @@ namespace Repositorch.Data.Entities.DSL.Selection
 						)
 					)
 				select c);
+		}
+		public static CommitSelectionExpression BeforeRevision(
+			this CommitSelectionExpression parentExp, string revision)
+		{
+			if (revision == null)
+			{
+				return parentExp;
+			}
+			var revisionData = (
+				from c in parentExp.Queryable<Commit>().Where(x => x.Revision == revision)
+				join b in parentExp.Queryable<Branch>() on c.BranchId equals b.Id
+				select new
+				{
+					Number = c.OrderedNumber,
+					Mask = b.Mask,
+					MaskOffset = b.MaskOffset
+				}).Single();
+			return parentExp
+				.Reselect(s =>
+					s.BeforeNumber(revisionData.Number))
+				.Reselect(s =>
+					s.OnBranchBack(revisionData.Mask, revisionData.MaskOffset));
+		}
+		public static CommitSelectionExpression TillRevision(
+			this CommitSelectionExpression parentExp, string revision)
+		{
+			if (revision == null)
+			{
+				return parentExp;
+			}
+			var revisionData = (
+				from c in parentExp.Queryable<Commit>().Where(x => x.Revision == revision)
+				join b in parentExp.Queryable<Branch>() on c.BranchId equals b.Id
+				select new
+				{
+					Number = c.OrderedNumber,
+					Mask = b.Mask,
+					MaskOffset = b.MaskOffset
+				}).Single();
+			return parentExp
+				.Reselect(s =>
+					s.TillNumber(revisionData.Number))
+				.Reselect(s =>
+					s.OnBranchBack(revisionData.Mask, revisionData.MaskOffset));
+		}
+		public static CommitSelectionExpression AfterRevision(
+			this CommitSelectionExpression parentExp, string revision)
+		{
+			if (revision == null)
+			{
+				return parentExp;
+			}
+			var revisionData = (
+				from c in parentExp.Queryable<Commit>().Where(x => x.Revision == revision)
+				join b in parentExp.Queryable<Branch>() on c.BranchId equals b.Id
+				select new
+				{
+					Number = c.OrderedNumber,
+					Mask = b.Mask,
+					MaskOffset = b.MaskOffset
+				}).Single();
+			return parentExp
+				.Reselect(s =>
+					s.AfterNumber(revisionData.Number))
+				.Reselect(s =>
+					s.OnBranchForward(revisionData.Mask, revisionData.MaskOffset));
+		}
+		public static CommitSelectionExpression FromRevision(
+			this CommitSelectionExpression parentExp, string revision)
+		{
+			if (revision == null)
+			{
+				return parentExp;
+			}
+			var revisionData = (
+				from c in parentExp.Queryable<Commit>().Where(x => x.Revision == revision)
+				join b in parentExp.Queryable<Branch>() on c.BranchId equals b.Id
+				select new
+				{
+					Number = c.OrderedNumber,
+					Mask = b.Mask,
+					MaskOffset = b.MaskOffset
+				}).Single();
+			return parentExp
+				.Reselect(s =>
+					s.FromNumber(revisionData.Number))
+				.Reselect(s =>
+					s.OnBranchForward(revisionData.Mask, revisionData.MaskOffset));
 		}
 	}
 

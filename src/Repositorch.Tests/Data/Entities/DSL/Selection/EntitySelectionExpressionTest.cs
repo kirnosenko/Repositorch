@@ -24,13 +24,13 @@ namespace Repositorch.Data.Entities.DSL.Selection
 
 			Assert.Equal(new string[] { "2", "4" }, selectionDSL
 				.Commits()
-				.BeforeRevision("5")
+				.BeforeNumber(5)
 				.Reselect(commits =>
 					from c in commits 
 					where c.Revision != "3"
 					select c
 				)
-				.AfterRevision("1")
+				.AfterNumber(1)
 				.Select(c => c.Revision));
 		}
 		[Fact]
@@ -74,12 +74,12 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			.Submit();
 
 			Assert.Equal(4, selectionDSL
-				.Commits().AfterRevision("2")
+				.Commits().AfterNumber(2)
 				.Modifications().InCommits()
 				.Commits().Count());
 			
 			Assert.Equal(2, selectionDSL
-				.Commits().AfterRevision("2")
+				.Commits().AfterNumber(2)
 				.Modifications().InCommits()
 				.Commits().Again().Count());
 		}
@@ -97,9 +97,9 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			.Submit();
 
 			selectionDSL.Commits()
-				.AfterRevision("1")
+				.AfterNumber(1)
 				.Do(x => Assert.Equal(3, x.Count()))
-				.BeforeRevision("3")
+				.BeforeNumber(3)
 				.Do(x => Assert.Equal(1, x.Count()));
 		}
 		[Fact]
@@ -116,7 +116,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			.Submit();
 
 			Func<CommitSelectionExpression, CommitSelectionExpression> selector =
-				e => e.AfterRevision("1").BeforeRevision("4");
+				e => e.AfterNumber(1).BeforeNumber(4);
 			
 			Assert.Equal(2, selectionDSL.Commits()
 				.Reselect(selector).Count());
@@ -137,7 +137,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			Assert.Equal(2, selectionDSL
 				.Commits()
 				.Reselect((Func<CommitSelectionExpression, CommitSelectionExpression>)null)
-				.BeforeRevision("3")
+				.BeforeNumber(3)
 				.Count());
 		}
 	}

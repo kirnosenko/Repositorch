@@ -21,134 +21,63 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			return Reselect(s => s.Where(x => x.Revision == revision));
 		}
-		public CommitSelectionExpression DateIsGreaterThan(DateTime date)
+		public CommitSelectionExpression RevisionIsNot(string revision)
 		{
-			return Reselect(s => s.Where(x => x.Date > date));
+			return Reselect(s => s.Where(x => x.Revision != revision));
 		}
-		public CommitSelectionExpression DateIsGreaterOrEquelThan(DateTime date)
-		{
-			return Reselect(s => s.Where(x => x.Date >= date));
-		}
-		public CommitSelectionExpression DateIsLesserThan(DateTime date)
+		public CommitSelectionExpression BeforeDate(DateTime date)
 		{
 			return Reselect(s => s.Where(x => x.Date < date));
 		}
-		public CommitSelectionExpression DateIsLesserOrEquelThan(DateTime date)
+		public CommitSelectionExpression TillDate(DateTime date)
 		{
 			return Reselect(s => s.Where(x => x.Date <= date));
 		}
-		public CommitSelectionExpression BeforeRevision(int revisionOrderedNumber)
+		public CommitSelectionExpression AfterDate(DateTime date)
+		{
+			return Reselect(s => s.Where(x => x.Date > date));
+		}
+		public CommitSelectionExpression FromDate(DateTime date)
+		{
+			return Reselect(s => s.Where(x => x.Date >= date));
+		}
+		public CommitSelectionExpression BeforeNumber(int orderedNumber)
 		{
 			return Reselect(s =>
 				from c in s
 				where
-					c.OrderedNumber < revisionOrderedNumber
+					c.OrderedNumber < orderedNumber
 				select c
 			);
 		}
-		public CommitSelectionExpression BeforeRevision(string revision)
-		{
-			if (revision == null)
-			{
-				return this;
-			}
-			var revisionNumber = Queryable<Commit>()
-					.Single(x => x.Revision == revision)
-					.OrderedNumber;
-			return Reselect(s =>
-				from c in s
-				//let revisionNumber = Queryable<Commit>()
-				//	.Single(x => x.Revision == revision)
-				//	.OrderedNumber
-				where
-					c.OrderedNumber < revisionNumber
-				select c
-			);
-		}
-		public CommitSelectionExpression TillRevision(int revisionOrderedNumber)
+		public CommitSelectionExpression TillNumber(int orderedNumber)
 		{
 			return Reselect(s =>
 				from c in s
 				where
-					c.OrderedNumber <= revisionOrderedNumber
+					c.OrderedNumber <= orderedNumber
 				select c
 			);
 		}
-		public CommitSelectionExpression TillRevision(string revision)
-		{
-			if (revision == null)
-			{
-				return this;
-			}
-			var revisionNumber = Queryable<Commit>()
-					.Single(x => x.Revision == revision)
-					.OrderedNumber;
-			return Reselect(s =>
-				from c in s
-				//let revisionNumber = Queryable<Commit>()
-				//	.Single(x => x.Revision == revision)
-				//	.OrderedNumber
-				where
-					c.OrderedNumber <= revisionNumber
-				select c
-			);
-		}
-		public CommitSelectionExpression FromRevision(int revisionOrderedNumber)
+		public CommitSelectionExpression FromNumber(int orderedNumber)
 		{
 			return Reselect(s =>
 				from c in s
 				where
-					c.OrderedNumber >= revisionOrderedNumber
+					c.OrderedNumber >= orderedNumber
 				select c
 			);
 		}
-		public CommitSelectionExpression FromRevision(string revision)
-		{
-			if (revision == null)
-			{
-				return this;
-			}
-			var revisionNumber = Queryable<Commit>()
-					.Single(x => x.Revision == revision)
-					.OrderedNumber;
-			return Reselect(s =>
-				from c in s
-				//let revisionNumber = Queryable<Commit>()
-				//	.Single(x => x.Revision == revision)
-				//	.OrderedNumber
-				where
-					c.OrderedNumber >= revisionNumber
-				select c
-			);
-		}
-		public CommitSelectionExpression AfterRevision(int revisionOrderedNumber)
+		public CommitSelectionExpression AfterNumber(int orderedNumber)
 		{
 			return Reselect(s =>
 				from c in s
 				where
-					c.OrderedNumber > revisionOrderedNumber
+					c.OrderedNumber > orderedNumber
 				select c
 			);
 		}
-		public CommitSelectionExpression AfterRevision(string revision)
-		{
-			if (revision == null)
-			{
-				return this;
-			}
-			var revisionNumber = Queryable<Commit>()
-					.Single(x => x.Revision == revision)
-					.OrderedNumber;
-			return Reselect(s =>
-				from c in s
-				//let revisionNumber = Queryable<Commit>()
-				//	.Single(x => x.Revision == revision)
-				//	.OrderedNumber
-				where
-					c.OrderedNumber > revisionNumber
-				select c
-			);
-		}
+		
 		protected override CommitSelectionExpression Recreate()
 		{
 			return new CommitSelectionExpression(this);

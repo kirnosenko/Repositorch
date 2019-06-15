@@ -23,11 +23,11 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			.Submit();
 
 			Assert.Equal(new string[] { "file1", "file2" }, selectionDSL
-				.Commits().TillRevision("2")
+				.Commits().TillNumber(2)
 				.Files().AddedInCommits()
 				.Select(x => x.Path));
 			Assert.Equal(new string[] { "file3" }, selectionDSL
-				.Commits().FromRevision("3")
+				.Commits().FromNumber(3)
 				.Files().AddedInCommits()
 				.Select(x => x.Path));
 		}
@@ -48,11 +48,11 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			.Submit();
 
 			Assert.Equal(new string[] { "file1" }, selectionDSL
-				.Commits().TillRevision("2")
+				.Commits().TillNumber(2)
 				.Files().DeletedInCommits()
 				.Select(x => x.Path));
 			Assert.Equal(new string[] { "file3" }, selectionDSL
-				.Commits().FromRevision("3")
+				.Commits().FromNumber(3)
 				.Files().DeletedInCommits()
 				.Select(x => x.Path));
 		}
@@ -181,18 +181,18 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		public void Should_get_defective_files()
 		{
 			mappingDSL
-				.AddCommit("1")
+				.AddCommit("1").OnBranch(1)
 					.AddFile("file1").Modified()
 						.Code(100)
 					.AddFile("file2").Modified()
 						.Code(200)
 			.Submit()
-				.AddCommit("2").IsBugFix()
+				.AddCommit("2").OnBranch(1).IsBugFix()
 					.File("file1").Modified()
 						.Code(-10).ForCodeAddedInitiallyInRevision("1")
 						.Code(20)
 			.Submit()
-				.AddCommit("3")
+				.AddCommit("3").OnBranch(1)
 					.File("file1").Modified()
 						.Code(-10).ForCodeAddedInitiallyInRevision("1")
 						.Code(20)
@@ -202,26 +202,26 @@ namespace Repositorch.Data.Entities.DSL.Selection
 					.AddFile("file3").Modified()
 						.Code(300)
 			.Submit()
-				.AddCommit("4").IsBugFix()
+				.AddCommit("4").OnBranch(1).IsBugFix()
 					.File("file3").Modified()
 						.Code(-10).ForCodeAddedInitiallyInRevision("3")
 						.Code(10)
 			.Submit()
-				.AddCommit("5").IsBugFix()
+				.AddCommit("5").OnBranch(1).IsBugFix()
 					.File("file1").Modified()
 						.Code(-10).ForCodeAddedInitiallyInRevision("2")
 						.Code(10)
 			.Submit();
 
 			Assert.Equal(new string[] { "file1" }, selectionDSL
-				.Commits().TillRevision("2")
+				.Commits().TillNumber(2)
 				.Modifications().InCommits()
 				.CodeBlocks()
 					.InModifications().DefectiveFiles(null, null)
 						.Select(x => x.Path));
 			Assert.Equal(new string[] { "file1" }, selectionDSL
 				.Commits()
-					.TillRevision("2")
+					.TillNumber(2)
 				.Modifications()
 					.InCommits()
 				.CodeBlocks()
@@ -229,7 +229,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 						.Select(x => x.Path));
 			Assert.Equal(new string[] { "file1" }, selectionDSL
 				.Commits()
-					.TillRevision("2")
+					.TillNumber(2)
 				.Modifications()
 					.InCommits()
 				.CodeBlocks()
@@ -237,7 +237,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 						.Select(x => x.Path));
 			Assert.Equal(new string[] {}, selectionDSL
 				.Commits()
-					.TillRevision("2")
+					.TillNumber(2)
 				.Modifications()
 					.InCommits()
 				.CodeBlocks()
@@ -245,7 +245,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 						.Select(x => x.Path));
 			Assert.Equal(new string[] { "file3" }, selectionDSL
 				.Commits()
-					.TillRevision("3")
+					.TillNumber(3)
 				.Modifications()
 					.InCommits()
 				.CodeBlocks()

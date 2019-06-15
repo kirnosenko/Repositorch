@@ -98,7 +98,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				.CodeBlocks().InBugFixes()
 				.Select(x => x.Size));
 			Assert.Equal(new double[] { -5, 5 }, selectionDSL
-				.Commits().BeforeRevision("4")
+				.Commits().BeforeNumber(4)
 				.BugFixes().InCommits()
 				.CodeBlocks().InBugFixes()
 				.Select(x => x.Size));

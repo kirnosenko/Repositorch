@@ -127,5 +127,128 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			Assert.Equal(new string[] { "310" }, selectionDSL
 				.Commits().OnBranchForward(0b1100_0100, 11).Select(x => x.Revision));
 		}
+		[Fact]
+		public void Should_select_commits_relatively_specified()
+		{
+			mappingDSL
+				.AddCommit("100").OnBranch(0b1000_0000)
+			.Submit()
+				.AddCommit("110").OnBranch(0b0000_0001, 7)
+			.Submit()
+				.AddCommit("200").OnBranch(0b0001_0001, 7)
+			.Submit()
+				.AddCommit("300").OnBranch(0b0100_0001, 7)
+			.Submit()
+				.AddCommit("210").OnBranch(0b0011_0001, 11)
+			.Submit()
+				.AddCommit("310").OnBranch(0b1100_0100, 11)
+			.Submit()
+				.AddCommit("999").OnBranch(0b1111_0101, 11)
+			.Submit();
+			
+			Assert.Equal(new string[] { }, selectionDSL
+				.Commits().BeforeRevision("100").Select(c => c.Revision));
+			Assert.Equal(new string[] { "100" }, selectionDSL
+				.Commits().BeforeRevision("110").Select(c => c.Revision));
+			Assert.Equal(new string[] { "100", "110" }, selectionDSL
+				.Commits().BeforeRevision("200").Select(c => c.Revision));
+			Assert.Equal(new string[] { "100", "110" }, selectionDSL
+				.Commits().BeforeRevision("300").Select(c => c.Revision));
+			Assert.Equal(new string[] { "100", "110", "200" }, selectionDSL
+				.Commits().BeforeRevision("210").Select(c => c.Revision));
+			Assert.Equal(new string[] { "100", "110", "300" }, selectionDSL
+				.Commits().BeforeRevision("310").Select(c => c.Revision));
+			Assert.Equal(new string[] { "100", "110", "200", "300", "210", "310" }, selectionDSL
+				.Commits().BeforeRevision("999").Select(c => c.Revision));
+
+			Assert.Equal(new string[] { "100" }, selectionDSL
+				.Commits().TillRevision("100").Select(c => c.Revision));
+			Assert.Equal(new string[] { "100", "110" }, selectionDSL
+				.Commits().TillRevision("110").Select(c => c.Revision));
+			Assert.Equal(new string[] { "100", "110", "200" }, selectionDSL
+				.Commits().TillRevision("200").Select(c => c.Revision));
+			Assert.Equal(new string[] { "100", "110", "300" }, selectionDSL
+				.Commits().TillRevision("300").Select(c => c.Revision));
+			Assert.Equal(new string[] { "100", "110", "200", "210" }, selectionDSL
+				.Commits().TillRevision("210").Select(c => c.Revision));
+			Assert.Equal(new string[] { "100", "110", "300", "310" }, selectionDSL
+				.Commits().TillRevision("310").Select(c => c.Revision));
+			Assert.Equal(new string[] { "100", "110", "200", "300", "210", "310", "999" }, selectionDSL
+				.Commits().TillRevision("999").Select(c => c.Revision));
+
+			Assert.Equal(new string[] { "110", "200", "300", "210", "310", "999" }, selectionDSL
+				.Commits().AfterRevision("100").Select(c => c.Revision));
+			Assert.Equal(new string[] { "200", "300", "210", "310", "999" }, selectionDSL
+				.Commits().AfterRevision("110").Select(c => c.Revision));
+			Assert.Equal(new string[] { "210", "999" }, selectionDSL
+				.Commits().AfterRevision("200").Select(c => c.Revision));
+			Assert.Equal(new string[] { "310", "999" }, selectionDSL
+				.Commits().AfterRevision("300").Select(c => c.Revision));
+			Assert.Equal(new string[] { "999" }, selectionDSL
+				.Commits().AfterRevision("210").Select(c => c.Revision));
+			Assert.Equal(new string[] { "999" }, selectionDSL
+				.Commits().AfterRevision("310").Select(c => c.Revision));
+			Assert.Equal(new string[] { }, selectionDSL
+				.Commits().AfterRevision("999").Select(c => c.Revision));
+
+			Assert.Equal(new string[] { "100", "110", "200", "300", "210", "310", "999" }, selectionDSL
+				.Commits().FromRevision("100").Select(c => c.Revision));
+			Assert.Equal(new string[] { "110", "200", "300", "210", "310", "999" }, selectionDSL
+				.Commits().FromRevision("110").Select(c => c.Revision));
+			Assert.Equal(new string[] { "200", "210", "999" }, selectionDSL
+				.Commits().FromRevision("200").Select(c => c.Revision));
+			Assert.Equal(new string[] { "300", "310", "999" }, selectionDSL
+				.Commits().FromRevision("300").Select(c => c.Revision));
+			Assert.Equal(new string[] { "210", "999" }, selectionDSL
+				.Commits().FromRevision("210").Select(c => c.Revision));
+			Assert.Equal(new string[] { "310", "999" }, selectionDSL
+				.Commits().FromRevision("310").Select(c => c.Revision));
+			Assert.Equal(new string[] { "999" }, selectionDSL
+				.Commits().FromRevision("999").Select(c => c.Revision));
+		}
+		[Fact]
+		public void Should_combine_commits_relatively_specified()
+		{
+			mappingDSL
+				.AddCommit("100").OnBranch(0b1000_0000)
+			.Submit()
+				.AddCommit("110").OnBranch(0b0000_0001, 7)
+			.Submit()
+				.AddCommit("200").OnBranch(0b0001_0001, 7)
+			.Submit()
+				.AddCommit("300").OnBranch(0b0100_0001, 7)
+			.Submit()
+				.AddCommit("210").OnBranch(0b0011_0001, 11)
+			.Submit()
+				.AddCommit("310").OnBranch(0b1100_0100, 11)
+			.Submit()
+				.AddCommit("999").OnBranch(0b1111_0101, 11)
+			.Submit();
+
+			Assert.Equal(new string[] { "200", "210", "999" }, selectionDSL
+				.Commits().FromRevision("200").TillRevision("999")
+				.Select(c => c.Revision));
+			Assert.Equal(new string[] { }, selectionDSL
+				.Commits().FromRevision("999").TillRevision("200")
+				.Select(c => c.Revision));
+		}
+		[Fact]
+		public void Should_ignore_null_values_for_commit_relative_selection()
+		{
+			mappingDSL
+				.AddCommit("1")
+			.Submit()
+				.AddCommit("2")
+			.Submit()
+				.AddCommit("3")
+			.Submit();
+
+			Assert.Equal(3, selectionDSL.Commits()
+				.AfterRevision(null)
+				.FromRevision(null)
+				.TillRevision(null)
+				.BeforeRevision(null)
+				.Count());
+		}
 	}
 }
