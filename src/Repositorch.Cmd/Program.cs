@@ -22,9 +22,9 @@ namespace Repositorch
 
 			//Selection(data);
 			//Dump(vcsData);
-			//Map(data, vcsData, 150);
+			//Map(data, vcsData, 200, true);
 			//Truncate(data, vcsData, 122);
-			Check(data, vcsData, 100, false);
+			Check(data, vcsData, 121, false);
 			Console.ReadKey();
 		}
 		static void Selection(IDataStore data)
@@ -65,25 +65,33 @@ namespace Repositorch
 				new ModificationMapper(vcsData));
 			dataMapper.RegisterMapper(
 				new CodeBlockMapper(vcsData));
+			dataMapper.OnMapRevision += revision =>
+			{
+				Console.WriteLine("mapping of revision {0}", revision);
+			};
+			dataMapper.OnTruncateRevision += revision =>
+			{
+				Console.WriteLine("truncating of revision {0}", revision);
+			};
+			dataMapper.OnCheckRevision += revision =>
+			{
+				Console.WriteLine("checking of revision {0}", revision);
+			};
 			dataMapper.OnError += message =>
 			{
 				Console.WriteLine(message);
 			};
 			return dataMapper;
 		}
-		static void Map(IDataStore data, IVcsData vcsData, int revisions)
+		static void Map(IDataStore data, IVcsData vcsData, int revisions, bool check)
 		{
 			DataMapper mapper = CreateDataMapper(data, vcsData);
 			
 			using (ConsoleTimeLogger.Start("mapping time"))
 			{
-				mapper.OnRevisionProcessing += (r, n) => Console.WriteLine(
-					"mapping of revision {0}{1}",
-					r,
-					r != n ? string.Format(" ({0})", n) : ""
-				);
-
-				mapper.MapRevisions(stopRevision: vcsData.GetRevisionByNumber(revisions));
+				mapper.MapRevisions(
+					stopRevision: vcsData.GetRevisionByNumber(revisions),
+					check: check);
 			}
 		}
 		static void Truncate(IDataStore data, IVcsData vcsData, int revisionsToKeep)
@@ -92,12 +100,6 @@ namespace Repositorch
 			
 			using (ConsoleTimeLogger.Start("truncating time"))
 			{
-				mapper.OnRevisionProcessing += (r, n) => Console.WriteLine(
-					"truncating of revision {0}{1}",
-					r,
-					r != n ? string.Format(" ({0})", n) : ""
-				);
-
 				mapper.Truncate(revisionsToKeep);
 			}
 		}
@@ -107,12 +109,6 @@ namespace Repositorch
 
 			using (ConsoleTimeLogger.Start("checking time"))
 			{
-				mapper.OnRevisionProcessing += (r, n) => Console.WriteLine(
-					"checking of revision {0}{1}",
-					r,
-					r != n ? string.Format(" ({0})", n) : ""
-				);
-
 				var revisions = data.UsingSession(s =>
 					s.Get<Commit>().Skip(skipRevisions).Select(c => c.Revision).ToArray());
 

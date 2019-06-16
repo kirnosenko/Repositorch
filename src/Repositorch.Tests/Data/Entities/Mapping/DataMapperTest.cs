@@ -127,7 +127,7 @@ namespace Repositorch.Data.Entities.Mapping
 				.GetRevisionByNumber(Arg.Any<int>())
 				.Returns(x => x[0].ToString());
 				
-			mapper.OnRevisionProcessing += (r, n) => revisions.Add(r);
+			mapper.OnMapRevision += (r) => revisions.Add(r);
 			mapper.MapRevisions(stopRevision: "5");
 
 			Assert.Equal(new string[] { "1", "2", "3", "4", "5" }, revisions);
@@ -141,7 +141,7 @@ namespace Repositorch.Data.Entities.Mapping
 				.GetRevisionByNumber(Arg.Any<int>())
 				.Returns(x => (int)x[0] == 6 ? null : x[0].ToString());
 			
-			mapper.OnRevisionProcessing += (r, n) => revisions.Add(r);
+			mapper.OnMapRevision += (r) => revisions.Add(r);
 			mapper.MapRevisions(stopRevision: null);
 
 			Assert.Equal(new string[] { "1", "2", "3", "4", "5" }, revisions);
@@ -166,7 +166,7 @@ namespace Repositorch.Data.Entities.Mapping
 				.GetRevisionByNumber(Arg.Any<int>())
 				.Returns(x => x[0].ToString());
 				
-			mapper.OnRevisionProcessing += (r, n) => revisions.Add(r);
+			mapper.OnMapRevision += (r) => revisions.Add(r);
 			mapper.MapRevisions(startRevision: "2");
 
 			Assert.Equal(new string[] { "2", "3" }, revisions);

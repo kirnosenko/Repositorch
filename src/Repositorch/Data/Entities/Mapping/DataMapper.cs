@@ -35,7 +35,9 @@ namespace Repositorch.Data.Entities.Mapping
 
 	public class DataMapper : IMappingHost
 	{
-		public event Action<string, string> OnRevisionProcessing;
+		public event Action<string> OnMapRevision;
+		public event Action<string> OnTruncateRevision;
+		public event Action<string> OnCheckRevision;
 		public event Action<string> OnError;
 
 		private IDataStore data;
@@ -73,7 +75,7 @@ namespace Repositorch.Data.Entities.Mapping
 				}
 			});
 		}
-		public void MapRevisions(string startRevision = null, string stopRevision = null)
+		public void MapRevisions(string startRevision = null, string stopRevision = null, bool check = false)
 		{
 			int nextRevisionNumber;
 			string nextRevision;
@@ -99,8 +101,15 @@ namespace Repositorch.Data.Entities.Mapping
 
 			do
 			{
-				OnRevisionProcessing?.Invoke(nextRevision, nextRevisionNumber.ToString());
+				OnMapRevision?.Invoke(GetRevisionName(nextRevision, nextRevisionNumber));
 				MapRevision(nextRevision);
+				if (check)
+				{
+					if (!CheckRevision(nextRevision, true, true))
+					{
+						break;
+					}
+				}
 				nextRevision = nextRevision == stopRevision ?
 					null
 					:
@@ -138,7 +147,7 @@ namespace Repositorch.Data.Entities.Mapping
 				
 				foreach (var c in commitsToRemove)
 				{
-					OnRevisionProcessing?.Invoke(c.Revision, c.OrderedNumber.ToString());
+					OnTruncateRevision?.Invoke(GetRevisionName(c.Revision, c.OrderedNumber));
 
 					var modificationsToRemove = s.Get<Modification>()
 						.Where(m => m.CommitId == c.Id);
@@ -166,14 +175,16 @@ namespace Repositorch.Data.Entities.Mapping
 				}
 			}
 		}
-		public bool CheckRevision(string revision, bool touchedOnly = true)
+		public bool CheckRevision(string revision, bool touchedOnly = true, bool mute = false)
 		{
 			bool result = true;
 
 			using (var s = data.OpenSession())
 			{
-				OnRevisionProcessing?.Invoke(revision, s.NumberOfRevision(revision).ToString());
-				
+				if (!mute)
+				{
+					OnCheckRevision?.Invoke(GetRevisionName(revision, s.NumberOfRevision(revision)));
+				}
 				var touchedFiles = s.SelectionDSL()
 					.Commits().RevisionIs(revision)
 					.Files().Reselect(
@@ -200,7 +211,7 @@ namespace Repositorch.Data.Entities.Mapping
 			}
 			if (fileBlame == null)
 			{
-				OnError(string.Format("Could not get blame for file {0} in revision {1}.",
+				OnError?.Invoke(string.Format("Could not get blame for file {0} in revision {1}.",
 					file.Path, revision));
 				return false;
 			}
@@ -216,7 +227,7 @@ namespace Repositorch.Data.Entities.Mapping
 
 			if (!correct)
 			{
-				OnError(string.Format("Incorrect number of lines in file {0}. {1} should be {2}",
+				OnError?.Invoke(string.Format("Incorrect number of lines in file {0}. {1} should be {2}",
 					file.Path, currentLOC, fileBlame.Count));
 				return false;
 			}
@@ -275,12 +286,12 @@ namespace Repositorch.Data.Entities.Mapping
 
 			if (codeBySourceRevision.Count() != linesByRevision.Count)
 			{
-				OnError(string.Format("Number of revisions file {0} contains code from is incorrect. {1} should be {2}",
+				OnError?.Invoke(string.Format("Number of revisions file {0} contains code from is incorrect. {1} should be {2}",
 					file.Path, codeBySourceRevision.Count(), linesByRevision.Count));
 			}
 			foreach (var error in errorCode)
 			{
-				OnError(string.Format("Incorrect number of lines in file {0} from revision {1}. {2} should be {3}",
+				OnError?.Invoke(string.Format("Incorrect number of lines in file {0} from revision {1}. {2} should be {3}",
 					file.Path,
 					error.SourceRevision,
 					error.CodeSize,
@@ -288,6 +299,13 @@ namespace Repositorch.Data.Entities.Mapping
 			}
 
 			return correct;
+		}
+
+		private string GetRevisionName(string revision, int number)
+		{
+			return string.Format("{0}{1}",
+				revision,
+				revision != number.ToString() ? string.Format(" ({0})", number) : "");
 		}
 	}
 }
