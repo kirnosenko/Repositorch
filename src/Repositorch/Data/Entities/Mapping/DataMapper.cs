@@ -215,9 +215,11 @@ namespace Repositorch.Data.Entities.Mapping
 					file.Path, revision));
 				return false;
 			}
+			
+			var commitsToLookAt = s.SelectionDSL()
+				.Commits().TillRevision(revision).Fixed();
 
-			double currentLOC = s.SelectionDSL()
-				.Commits().TillRevision(revision)
+			double currentLOC = commitsToLookAt
 				.Files().IdIs(file.Id)
 				.Modifications().InCommits().InFiles()
 				.CodeBlocks().InModifications()
@@ -243,7 +245,7 @@ namespace Repositorch.Data.Entities.Mapping
 				from f in s.Get<CodeFile>()
 				join m in s.Get<Modification>() on f.Id equals m.FileId
 				join cb in s.Get<CodeBlock>() on m.Id equals cb.ModificationId
-				join c in s.Get<Commit>() on m.CommitId equals c.Id
+				join c in commitsToLookAt on m.CommitId equals c.Id
 				let addedCodeBlock = s.Get<CodeBlock>()
 					.Single(x => x.Id == (cb.Size < 0 ? cb.TargetCodeBlockId : cb.Id))
 				let codeAddedInitiallyInRevision = s.Get<Commit>()
