@@ -38,7 +38,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			mappingDSL
 				.AddCommit("1")
-					.AddFile("file1").Modified()
+					.File("file1").Added()
 						.Code(100)
 			.Submit()
 				.AddCommit("2")

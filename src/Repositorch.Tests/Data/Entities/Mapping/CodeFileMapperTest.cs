@@ -11,20 +11,20 @@ namespace Repositorch.Data.Entities.Mapping
 	public class CodeFileMapperTest : BaseMapperTest
 	{
 		private CodeFileMapper mapper;
-		private List<TouchedFile> touchedFiles;
+		private TestLog log;
 
 		public CodeFileMapperTest()
 		{
-			touchedFiles = new List<TouchedFile>();
+			log = new TestLog("10", "alan", DateTime.Today, "text");
 			vcsData
 				.Log(Arg.Is<string>("10"))
-				.Returns(new TestLog("10", "alan", DateTime.Today, "text", touchedFiles));
+				.Returns(log);
 			mapper = new CodeFileMapper(vcsData);
 		}
 		[Fact]
-		public void Should_map_added_file()
+		public void Should_map_file()
 		{
-			AddFile("file1");
+			log.FileAdded("file1");
 
 			mapper.Map(
 				mappingDSL.AddCommit("10")
@@ -34,90 +34,14 @@ namespace Repositorch.Data.Entities.Mapping
 			Assert.Equal(1, Get<CodeFile>().Count());
 			var f = Get<CodeFile>().Single();
 			Assert.Equal("file1", f.Path);
-			Assert.Equal("10", f.AddedInCommit.Revision);
-		}
-		[Fact]
-		public void Should_not_map_anything_for_modified_file()
-		{
-			mappingDSL
-				.AddCommit("9").At(DateTime.Today.AddDays(-1))
-					.AddFile("file1")
-			.Submit();
-
-			ModifyFile("file1");
-
-			CodeFile file = 
-			mapper.Map(
-				mappingDSL.AddCommit("10")
-			).Single().CurrentEntity<CodeFile>();
-			SubmitChanges();
-
-			Assert.Equal(1, Get<CodeFile>().Count());
-			Assert.Equal("9", file.AddedInCommit.Revision);
-		}
-		[Fact]
-		public void Should_map_copied_file_with_source()
-		{
-			mappingDSL
-				.AddCommit("9").At(DateTime.Today.AddDays(-1))
-					.AddFile("file1")
-			.Submit();
-
-			CopyFile("file2", "file1", "9");
-			
-			mapper.Map(
-				mappingDSL.AddCommit("10")
-			);
-			SubmitChanges();
-
-			Assert.Equal(2, Get<CodeFile>().Count());
-			var f = Get<CodeFile>().Single(x => x.Path == "file2");
-			Assert.Equal("file1", f.SourceFile.Path);
-			Assert.Equal("9", f.SourceCommit.Revision);
-		}
-		[Fact]
-		public void Should_set_previous_revision_as_source_for_file_copied_without_source_revision()
-		{
-			mappingDSL
-				.AddCommit("9").At(DateTime.Today.AddDays(-1))
-					.AddFile("file1")
-			.Submit();
-
-			RenameFile("file2", "file1");
-				
-			mapper.Map(
-				mappingDSL.AddCommit("10")
-			);
-			SubmitChanges();
-
-			var f = Get<CodeFile>().Single(x => x.Path == "file2");
-			Assert.Equal("file1", f.SourceFile.Path);
-			Assert.Equal("9", f.SourceCommit.Revision);
-		}
-		[Fact]
-		public void Should_map_deleted_file()
-		{
-			mappingDSL
-				.AddCommit("9").At(DateTime.Today.AddDays(-1))
-					.AddFile("file1")
-			.Submit();
-
-			DeleteFile("file1");
-
-			mapper.Map(
-				mappingDSL.AddCommit("10")
-			);
-			SubmitChanges();
-
-			Assert.Equal("10", Get<CodeFile>().Single().DeletedInCommit.Revision);
 		}
 		[Fact]
 		public void Should_use_path_selectors()
 		{
-			AddFile("file1.123");
-			AddFile("file2.555");
-			AddFile("file3.123");
-			AddFile("file4.555");
+			log.FileAdded("file1.123");
+			log.FileAdded("file2.555");
+			log.FileAdded("file3.123");
+			log.FileAdded("file4.555");
 
 			var selector = Substitute.For<IPathSelector>();
 			selector
@@ -136,9 +60,9 @@ namespace Repositorch.Data.Entities.Mapping
 		[Fact]
 		public void Should_use_all_path_selectors()
 		{
-			AddFile("/dir1/file1.123");
-			AddFile("/dir1/file2.555");
-			AddFile("/dir2/file3.555");
+			log.FileAdded("/dir1/file1.123");
+			log.FileAdded("/dir1/file2.555");
+			log.FileAdded("/dir2/file3.555");
 
 			var selector1 = Substitute.For<IPathSelector>();
 			selector1
@@ -164,16 +88,16 @@ namespace Repositorch.Data.Entities.Mapping
 		{
 			mappingDSL
 				.AddCommit("9")
-					.AddFile("file1.c").Modified()
+					.File("file1.c").Added()
 			.Submit()
 				.AddCommit("10")
-					.File("file1.c").Delete()
+					.File("file1.c").Removed()
 			.Submit()
 				.AddCommit("11")
-					.AddFile("file3.c").Modified()
+					.File("file3.c").Added()
 			.Submit();
 			
-			RenameFile("file1.cpp", "file1.c");
+			log.FileRenamed("file1.cpp", "file1.c");
 
 			var selector = Substitute.For<IPathSelector>();
 			selector
@@ -188,38 +112,6 @@ namespace Repositorch.Data.Entities.Mapping
 
 			Assert.Equal(1, Get<CodeFile>()
 				.Where(x => x.Path == "file1.cpp").Count());
-		}
-		
-		private void AddFile(string path)
-		{
-			TouchPath(path, TouchedFile.TouchedFileAction.ADDED, null, null);
-		}
-		private void ModifyFile(string path)
-		{
-			TouchPath(path, TouchedFile.TouchedFileAction.MODIFIED, null, null);
-		}
-		private void CopyFile(string path, string sourcePath, string sourceRevision)
-		{
-			TouchPath(path, TouchedFile.TouchedFileAction.ADDED, sourcePath, sourceRevision);
-		}
-		private void RenameFile(string path, string sourcePath)
-		{
-			DeleteFile(sourcePath);
-			CopyFile(path, sourcePath, null);
-		}
-		private void DeleteFile(string path)
-		{
-			TouchPath(path, TouchedFile.TouchedFileAction.DELETED, null, null);
-		}
-		private void TouchPath(string path, TouchedFile.TouchedFileAction action, string sourcePath, string sourceRevision)
-		{
-			touchedFiles.Add(new TouchedFile()
-			{
-				Path = path,
-				Action = action,
-				SourcePath = sourcePath,
-				SourceRevision = sourceRevision
-			});
 		}
 	}
 }

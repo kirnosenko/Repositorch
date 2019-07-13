@@ -5,7 +5,8 @@ namespace Repositorch.Data.Entities
 {
 	/// <summary>
 	/// Branch the commit is sitting on.
-	/// Not a branch in terms of git but a separate line of code evolution.
+	/// Not a branch in terms of git but a separate line of code evolution
+	/// on commit graph of single git branch (master or something else).
 	/// </summary>
 	public class Branch
 	{

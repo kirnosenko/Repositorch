@@ -21,8 +21,8 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 				join c in exp.Get<Commit>() on m.CommitId equals c.Id
 					let addedCodeID = cb.Size < 0 ? cb.TargetCodeBlockId : cb.Id
 				where
-					f.Id == exp.CurrentEntity<CodeFile>().SourceFile.Id &&
-					c.OrderedNumber <= exp.CurrentEntity<CodeFile>().SourceCommit.OrderedNumber
+					f.Id == exp.CurrentEntity<Modification>().SourceFile.Id &&
+					c.OrderedNumber <= exp.CurrentEntity<Modification>().SourceCommit.OrderedNumber
 				group cb.Size by addedCodeID
 				)
 			)

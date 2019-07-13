@@ -12,11 +12,11 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			mappingDSL
 				.AddCommit("1")
-					.AddFile("file1").Modified()
+					.File("file1").Added()
 			.Submit()
 				.AddCommit("2")
 					.File("file1").Modified()
-					.AddFile("file2").Modified()
+					.File("file2").Added()
 			.Submit();
 
 			Assert.Equal(1, selectionDSL
@@ -36,12 +36,12 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			mappingDSL
 				.AddCommit("1")
-					.AddFile("file1").Modified()
-					.AddFile("file2").Modified()
+					.File("file1").Added()
+					.File("file2").Added()
 			.Submit()
 				.AddCommit("2")
 					.File("file1").Modified()
-					.AddFile("file3").Modified()
+					.File("file3").Added()
 			.Submit()
 				.AddCommit("3")
 					.File("file1").Modified()
@@ -66,11 +66,11 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			mappingDSL
 				.AddCommit("1")
-					.AddFile("file1").Modified()
+					.File("file1").Added()
 			.Submit()
 				.AddCommit("2")
 					.File("file1").Modified()
-					.AddFile("file2").Modified()
+					.File("file2").Added()
 			.Submit();
 
 			Assert.Equal(new string[] { "1", "2" }, selectionDSL
@@ -92,11 +92,11 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			mappingDSL
 				.AddCommit("1")
-					.AddFile("file1").Modified()
+					.File("file1").Added()
 			.Submit()
 				.AddCommit("2")
 					.File("file1").Modified()
-					.AddFile("file2").Modified()
+					.File("file2").Added()
 			.Submit();
 
 			Assert.Equal(new string[] { "file1", "file2" }, selectionDSL
@@ -108,11 +108,11 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			mappingDSL
 				.AddCommit("1")
-					.AddFile("file1").Modified()
+					.File("file1").Added()
 			.Submit()
 				.AddCommit("2")
 					.File("file1").Modified()
-					.AddFile("file2").Modified()
+					.File("file2").Added()
 			.Submit();
 
 			Assert.Equal(new string[] { "file1" }, selectionDSL
@@ -132,11 +132,11 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			mappingDSL
 				.AddCommit("1")
-					.AddFile("file1").Modified()
+					.File("file1").Added()
 			.Submit()
 				.AddCommit("2")
 					.File("file1").Modified()
-					.AddFile("file2").Modified()
+					.File("file2").Added()
 			.Submit();
 
 			Assert.Equal(new string[] { "1", "2" }, selectionDSL

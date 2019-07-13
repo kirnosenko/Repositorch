@@ -35,7 +35,7 @@ namespace Repositorch.Data.Entities.Mapping
 
 			mapper.Map(
 				mappingDSL.AddCommit("abc")
-					.AddFile("file1").Modified()
+					.File("file1").Added().Modified()
 			);
 			SubmitChanges();
 
@@ -49,12 +49,12 @@ namespace Repositorch.Data.Entities.Mapping
 		{
 			mappingDSL
 				.AddCommit("ab")
-					.AddFile("file1").Modified()
+					.File("file1").Added()
 						.Code(100)
 				.Submit();
 			mapper.Map(
 				mappingDSL.AddCommit("abc")
-					.File("file1").Delete().Modified()
+					.File("file1").Removed()
 			);
 			SubmitChanges();
 
@@ -67,7 +67,7 @@ namespace Repositorch.Data.Entities.Mapping
 		{
 			mappingDSL
 				.AddCommit("a")
-					.AddFile("file1").Modified()
+					.File("file1").Added()
 						.Code(10)
 			.Submit()
 				.AddCommit("ab")
@@ -106,11 +106,11 @@ namespace Repositorch.Data.Entities.Mapping
 		public void Should_map_all_code_as_is_for_copied_file()
 		{
 			mappingDSL
-				.AddCommit("a")
-					.AddFile("file1").Modified()
+				.AddCommit("a").OnBranch(1)
+					.File("file1").Added()
 						.Code(10)
 			.Submit()
-				.AddCommit("ab")
+				.AddCommit("ab").OnBranch(1)
 					.File("file1").Modified()
 						.Code(5)
 			.Submit();
@@ -128,8 +128,8 @@ namespace Repositorch.Data.Entities.Mapping
 				.Returns(blame);
 
 			mapper.Map(
-				mappingDSL.AddCommit("abc")
-					.AddFile("file2").CopiedFrom("file1", "ab").Modified()
+				mappingDSL.AddCommit("abc").OnBranch(1)
+					.File("file2").CopiedFrom("file1", "ab")
 			);
 			SubmitChanges();
 
@@ -145,8 +145,8 @@ namespace Repositorch.Data.Entities.Mapping
 		public void Should_map_new_code_in_copied_file_as_new()
 		{
 			mappingDSL
-				.AddCommit("a")
-					.AddFile("file1").Modified()
+				.AddCommit("a").OnBranch(1)
+					.File("file1").Added()
 						.Code(10)
 			.Submit();
 
@@ -163,8 +163,8 @@ namespace Repositorch.Data.Entities.Mapping
 				.Returns(blame);
 			
 			mapper.Map(
-				mappingDSL.AddCommit("abc")
-					.AddFile("file2").CopiedFrom("file1", "a").Modified()
+				mappingDSL.AddCommit("abc").OnBranch(1)
+					.File("file2").CopiedFrom("file1", "a")
 			);
 			SubmitChanges();
 

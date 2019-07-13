@@ -145,31 +145,46 @@ namespace Repositorch.Data.Entities.Mapping
 					.OrderByDescending(x => x.OrderedNumber)
 					.ToArray();
 				
-				foreach (var c in commitsToRemove)
+				foreach (var commit in commitsToRemove)
 				{
-					OnTruncateRevision?.Invoke(GetRevisionName(c.Revision, c.OrderedNumber));
+					OnTruncateRevision?.Invoke(GetRevisionName(commit.Revision, commit.OrderedNumber));
 
 					var modificationsToRemove = s.Get<Modification>()
-						.Where(m => m.CommitId == c.Id);
+						.Where(m => m.CommitId == commit.Id);
 					var codeToRemove =
 						from m in modificationsToRemove
 						join cb in s.Get<CodeBlock>() on m.Id equals cb.ModificationId
 						select cb;
 					s.RemoveRange(codeToRemove);
 					s.RemoveRange(modificationsToRemove);
-					var filesToRemove = s.Get<CodeFile>()
-						.Where(x => x.AddedInCommitId == c.Id);
+					var filesToRemove =
+						from f in s.Get<CodeFile>()
+						join m in s.Get<Modification>() on f.Id equals m.FileId
+						join c in s.Get<Commit>() on m.CommitId equals c.Id
+						group c by f into fileCommits
+						where fileCommits.OrderBy(x => x.OrderedNumber).First().OrderedNumber >= commit.OrderedNumber
+						select fileCommits.Key;
 					s.RemoveRange(filesToRemove);
-					foreach (var f in s.Get<CodeFile>().Where(x => x.DeletedInCommitId == c.Id))
-					{
-						f.DeletedInCommit = null;
-					}
-					var fixToRemove = s.Get<BugFix>().SingleOrDefault(x => x.CommitId == c.Id);
+					var authorsToRemove =
+						from a in s.Get<Author>()
+						join c in s.Get<Commit>() on a.Id equals c.AuthorId
+						group c by a into authorCommits
+						where authorCommits.OrderBy(x => x.OrderedNumber).First().OrderedNumber >= commit.OrderedNumber
+						select authorCommits.Key;
+					s.RemoveRange(authorsToRemove);
+					var branchesToRemove =
+						from b in s.Get<Branch>()
+						join c in s.Get<Commit>() on b.Id equals c.BranchId
+						group c by b into branchCommits
+						where branchCommits.OrderBy(x => x.OrderedNumber).First().OrderedNumber >= commit.OrderedNumber
+						select branchCommits.Key;
+					s.RemoveRange(branchesToRemove);
+					var fixToRemove = s.Get<BugFix>().SingleOrDefault(x => x.CommitId == commit.Id);
 					if (fixToRemove != null)
 					{
 						s.Remove(fixToRemove);
 					}
-					s.Remove(c);
+					s.Remove(commit);
 					
 					s.SubmitChanges();
 				}

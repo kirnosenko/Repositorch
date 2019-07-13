@@ -17,11 +17,9 @@ namespace Repositorch.Data.Entities.Mapping
 			List<CodeBlockMappingExpression> codeBlockExpressions = new List<CodeBlockMappingExpression>();
 			string revision = expression.CurrentEntity<Commit>().Revision;
 			CodeFile file = expression.CurrentEntity<CodeFile>();
-			bool fileIsNew = (file.AddedInCommit != null) && (file.AddedInCommit.Revision == revision);
-			bool fileCopied = fileIsNew && (file.SourceFile != null);
-			bool fileDeleted = file.DeletedInCommit != null;
+			Modification modification = expression.CurrentEntity<Modification>();
 			
-			if (fileDeleted)
+			if (modification.Action == Modification.FileAction.REMOVED)
 			{
 				codeBlockExpressions.Add(
 					expression.DeleteCode()
@@ -31,7 +29,9 @@ namespace Repositorch.Data.Entities.Mapping
 			{
 				IBlame blame = vcsData.Blame(revision, file.Path);
 				var linesByRevision = from l in blame group l.Key by l.Value;
-				
+				bool fileCopied = (modification.Action == Modification.FileAction.ADDED) &&
+					(modification.SourceFile != null);
+
 				if (fileCopied)
 				{
 					foreach (var linesForRevision in linesByRevision)

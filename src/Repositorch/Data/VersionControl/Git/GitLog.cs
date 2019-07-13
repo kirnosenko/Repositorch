@@ -34,10 +34,10 @@ namespace Repositorch.Data.VersionControl.Git
 						TouchFile(TouchedFile.TouchedFileAction.ADDED, blocks[1]);
 						break;
 					case TouchedFileGitAction.DELETED:
-						TouchFile(TouchedFile.TouchedFileAction.DELETED, blocks[1]);
+						TouchFile(TouchedFile.TouchedFileAction.REMOVED, blocks[1]);
 						break;
 					case TouchedFileGitAction.RENAMED:
-						TouchFile(TouchedFile.TouchedFileAction.DELETED, blocks[1]);
+						TouchFile(TouchedFile.TouchedFileAction.REMOVED, blocks[1]);
 						TouchFile(TouchedFile.TouchedFileAction.ADDED, blocks[2], blocks[1]);
 						break;
 					case TouchedFileGitAction.COPIED:

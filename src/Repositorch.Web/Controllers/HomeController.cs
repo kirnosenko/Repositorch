@@ -45,9 +45,12 @@ namespace Repositorch.Web.Controllers
 				
 				var files = s.SelectionDSL()
 					.Files().Fixed();
-				ViewData["files"] = files.Exist().Count();
-				ViewData["filesAdded"] = files.Count();
-				ViewData["filesRemoved"] = files.Deleted().Count();
+				var filesAll = files.Count();
+				var filesExist = files.Exist().Count();
+				var filesRemoved = filesAll - filesExist;
+				ViewData["files"] = filesExist;
+				ViewData["filesAdded"] = filesAll;
+				ViewData["filesRemoved"] = filesRemoved;
 
 				var code = s.SelectionDSL()
 					.CodeBlocks().Fixed();

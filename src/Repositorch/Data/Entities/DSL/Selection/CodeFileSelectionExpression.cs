@@ -37,26 +37,21 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		public CodeFileSelectionExpression AddedInCommits()
 		{
 			return Reselect(s =>
-				from f in s
-				join c in Selection<Commit>() on f.AddedInCommitId equals c.Id
-				select f
+				(from c in Selection<Commit>()
+				join m in Queryable<Modification>() on c.Id equals m.CommitId
+				join f in s on m.FileId equals f.Id
+				where m.Action == Modification.FileAction.ADDED
+				select f).Distinct()
 			);
 		}
-		public CodeFileSelectionExpression Deleted()
+		public CodeFileSelectionExpression RemovedInCommits()
 		{
 			return Reselect(s =>
-				from f in s
-				where
-					f.DeletedInCommitId != null
-				select f
-			);
-		}
-		public CodeFileSelectionExpression DeletedInCommits()
-		{
-			return Reselect(s =>
-				from f in s
-				join c in Selection<Commit>() on f.DeletedInCommitId equals c.Id
-				select f
+				(from c in Selection<Commit>()
+				join m in Queryable<Modification>() on c.Id equals m.CommitId
+				join f in s on m.FileId equals f.Id
+				where m.Action == Modification.FileAction.REMOVED
+				select f).Distinct()
 			);
 		}
 		public CodeFileSelectionExpression IdIs(int id)
@@ -95,20 +90,23 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			return Reselect(s =>
 				from f in s
-				where f.DeletedInCommitId == null
-				select f
+				join m in Queryable<Modification>() on f.Id equals m.FileId
+				group m by f into fileModifications
+				where fileModifications.OrderByDescending(x => x.Id).First().Action != Modification.FileAction.REMOVED
+				select fileModifications.Key
 			);
 		}
 		public CodeFileSelectionExpression ExistInRevision(string revision)
 		{
-			var revisionNumber = Queryable<Commit>().Single(x => x.Revision == revision).OrderedNumber;
+			var allCommitsTillRevision = this.Commits().TillRevision(revision);
+
 			return Reselect(s =>
-				from f in s
-				join ac in Queryable<Commit>() on f.AddedInCommitId equals ac.Id
-				join dc in Queryable<Commit>() on f.DeletedInCommitId equals dc.Id into deletedInCommit
-				from dcn in deletedInCommit.DefaultIfEmpty()
-				where ac.OrderedNumber <= revisionNumber && (dcn == null || dcn.OrderedNumber > revisionNumber)
-				select f
+				from c in allCommitsTillRevision
+				join m in Queryable<Modification>() on c.Id equals m.CommitId
+				join f in s on m.FileId equals f.Id
+				group m by f into fileModifications
+				where fileModifications.OrderByDescending(x => x.Id).First().Action != Modification.FileAction.REMOVED
+				select fileModifications.Key
 			);
 		}
 		protected override CodeFileSelectionExpression Recreate()

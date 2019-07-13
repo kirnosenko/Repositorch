@@ -11,15 +11,15 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		public void Should_get_files_added_in_specified_commits()
 		{
 			mappingDSL
-				.AddCommit("1")
-					.AddFile("file1")
+				.AddCommit("1").OnBranch(1)
+					.File("file1").Added()
 			.Submit()
-				.AddCommit("2")
-					.File("file1")
-					.AddFile("file2")
+				.AddCommit("2").OnBranch(1)
+					.File("file1").Modified()
+					.File("file2").Added()
 			.Submit()
-				.AddCommit("3")
-					.AddFile("file3").CopiedFrom("file1", "1")
+				.AddCommit("3").OnBranch(1)
+					.File("file3").CopiedFrom("file1", "1")
 			.Submit();
 
 			Assert.Equal(new string[] { "file1", "file2" }, selectionDSL
@@ -32,28 +32,28 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				.Select(x => x.Path));
 		}
 		[Fact]
-		public void Should_get_files_deleted_in_specified_commits()
+		public void Should_get_files_removed_in_specified_commits()
 		{
 			mappingDSL
-				.AddCommit("1")
-					.AddFile("file1")
+				.AddCommit("1").OnBranch(1)
+					.File("file1").Added()
 			.Submit()
-				.AddCommit("2")
-					.File("file1").Delete()
-					.AddFile("file2").CopiedFrom("file1", "1")
-					.AddFile("file3")
+				.AddCommit("2").OnBranch(1)
+					.File("file1").Removed()
+					.File("file2").CopiedFrom("file1", "1")
+					.File("file3").Added()
 			.Submit()
-				.AddCommit("3")
-					.File("file3").Delete()
+				.AddCommit("3").OnBranch(1)
+					.File("file3").Removed()
 			.Submit();
 
 			Assert.Equal(new string[] { "file1" }, selectionDSL
 				.Commits().TillNumber(2)
-				.Files().DeletedInCommits()
+				.Files().RemovedInCommits()
 				.Select(x => x.Path));
 			Assert.Equal(new string[] { "file3" }, selectionDSL
 				.Commits().FromNumber(3)
-				.Files().DeletedInCommits()
+				.Files().RemovedInCommits()
 				.Select(x => x.Path));
 		}
 		[Fact]
@@ -61,12 +61,12 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			mappingDSL
 				.AddCommit("1")
-					.AddFile("file1").Modified()
-					.AddFile("file2").Modified()
+					.File("file1").Added()
+					.File("file2").Added()
 			.Submit()
 				.AddCommit("2")
 					.File("file2").Modified()
-					.AddFile("file3").Modified()
+					.File("file3").Added()
 			.Submit();
 			
 			foreach (var file in selectionDSL.Files())
@@ -80,32 +80,34 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		public void Should_get_files_by_name()
 		{
 			mappingDSL
-				.AddCommit("1").At(DateTime.Today.AddDays(-9))
-					.AddFile("file1").Modified()
+				.AddCommit("1")
+					.File("file1").Added()
 			.Submit()
-				.AddCommit("2").At(DateTime.Today.AddDays(-8))
-					.AddFile("file2").Modified()
-					.File("file1").Delete()
+				.AddCommit("2")
+					.File("file2").Added()
+					.File("file1").Removed()
 			.Submit()
-				.AddCommit("3").At(DateTime.Today.AddDays(-7))
-					.AddFile("file1").Modified()
+				.AddCommit("3")
+					.File("file1").Added()
 			.Submit();
 
-			Assert.Equal(2, selectionDSL
+			Assert.Equal(1, selectionDSL
 				.Files().PathIs("file1").Count());
 			Assert.Equal(1, selectionDSL
 				.Files().PathIs("file2").Count());
+			Assert.Equal(0, selectionDSL
+				.Files().PathIs("file3").Count());
 		}
 		[Fact]
 		public void Should_get_existent_files()
 		{
 			mappingDSL
 				.AddCommit("1")
-					.AddFile("file1").Modified()
+					.File("file1").Added()
 			.Submit()
 				.AddCommit("2")
-					.File("file1").Delete()
-					.AddFile("file2").Modified()
+					.File("file1").Removed()
+					.File("file2").Added()
 			.Submit();
 
 			Assert.Equal(new string[] { "file2" }, selectionDSL
@@ -116,17 +118,17 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		public void Should_get_existent_files_for_revision()
 		{
 			mappingDSL
-				.AddCommit("1")
-					.AddFile("file1").Modified()
+				.AddCommit("1").OnBranch(1)
+					.File("file1").Added()
 			.Submit()
-				.AddCommit("2")
-					.File("file1").Delete()
-					.AddFile("file2").Modified()
-					.AddFile("file3").Modified()
+				.AddCommit("2").OnBranch(1)
+					.File("file1").Removed()
+					.File("file2").Added()
+					.File("file3").Added()
 			.Submit()
-				.AddCommit("3")
-					.File("file2").Delete()
-					.AddFile("file4").CopiedFrom("file2", "2")
+				.AddCommit("3").OnBranch(1)
+					.File("file2").Removed()
+					.File("file4").CopiedFrom("file2", "2")
 			.Submit();
 
 			Assert.Equal(new string[] { "file1" }, selectionDSL
@@ -140,32 +142,45 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				.Select(f => f.Path));
 		}
 		[Fact]
-		public void Should_get_distinct_files()
+		public void Should_get_existent_files_on_different_branches()
 		{
 			mappingDSL
-				.AddCommit("1")
-					.AddFile("file1").Modified()
+				.AddCommit("1").OnBranch(0001)
+					.File("file1").Added()
 			.Submit()
-				.AddCommit("2")
-					.File("file1").Modified()
+				.AddCommit("2").OnBranch(0011)
+					.File("file1").Removed()
+					.File("file2").Added()
+			.Submit()
+				.AddCommit("3").OnBranch(0101)
+					.File("file2").Added()
+					.File("file3").Added()
 			.Submit();
 
-			Assert.Equal(1, selectionDSL
-				.Files().Count());
+
+			Assert.Equal(new string[] { "file1" }, selectionDSL
+				.Files().ExistInRevision("1")
+				.Select(f => f.Path));
+			Assert.Equal(new string[] { "file2" }, selectionDSL
+				.Files().ExistInRevision("2")
+				.Select(f => f.Path));
+			Assert.Equal(new string[] { "file1", "file2", "file3" }, selectionDSL
+				.Files().ExistInRevision("3")
+				.Select(f => f.Path));
 		}
 		[Fact]
 		public void Should_get_files_in_directory()
 		{
 			mappingDSL
 				.AddCommit("1")
-					.AddFile("/trunk/dir1/file1").Modified()
+					.File("/trunk/dir1/file1").Added()
 			.Submit()
 				.AddCommit("2")
-					.AddFile("/trunk/dir2changelog")
-					.AddFile("/trunk/dir2/file2").Modified()
+					.File("/trunk/dir2changelog").Added()
+					.File("/trunk/dir2/file2").Added()
 			.Submit()
 				.AddCommit("3")
-					.AddFile("/file3")
+					.File("/file3").Added()
 			.Submit();
 
 			Assert.Equal(1, selectionDSL
@@ -182,9 +197,9 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			mappingDSL
 				.AddCommit("1").OnBranch(1)
-					.AddFile("file1").Modified()
+					.File("file1").Added()
 						.Code(100)
-					.AddFile("file2").Modified()
+					.File("file2").Added()
 						.Code(200)
 			.Submit()
 				.AddCommit("2").OnBranch(1).IsBugFix()
@@ -199,7 +214,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 					.File("file2").Modified()
 						.Code(-20)
 						.Code(50)
-					.AddFile("file3").Modified()
+					.File("file3").Added()
 						.Code(300)
 			.Submit()
 				.AddCommit("4").OnBranch(1).IsBugFix()

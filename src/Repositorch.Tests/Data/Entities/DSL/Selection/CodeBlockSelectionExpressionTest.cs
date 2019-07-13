@@ -12,9 +12,9 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			mappingDSL
 				.AddCommit("1")
-					.AddFile("file1").Modified()
+					.File("file1").Added()
 						.Code(+100)
-					.AddFile("file2").Modified()
+					.File("file2").Added()
 						.Code(+50)
 			.Submit()
 				.AddCommit("2")
@@ -39,9 +39,9 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			mappingDSL
 				.AddCommit("1")
-					.AddFile("file1").Modified()
+					.File("file1").Added()
 						.Code(+100)
-					.AddFile("file2").Modified()
+					.File("file2").Added()
 						.Code(+50)
 			.Submit()
 				.AddCommit("2")
@@ -75,7 +75,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			mappingDSL
 				.AddCommit("1")
-					.AddFile("file1").Modified()
+					.File("file1").Added()
 						.Code(100)
 			.Submit()
 				.AddCommit("2").IsBugFix()
@@ -107,12 +107,12 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		public void Should_select_code_added_initially_in_commit()
 		{
 			mappingDSL
-				.AddCommit("1")
-					.AddFile("file1").Modified()
+				.AddCommit("1").OnBranch(1)
+					.File("file1").Added()
 						.Code(100)
 			.Submit()
-				.AddCommit("2")
-					.AddFile("file2").CopiedFrom("file1", "1").Modified()
+				.AddCommit("2").OnBranch(1)
+					.File("file2").CopiedFrom("file1", "1")
 						.CopyCode()
 			.Submit();
 
@@ -126,7 +126,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			mappingDSL
 				.AddCommit("1")
-					.AddFile("file1").Modified()
+					.File("file1").Added()
 						.Code(100)
 			.Submit()
 				.AddCommit("2")
@@ -149,7 +149,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			mappingDSL
 				.AddCommit("1")
-					.AddFile("file1").Modified()
+					.File("file1").Added()
 						.Code(100)
 			.Submit()
 				.AddCommit("2")

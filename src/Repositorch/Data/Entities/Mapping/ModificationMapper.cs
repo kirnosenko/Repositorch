@@ -14,9 +14,38 @@ namespace Repositorch.Data.Entities.Mapping
 		}
 		public override IEnumerable<ModificationMappingExpression> Map(CodeFileMappingExpression expression)
 		{
+			string revision = expression.CurrentEntity<Commit>().Revision;
+			string filePath = expression.CurrentEntity<CodeFile>().Path;
+			Log log = vcsData.Log(revision);
+			var touchedFile = log.TouchedFiles.Single(x => x.Path == filePath);
+
+			switch (touchedFile.Action)
+			{
+				case TouchedFile.TouchedFileAction.ADDED:
+					if (touchedFile.SourcePath == null)
+					{
+						return Result(expression.Added());
+					}
+					if (touchedFile.SourceRevision == null)
+					{
+						touchedFile.SourceRevision = expression.Get<Commit>()
+							.Single(c => c.OrderedNumber == expression.CurrentEntity<Commit>().OrderedNumber - 1)
+							.Revision;
+					}
+					return Result(expression.CopiedFrom(touchedFile.SourcePath, touchedFile.SourceRevision));
+				case TouchedFile.TouchedFileAction.MODIFIED:
+					return Result(expression.Modified());
+				case TouchedFile.TouchedFileAction.REMOVED:
+					return Result(expression.Removed());
+				default:
+					throw new InvalidOperationException();
+			}
+		}
+		private ModificationMappingExpression[] Result(ModificationMappingExpression expression)
+		{
 			return new ModificationMappingExpression[]
 			{
-				expression.Modified()
+				expression
 			};
 		}
 	}

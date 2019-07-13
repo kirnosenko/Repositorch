@@ -19,8 +19,8 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		{
 			var exp = mappingDSL
 				.AddCommit("1")
-			.AddFile("file1").Modified()
-			.AddFile("file2").Modified();
+					.File("file1").Added()
+					.File("file2").Added();
 
 			Assert.Equal("1", exp.CurrentEntity<Commit>().Revision);
 			Assert.Null(exp.CurrentEntity<BugFix>());

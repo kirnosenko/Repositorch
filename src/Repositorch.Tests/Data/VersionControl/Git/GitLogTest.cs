@@ -89,7 +89,7 @@ M	tests/regressiontests/staticfiles_tests/tests.py".Replace("'", "\"");
 					"/show-diff.c"
 				},
 				log.TouchedFiles
-					.Where(x => x.Action == TouchedFile.TouchedFileAction.DELETED)
+					.Where(x => x.Action == TouchedFile.TouchedFileAction.REMOVED)
 					.Select(x => x.Path));
 
 			Assert.Equal(

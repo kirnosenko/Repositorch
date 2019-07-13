@@ -82,14 +82,6 @@ namespace Repositorch.Data.Entities.EF
 				.HasOne(bf => bf.Commit)
 				.WithOne((string)null)
 				.HasForeignKey<BugFix>(bf => bf.CommitId);
-			modelBuilder.Entity<CodeFile>()
-				.HasOne(f => f.AddedInCommit)
-				.WithMany((string)null)
-				.HasForeignKey(f => f.AddedInCommitId);
-			modelBuilder.Entity<CodeFile>()
-				.HasOne(f => f.DeletedInCommit)
-				.WithMany((string)null)
-				.HasForeignKey(f => f.DeletedInCommitId);
 			modelBuilder.Entity<Modification>()
 				.HasOne(m => m.Commit)
 				.WithMany((string)null)
@@ -98,6 +90,14 @@ namespace Repositorch.Data.Entities.EF
 				.HasOne(m => m.File)
 				.WithMany((string)null)
 				.HasForeignKey(m => m.FileId);
+			modelBuilder.Entity<Modification>()
+				.HasOne(m => m.SourceCommit)
+				.WithMany((string)null)
+				.HasForeignKey(m => m.SourceCommitId);
+			modelBuilder.Entity<Modification>()
+				.HasOne(m => m.SourceFile)
+				.WithMany((string)null)
+				.HasForeignKey(m => m.SourceFileId);
 			modelBuilder.Entity<CodeBlock>()
 				.HasOne(cb => cb.Modification)
 				.WithMany((string)null)

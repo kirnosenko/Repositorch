@@ -22,35 +22,7 @@ namespace Repositorch.Data.Entities.Mapping
 			
 			foreach (var touchedFile in touchedFiles)
 			{
-				CodeFileMappingExpression fileExp = null;
-				
-				switch (touchedFile.Action)
-				{
-					case TouchedFile.TouchedFileAction.MODIFIED:
-						fileExp = expression.File(touchedFile.Path);
-						break;
-					case TouchedFile.TouchedFileAction.ADDED:
-						fileExp = expression.AddFile(touchedFile.Path);
-						break;
-					case TouchedFile.TouchedFileAction.DELETED:
-						fileExp = expression.File(touchedFile.Path);
-						fileExp.Delete();
-						break;
-					default:
-						break;
-				}
-				if (touchedFile.SourcePath != null)
-				{
-					if (touchedFile.SourceRevision == null)
-					{
-						touchedFile.SourceRevision = expression.Get<Commit>()
-							.Single(c => c.OrderedNumber == expression.CurrentEntity<Commit>().OrderedNumber - 1)
-							.Revision;
-					}
-					fileExp.CopiedFrom(touchedFile.SourcePath, touchedFile.SourceRevision);
-				}
-
-				fileExpressions.Add(fileExp);
+				fileExpressions.Add(expression.File(touchedFile.Path));
 			}
 
 			return fileExpressions;

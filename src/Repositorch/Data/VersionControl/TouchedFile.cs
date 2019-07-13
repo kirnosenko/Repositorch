@@ -13,17 +13,17 @@ namespace Repositorch.Data.VersionControl
 		public enum TouchedFileAction
 		{
 			/// <summary>
-			/// Addition of a new file.
-			/// </summary>
-			ADDED,
-			/// <summary>
 			/// Modification of an existent file.
 			/// </summary>
 			MODIFIED,
 			/// <summary>
+			/// Addition of a new file.
+			/// </summary>
+			ADDED,
+			/// <summary>
 			/// Removing of an existent file.
 			/// </summary>
-			DELETED
+			REMOVED
 		}
 		
 		/// <summary>

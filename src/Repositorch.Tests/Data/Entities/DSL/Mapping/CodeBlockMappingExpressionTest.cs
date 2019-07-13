@@ -11,7 +11,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		{
 			mappingDSL
 				.AddCommit("1")
-					.AddFile("file1").Modified()
+					.File("file1").Added()
 						.Code(10)
 			.Submit();
 
@@ -26,14 +26,14 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		{
 			mappingDSL
 				.AddCommit("1")
-					.AddFile("file1").Modified()
+					.File("file1").Added()
 						.Code(100)
 			.Submit()
 				.AddCommit("2")
 					.File("file1").Modified()
 						.Code(20)
 						.Code(-5).ForCodeAddedInitiallyInRevision("1")
-					.AddFile("file2").Modified()
+					.File("file2").Added()
 						.Code(40)
 			.Submit()
 				.AddCommit("3")
@@ -66,15 +66,15 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		public void Should_set_correct_target_code_block_for_copied_files()
 		{
 			mappingDSL
-				.AddCommit("1")
-					.AddFile("file1").Modified()
+				.AddCommit("1").OnBranch(1)
+					.File("file1").Added()
 						.Code(100)
 			.Submit()
-				.AddCommit("2")
-					.AddFile("file2").CopiedFrom("file1", "1").Modified()
+				.AddCommit("2").OnBranch(1)
+					.File("file2").CopiedFrom("file1", "1")
 						.CopyCode()
 			.Submit()
-				.AddCommit("3")
+				.AddCommit("3").OnBranch(1)
 					.File("file2").Modified()
 						.Code(-10).ForCodeAddedInitiallyInRevision("1")
 			.Submit();
@@ -87,22 +87,22 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		public void Can_set_commit_code_was_added_in()
 		{
 			mappingDSL
-				.AddCommit("1")
-					.AddFile("file1").Modified()
+				.AddCommit("1").OnBranch(1)
+					.File("file1").Added()
 						.Code(100)
 			.Submit()
-				.AddCommit("2")
+				.AddCommit("2").OnBranch(1)
 					.File("file1").Modified()
 						.Code(20)
 						.Code(-5).ForCodeAddedInitiallyInRevision("1")
 			.Submit()
-				.AddCommit("3")
-					.AddFile("file2").CopiedFrom("file1", "2").Modified()
+				.AddCommit("3").OnBranch(1)
+					.File("file2").CopiedFrom("file1", "2")
 						.Code(95).CopiedFrom("1")
 						.Code(20).CopiedFrom("2")
 			.Submit()
-				.AddCommit("4")
-					.AddFile("file3").CopiedFrom("file1", "2").Modified()
+				.AddCommit("4").OnBranch(1)
+					.File("file3").CopiedFrom("file1", "2")
 						.CopyCode()
 			.Submit();
 
@@ -126,22 +126,22 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		public void Should_copy_code_for_copied_file()
 		{
 			mappingDSL
-				.AddCommit("1")
-					.AddFile("file1").Modified()
+				.AddCommit("1").OnBranch(1)
+					.File("file1").Added()
 						.Code(100)
 			.Submit()
-				.AddCommit("2")
+				.AddCommit("2").OnBranch(1)
 					.File("file1").Modified()
 						.Code(20)
 						.Code(-5).ForCodeAddedInitiallyInRevision("1")
 			.Submit()
-				.AddCommit("3")
+				.AddCommit("3").OnBranch(1)
 					.File("file1").Modified()
 						.Code(10)
 						.Code(-2).ForCodeAddedInitiallyInRevision("2")
 			.Submit()
-				.AddCommit("4")
-					.AddFile("file2").CopiedFrom("file1", "2").Modified()
+				.AddCommit("4").OnBranch(1)
+					.File("file2").CopiedFrom("file1", "2")
 						.CopyCode()
 			.Submit();
 
@@ -153,22 +153,22 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		public void Should_not_add_empty_code_blocks_for_copied_file()
 		{
 			mappingDSL
-				.AddCommit("1")
-					.AddFile("file1").Modified()
+				.AddCommit("1").OnBranch(1)
+					.File("file1").Added()
 						.Code(10)
 			.Submit()
-				.AddCommit("2")
+				.AddCommit("2").OnBranch(1)
 					.File("file1").Modified()
 						.Code(20)
 						.Code(-5).ForCodeAddedInitiallyInRevision("1")
 			.Submit()
-				.AddCommit("3")
+				.AddCommit("3").OnBranch(1)
 					.File("file1").Modified()
 						.Code(5)
 						.Code(-5).ForCodeAddedInitiallyInRevision("1")
 			.Submit()
-				.AddCommit("4")
-					.AddFile("file2").CopiedFrom("file1", "3").Modified()
+				.AddCommit("4").OnBranch(1)
+					.File("file2").CopiedFrom("file1", "3")
 						.CopyCode()
 			.Submit();
 
@@ -180,15 +180,15 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		public void Should_find_target_codeblock_for_copied_file()
 		{
 			mappingDSL
-				.AddCommit("1")
-					.AddFile("file1").Modified()
+				.AddCommit("1").OnBranch(1)
+					.File("file1").Added()
 						.Code(100)
 			.Submit()
-				.AddCommit("2")
-					.AddFile("file2").CopiedFrom("file1", "1").Modified()
+				.AddCommit("2").OnBranch(1)
+					.File("file2").CopiedFrom("file1", "1")
 						.CopyCode()
 			.Submit()
-				.AddCommit("3")
+				.AddCommit("3").OnBranch(1)
 					.File("file2").Modified()
 						.Code(-5).ForCodeAddedInitiallyInRevision("1")
 			.Submit();
@@ -200,14 +200,14 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		public void Should_copy_code_from_specified_file_only()
 		{
 			mappingDSL
-				.AddCommit("1")
-					.AddFile("file1").Modified()
+				.AddCommit("1").OnBranch(1)
+					.File("file1").Added()
 						.Code(100)
-					.AddFile("file2").Modified()
+					.File("file2").Added()
 						.Code(50)
 			.Submit()
-				.AddCommit("2")
-					.AddFile("file3").CopiedFrom("file2", "1").Modified()
+				.AddCommit("2").OnBranch(1)
+					.File("file3").CopiedFrom("file2", "1")
 						.CopyCode()
 			.Submit();
 
@@ -219,21 +219,21 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		public void Should_copy_copied_code_with_correct_initial_commit()
 		{
 			mappingDSL
-				.AddCommit("1")
-					.AddFile("file1").Modified()
+				.AddCommit("1").OnBranch(1)
+					.File("file1").Added()
 						.Code(100)
 			.Submit()
-				.AddCommit("2")
+				.AddCommit("2").OnBranch(1)
 					.File("file1").Modified()
 						.Code(-10).ForCodeAddedInitiallyInRevision("1")
 						.Code(20)
 			.Submit()
-				.AddCommit("3")
-					.AddFile("file2").CopiedFrom("file1", "2").Modified()
+				.AddCommit("3").OnBranch(1)
+					.File("file2").CopiedFrom("file1", "2")
 						.CopyCode()
 			.Submit()
-				.AddCommit("4")
-					.AddFile("file3").CopiedFrom("file2", "3").Modified()
+				.AddCommit("4").OnBranch(1)
+					.File("file3").CopiedFrom("file2", "3")
 						.CopyCode()
 			.Submit();
 
@@ -246,7 +246,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		{
 			mappingDSL
 				.AddCommit("1")
-					.AddFile("file1").Modified()
+					.File("file1").Added()
 						.Code(100)
 			.Submit()
 				.AddCommit("2")
@@ -255,7 +255,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 						.Code(10)
 			.Submit()
 				.AddCommit("3")
-					.File("file1").Delete().Modified()
+					.File("file1").Removed()
 						.DeleteCode()
 			.Submit();
 
@@ -276,7 +276,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		{
 			mappingDSL
 				.AddCommit("1")
-					.AddFile("file1").Modified()
+					.File("file1").Added()
 						.Code(10)
 			.Submit()
 				.AddCommit("2")
@@ -290,7 +290,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 						.Code(-5).ForCodeAddedInitiallyInRevision("1")
 			.Submit()
 				.AddCommit("4")
-					.File("file1").Delete().Modified()
+					.File("file1").Removed()
 						.DeleteCode()
 			.Submit();
 
@@ -302,16 +302,16 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		public void Can_delete_code_for_copied_file()
 		{
 			mappingDSL
-				.AddCommit("1")
-					.AddFile("file1").Modified()
+				.AddCommit("1").OnBranch(1)
+					.File("file1").Added()
 						.Code(100)
 			.Submit()
-				.AddCommit("2")
-					.AddFile("file2").CopiedFrom("file1", "1").Modified()
+				.AddCommit("2").OnBranch(1)
+					.File("file2").CopiedFrom("file1", "1")
 						.CopyCode()
 			.Submit()
-				.AddCommit("3")
-					.File("file2").Delete().Modified()
+				.AddCommit("3").OnBranch(1)
+					.File("file2").Removed()
 						.DeleteCode()
 			.Submit();
 

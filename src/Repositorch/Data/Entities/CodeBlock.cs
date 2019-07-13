@@ -23,7 +23,6 @@ namespace Repositorch.Data.Entities
 		public Commit AddedInitiallyInCommit { get; set; }
 		/// <summary>
 		/// Modification code block was created in.
-		/// Null for code removing.
 		/// </summary>
 		public int ModificationId { get; set; }
 		public Modification Modification { get; set; }
@@ -31,6 +30,7 @@ namespace Repositorch.Data.Entities
 		/// A code block being changed by this one.
 		/// Now code removing block keeps code block from which
 		/// code being removed.
+		/// Null for code addition block.
 		/// </summary>
 		public int? TargetCodeBlockId { get; set; }
 		public CodeBlock TargetCodeBlock { get; set; }

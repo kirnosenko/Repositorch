@@ -154,13 +154,13 @@ namespace Repositorch.Data.Entities.Mapping
 			data.UsingSession(s =>
 				s.MappingDSL()
 					.AddCommit("1")
-						.AddFile("file1").Modified()
+						.File("file1").Added()
 				.Submit()
 					.AddCommit("2")
-						.AddFile("file2").Modified()
+						.File("file2").Added()
 				.Submit()
 					.AddCommit("3")
-						.AddFile("file3").Modified()
+						.File("file3").Added()
 				.Submit());
 			vcsData
 				.GetRevisionByNumber(Arg.Any<int>())
@@ -199,11 +199,20 @@ namespace Repositorch.Data.Entities.Mapping
 					.AddCommit("3")
 				.Submit());
 			
+			mapper.Truncate(2);
+
+			data.UsingSession(s =>
+			{
+				Assert.Equal(new string[] { "1", "2" },
+					s.Get<Commit>().Select(x => x.Revision));
+			});
+
 			mapper.Truncate(1);
 
 			data.UsingSession(s =>
 			{
-				Assert.Equal(1, s.Get<Commit>().Count());
+				Assert.Equal(new string[] { "1" },
+					s.Get<Commit>().Select(x => x.Revision));
 			});
 		}
 		[Fact]
@@ -211,47 +220,43 @@ namespace Repositorch.Data.Entities.Mapping
 		{
 			data.UsingSession(s =>
 				s.MappingDSL()
-					.AddCommit("1")
-						.AddFile("file1").Modified().Code(100)
+					.AddCommit("1").OnBranch(0b001).AuthorIs("alan")
+						.File("file1").Added().Code(100)
 				.Submit()
-					.AddCommit("2").IsBugFix()
+					.AddCommit("2").OnBranch(0b011).AuthorIs("bob").IsBugFix()
 						.File("file1").Modified().Code(-10)
-						.AddFile("file2").Modified().Code(10)
+						.File("file2").Added().Code(20)
 				.Submit()
-					.AddCommit("3")
+					.AddCommit("3").OnBranch(0b111).AuthorIs("ivan")
 						.File("file2").Modified().Code(20)
 				.Submit());
 			
+			mapper.Truncate(2);
+
+			data.UsingSession(s =>
+			{
+				Assert.Equal(new string[] { "alan", "bob" },
+					s.Get<Author>().Select(x => x.Name));
+				Assert.Equal(2, s.Get<Branch>().Count());
+				Assert.Equal(1, s.Get<BugFix>().Count());
+				Assert.Equal(new string[] { "file1", "file2" },
+					s.Get<CodeFile>().Select(f => f.Path));
+				Assert.Equal(3, s.Get<Modification>().Count());
+				Assert.Equal(110, s.Get<CodeBlock>().Sum(x => x.Size));
+			});
+
 			mapper.Truncate(1);
 
 			data.UsingSession(s =>
 			{
-				Assert.Equal(1, s.Get<Commit>().Count());
+				Assert.Equal(new string[] { "alan" },
+					s.Get<Author>().Select(x => x.Name));
+				Assert.Equal(1, s.Get<Branch>().Count());
 				Assert.Equal(0, s.Get<BugFix>().Count());
 				Assert.Equal(new string[] { "file1" },
 					s.Get<CodeFile>().Select(f => f.Path));
 				Assert.Equal(1, s.Get<Modification>().Count());
-				Assert.Equal(new double[] { 100 },
-					s.Get<CodeBlock>().Select(x => x.Size));
-			});
-		}
-		[Fact]
-		public void Should_clear_file_removing_flag_during_truncate()
-		{
-			data.UsingSession(s =>
-				s.MappingDSL()
-					.AddCommit("1")
-						.AddFile("file1").Modified().Code(100)
-				.Submit()
-					.AddCommit("2")
-						.File("file1").Delete()
-				.Submit());
-			
-			mapper.Truncate(1);
-
-			data.UsingSession(s =>
-			{
-				Assert.Null(s.Get<CodeFile>().Single().DeletedInCommitId);
+				Assert.Equal(100, s.Get<CodeBlock>().Sum(x => x.Size));
 			});
 		}
 	}
