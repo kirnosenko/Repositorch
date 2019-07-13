@@ -53,6 +53,21 @@ namespace Repositorch.Data.Entities.Mapping
 			}
 		}
 
+		protected class TestBlame : Dictionary<int, string>, IBlame
+		{
+			public TestBlame AddLinesFromRevision(string revision, int lines)
+			{
+				int from = Count + 1;
+				int to = from + lines;
+				for (int i = from; i < to; i++)
+				{
+					this[i] = revision;
+				}
+
+				return this;
+			}
+		}
+
 		protected IVcsData vcsData;
 		
 		public BaseMapperTest()

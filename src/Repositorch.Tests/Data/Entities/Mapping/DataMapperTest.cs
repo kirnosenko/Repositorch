@@ -9,10 +9,9 @@ using Repositorch.Data.Entities.DSL.Mapping;
 
 namespace Repositorch.Data.Entities.Mapping
 {
-	public class DataMapperTest
+	public class DataMapperTest : BaseMapperTest
 	{
 		private IDataStore data;
-		private IVcsData vcsData;
 		private DataMapper mapper;
 		private CommitMapper commitMapper;
 		private BugFixMapper bugFixMapper;
@@ -21,7 +20,6 @@ namespace Repositorch.Data.Entities.Mapping
 		public DataMapperTest()
 		{
 			data = new InMemoryDataStore(Guid.NewGuid().ToString());
-			vcsData = Substitute.For<IVcsData>();
 			mapper = new DataMapper(data, vcsData);
 			commitMapper = Substitute.For<CommitMapper>((IVcsData)null);
 			bugFixMapper = Substitute.For<BugFixMapper>(null, null);
@@ -258,6 +256,43 @@ namespace Repositorch.Data.Entities.Mapping
 				Assert.Equal(1, s.Get<Modification>().Count());
 				Assert.Equal(100, s.Get<CodeBlock>().Sum(x => x.Size));
 			});
+		}
+		[Fact]
+		public void Should_check_file_blame_vs_code_blocks()
+		{
+			data.UsingSession(s =>
+				s.MappingDSL()
+					.AddCommit("1").OnBranch(0b001).AuthorIs("alan")
+						.File("file1").Added()
+							.Code(100)
+				.Submit());
+
+			vcsData.Blame("1", "file1")
+				.Returns(new TestBlame().AddLinesFromRevision("1", 100));
+
+			Assert.True(mapper.CheckRevision("1"));
+
+			data.UsingSession(s =>
+				s.MappingDSL()
+					.AddCommit("2").OnBranch(0b001).AuthorIs("alan")
+						.File("file1").Modified()
+							.Code(10)
+							.Code(-10).ForCodeAddedInitiallyInRevision("1")
+				.Submit());
+
+			vcsData.Blame("2", "file1")
+				.Returns(new TestBlame()
+					.AddLinesFromRevision("1", 90)
+					.AddLinesFromRevision("2", 10));
+
+			Assert.True(mapper.CheckRevision("2"));
+
+			vcsData.Blame("2", "file1")
+				.Returns(new TestBlame()
+					.AddLinesFromRevision("1", 90)
+					.AddLinesFromRevision("2", 11));
+
+			Assert.False(mapper.CheckRevision("2"));
 		}
 	}
 }

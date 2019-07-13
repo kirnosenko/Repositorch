@@ -11,9 +11,6 @@ namespace Repositorch.Data.Entities.Mapping
 {
 	public class CodeBlockMapperTest : BaseMapperTest
 	{
-		private class BlameStub : Dictionary<int, string>, IBlame
-		{
-		}
 		private CodeBlockMapper mapper;
 		
 		public CodeBlockMapperTest()
@@ -23,12 +20,8 @@ namespace Repositorch.Data.Entities.Mapping
 		[Fact]
 		public void Should_map_added_lines()
 		{
-			var blame = new BlameStub()
-			{
-				{ 1, "abc" },
-				{ 2, "abc" },
-				{ 3, "abc" },
-			};
+			var blame = new TestBlame()
+				.AddLinesFromRevision("abc", 3);
 			
 			vcsData.Blame(Arg.Is<string>("abc"), Arg.Is<string>("file1"))
 				.Returns(blame);
@@ -75,15 +68,9 @@ namespace Repositorch.Data.Entities.Mapping
 						.Code(20)
 			.Submit();
 
-			var blame = new BlameStub();
-			for (int i = 1; i <= 10; i++)
-			{
-				blame[i] = "abc";
-			}
-			for (int i = 11; i <= 25; i++)
-			{
-				blame[i] = "ab";
-			}
+			var blame = new TestBlame()
+				.AddLinesFromRevision("abc", 10)
+				.AddLinesFromRevision("ab", 15);
 			vcsData.Blame("abc", "file1")
 				.Returns(blame);
 			
@@ -115,15 +102,9 @@ namespace Repositorch.Data.Entities.Mapping
 						.Code(5)
 			.Submit();
 
-			var blame = new BlameStub();
-			for (int i = 1; i <= 10; i++)
-			{
-				blame[i] = "a";
-			}
-			for (int i = 11; i <= 15; i++)
-			{
-				blame[i] = "ab";
-			}
+			var blame = new TestBlame()
+				.AddLinesFromRevision("a", 10)
+				.AddLinesFromRevision("ab", 5);
 			vcsData.Blame("abc", "file2")
 				.Returns(blame);
 
@@ -150,15 +131,9 @@ namespace Repositorch.Data.Entities.Mapping
 						.Code(10)
 			.Submit();
 
-			var blame = new BlameStub();
-			for (int i = 1; i <= 10; i++)
-			{
-				blame[i] = "a";
-			}
-			for (int i = 11; i <= 15; i++)
-			{
-				blame[i] = "abc";
-			}
+			var blame = new TestBlame()
+				.AddLinesFromRevision("a", 10)
+				.AddLinesFromRevision("abc", 5);
 			vcsData.Blame("abc", "file2")
 				.Returns(blame);
 			
