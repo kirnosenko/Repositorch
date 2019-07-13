@@ -22,9 +22,9 @@ namespace Repositorch
 
 			//Selection(data);
 			//Dump(vcsData);
-			//Map(data, vcsData, 200, true);
+			Map(data, vcsData, 200, true);
 			//Truncate(data, vcsData, 122);
-			Check(data, vcsData, 121, false);
+			//Check(data, vcsData, 121, false);
 			Console.ReadKey();
 		}
 		static void Selection(IDataStore data)
