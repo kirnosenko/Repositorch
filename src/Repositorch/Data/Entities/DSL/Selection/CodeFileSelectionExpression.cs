@@ -88,26 +88,52 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		}
 		public CodeFileSelectionExpression Exist()
 		{
-			return Reselect(s =>
-				from f in s
+			// This code is the result of exorcism to evict EF 'must be reducible node' error.
+			// Reproduced on real DB not in-memory.
+
+			var filesWithLastAction =
+				from f in Queryable<CodeFile>()
 				join m in Queryable<Modification>() on f.Id equals m.FileId
 				group m by f into fileModifications
-				where fileModifications.OrderByDescending(x => x.Id).First().Action != Modification.FileAction.REMOVED
-				select fileModifications.Key
-			);
+				select new
+				{
+					File = fileModifications.Key,
+					LastAction = fileModifications.OrderByDescending(x => x.Id).First().Action
+				};
+
+			return Reselect(s =>
+				(
+					from f in s
+					join fa in filesWithLastAction on f.Id equals fa.File.Id
+					select fa
+				).Where(x => x.LastAction != Modification.FileAction.REMOVED)
+				.Select(x => x.File));
 		}
 		public CodeFileSelectionExpression ExistInRevision(string revision)
 		{
+			// This code is the result of exorcism to evict EF 'must be reducible node' error.
+			// Reproduced on real DB not in-memory.
+
 			var allCommitsTillRevision = this.Commits().TillRevision(revision);
 
-			return Reselect(s =>
+			var filesWithLastAction =
 				from c in allCommitsTillRevision
 				join m in Queryable<Modification>() on c.Id equals m.CommitId
-				join f in s on m.FileId equals f.Id
+				join f in Queryable<CodeFile>() on m.FileId equals f.Id
 				group m by f into fileModifications
-				where fileModifications.OrderByDescending(x => x.Id).First().Action != Modification.FileAction.REMOVED
-				select fileModifications.Key
-			);
+				select new
+				{
+					File = fileModifications.Key,
+					LastAction = fileModifications.OrderByDescending(x => x.Id).First().Action
+				};
+
+			return Reselect(s =>
+				(
+					from f in s
+					join fa in filesWithLastAction on f.Id equals fa.File.Id
+					select fa
+				).Where(x => x.LastAction != Modification.FileAction.REMOVED)
+				.Select(x => x.File));
 		}
 		protected override CodeFileSelectionExpression Recreate()
 		{
