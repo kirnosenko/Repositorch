@@ -23,7 +23,7 @@ namespace Repositorch
 			//Selection(data);
 			//Dump(vcsData);
 			Map(data, vcsData, 200, true);
-			//Truncate(data, vcsData, 122);
+			//Truncate(data, vcsData, 120);
 			//Check(data, vcsData, 121, false);
 			Console.ReadKey();
 		}

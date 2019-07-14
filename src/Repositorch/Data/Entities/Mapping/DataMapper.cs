@@ -107,6 +107,7 @@ namespace Repositorch.Data.Entities.Mapping
 				{
 					if (!CheckRevision(nextRevision, true, true))
 					{
+						Truncate(nextRevisionNumber - 1);
 						break;
 					}
 				}
@@ -161,22 +162,22 @@ namespace Repositorch.Data.Entities.Mapping
 						from f in s.Get<CodeFile>()
 						join m in s.Get<Modification>() on f.Id equals m.FileId
 						join c in s.Get<Commit>() on m.CommitId equals c.Id
-						group c by f into fileCommits
-						where fileCommits.OrderBy(x => x.OrderedNumber).First().OrderedNumber >= commit.OrderedNumber
+						group c.Id by f into fileCommits
+						where fileCommits.Count() == 1 && fileCommits.Max() == commit.Id
 						select fileCommits.Key;
 					s.RemoveRange(filesToRemove);
 					var authorsToRemove =
 						from a in s.Get<Author>()
 						join c in s.Get<Commit>() on a.Id equals c.AuthorId
-						group c by a into authorCommits
-						where authorCommits.OrderBy(x => x.OrderedNumber).First().OrderedNumber >= commit.OrderedNumber
+						group c.Id by a into authorCommits
+						where authorCommits.Count() == 1 && authorCommits.Max() == commit.Id
 						select authorCommits.Key;
 					s.RemoveRange(authorsToRemove);
 					var branchesToRemove =
 						from b in s.Get<Branch>()
 						join c in s.Get<Commit>() on b.Id equals c.BranchId
-						group c by b into branchCommits
-						where branchCommits.OrderBy(x => x.OrderedNumber).First().OrderedNumber >= commit.OrderedNumber
+						group c.Id by b into branchCommits
+						where branchCommits.Count() == 1 && branchCommits.Max() == commit.Id
 						select branchCommits.Key;
 					s.RemoveRange(branchesToRemove);
 					var fixToRemove = s.Get<BugFix>().SingleOrDefault(x => x.CommitId == commit.Id);

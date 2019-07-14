@@ -294,5 +294,25 @@ namespace Repositorch.Data.Entities.Mapping
 
 			Assert.False(mapper.CheckRevision("2"));
 		}
+		[Fact]
+		public void Should_truncate_unsuccessfully_mapped_revision()
+		{
+			data.UsingSession(s =>
+				s.MappingDSL()
+					.AddCommit("1").OnBranch(0b001).AuthorIs("alan")
+						.File("file1").Added()
+							.Code(100)
+				.Submit());
+
+			vcsData.Blame("1", "file1")
+				.Returns(new TestBlame().AddLinesFromRevision("1", 99));
+			
+			mapper.MapRevisions("1", "1", true);
+
+			data.UsingSession(s =>
+			{
+				Assert.Equal(0, s.Get<Commit>().Count());
+			});
+		}
 	}
 }
