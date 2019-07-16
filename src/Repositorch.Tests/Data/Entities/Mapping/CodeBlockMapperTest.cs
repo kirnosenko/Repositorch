@@ -27,7 +27,7 @@ namespace Repositorch.Data.Entities.Mapping
 				.Returns(blame);
 
 			mapper.Map(
-				mappingDSL.AddCommit("abc")
+				mappingDSL.AddCommit("abc").OnBranch(1)
 					.File("file1").Added().Modified()
 			);
 			SubmitChanges();
@@ -41,12 +41,12 @@ namespace Repositorch.Data.Entities.Mapping
 		public void Should_not_take_blame_for_deleted_file()
 		{
 			mappingDSL
-				.AddCommit("ab")
+				.AddCommit("ab").OnBranch(1)
 					.File("file1").Added()
 						.Code(100)
 				.Submit();
 			mapper.Map(
-				mappingDSL.AddCommit("abc")
+				mappingDSL.AddCommit("abc").OnBranch(1)
 					.File("file1").Removed()
 			);
 			SubmitChanges();
@@ -59,11 +59,11 @@ namespace Repositorch.Data.Entities.Mapping
 		public void Should_remove_code_that_no_more_exists()
 		{
 			mappingDSL
-				.AddCommit("a")
+				.AddCommit("a").OnBranch(1)
 					.File("file1").Added()
 						.Code(10)
 			.Submit()
-				.AddCommit("ab")
+				.AddCommit("ab").OnBranch(1)
 					.File("file1").Modified()
 						.Code(20)
 			.Submit();
@@ -75,7 +75,7 @@ namespace Repositorch.Data.Entities.Mapping
 				.Returns(blame);
 			
 			mapper.Map(
-				mappingDSL.AddCommit("abc")
+				mappingDSL.AddCommit("abc").OnBranch(1)
 					.File("file1").Modified()
 			);
 			SubmitChanges();
@@ -86,6 +86,47 @@ namespace Repositorch.Data.Entities.Mapping
 			Assert.Equal(new double[] { 10, -10, -5 }, code
 				.Select(cb => cb.Size));
 			Assert.Equal(new double[] { 10, 20 }, code
+				.Where(cb => cb.Size < 0)
+				.Select(cb => cb.TargetCodeBlock.Size));
+		}
+		[Fact]
+		public void Should_not_take_into_account_code_on_another_branch()
+		{
+			mappingDSL
+				.AddCommit("1").OnBranch(0b001)
+					.File("file1").Added()
+						.Code(100)
+			.Submit()
+				.AddCommit("2").OnBranch(0b011)
+					.File("file1").Modified()
+						.Code(10)
+						.Code(-10).ForCodeAddedInitiallyInRevision("1")
+			.Submit()
+				.AddCommit("3").OnBranch(0b101)
+					.File("file1").Modified()
+						.Code(20)
+						.Code(-20).ForCodeAddedInitiallyInRevision("1")
+			.Submit();
+
+			var blame = new TestBlame()
+				.AddLinesFromRevision("1", 90)
+				.AddLinesFromRevision("2", 5)
+				.AddLinesFromRevision("4", 5);
+			vcsData.Blame("4", "file1")
+				.Returns(blame);
+
+			mapper.Map(
+				mappingDSL.AddCommit("4").OnBranch(0b011)
+					.File("file1").Modified()
+			);
+			SubmitChanges();
+
+			var code = Get<CodeBlock>()
+				.Where(cb => cb.Modification.Commit.Revision == "4");
+
+			Assert.Equal(new double[] { 5, -5 }, code
+				.Select(cb => cb.Size));
+			Assert.Equal(new double[] { 10 }, code
 				.Where(cb => cb.Size < 0)
 				.Select(cb => cb.TargetCodeBlock.Size));
 		}
