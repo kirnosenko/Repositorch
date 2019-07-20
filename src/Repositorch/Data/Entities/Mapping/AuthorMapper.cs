@@ -5,13 +5,13 @@ using Repositorch.Data.Entities.DSL.Mapping;
 
 namespace Repositorch.Data.Entities.Mapping
 {
-	public class AuthorMapper : EntityMapper<Author, CommitMappingExpression, AuthorMappingExpression>
+	public class AuthorMapper : EntityMapper<ICommitMappingExpression, IAuthorMappingExpression>
 	{
 		public AuthorMapper(IVcsData vcsData)
 			: base(vcsData)
 		{
 		}
-		public override IEnumerable<AuthorMappingExpression> Map(CommitMappingExpression expression)
+		public override IEnumerable<IAuthorMappingExpression> Map(ICommitMappingExpression expression)
 		{
 			Log log = vcsData.Log(expression.CurrentEntity<Commit>().Revision);
 

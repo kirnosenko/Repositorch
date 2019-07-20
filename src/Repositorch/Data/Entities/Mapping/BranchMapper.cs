@@ -6,13 +6,13 @@ using Repositorch.Data.Entities.DSL.Mapping;
 
 namespace Repositorch.Data.Entities.Mapping
 {
-	public class BranchMapper : EntityMapper<Branch, CommitMappingExpression, BranchMappingExpression>
+	public class BranchMapper : EntityMapper<ICommitMappingExpression, IBranchMappingExpression>
 	{
 		public BranchMapper(IVcsData vcsData)
 			: base(vcsData)
 		{
 		}
-		public override IEnumerable<BranchMappingExpression> Map(CommitMappingExpression expression)
+		public override IEnumerable<IBranchMappingExpression> Map(ICommitMappingExpression expression)
 		{
 			var parentRevisions = vcsData.GetRevisionParents(
 				expression.CurrentEntity<Commit>().Revision).ToArray();

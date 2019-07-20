@@ -74,20 +74,80 @@ namespace Repositorch.Data.Entities.Mapping
 				.Map(Arg.Is(commitExp));
 		}
 		[Fact]
-		public void Can_use_the_same_expression_for_several_mappers()
+		public void Should_organize_expressions_into_chain()
 		{
-			CommitMappingExpression commitExp = data.UsingSession(
-				s => s.MappingDSL().AddCommit("1"));
+			ICommitMappingExpression commitExp = null;
+			IBugFixMappingExpression bugfixExp = null;
+			ICodeFileMappingExpression fileExp = null;
 
 			commitMapper
-				.Map(Arg.Any<RepositoryMappingExpression>())
-				.Returns(new CommitMappingExpression[] { commitExp });
+				.Map(Arg.Any<IRepositoryMappingExpression>())
+				.Returns(x =>
+				{
+					commitExp = Substitute.For<ICommitMappingExpression>();
+					return new ICommitMappingExpression[] { commitExp };
+				});
 			bugFixMapper
-				.Map(Arg.Any<CommitMappingExpression>())
-				.Returns(Enumerable.Empty<BugFixMappingExpression>());
+				.Map(Arg.Any<ICommitMappingExpression>())
+				.Returns(x =>
+				{
+					bugfixExp = Substitute.For<IBugFixMappingExpression>();
+					return new IBugFixMappingExpression[] { bugfixExp };
+				});
 			fileMapper
-				.Map(Arg.Any<CommitMappingExpression>())
-				.Returns(Enumerable.Empty<CodeFileMappingExpression>());
+				.Map(Arg.Any<ICommitMappingExpression>())
+				.Returns(x => 
+				{
+					fileExp = Substitute.For<ICodeFileMappingExpression>();
+					return new ICodeFileMappingExpression[] { fileExp };
+				});
+
+			mapper.RegisterMapper(commitMapper);
+			mapper.RegisterMapper(bugFixMapper);
+			mapper.RegisterMapper(fileMapper);
+
+			mapper.MapRevision("1");
+
+			commitMapper
+				.Received(1)
+				.Map(Arg.Any<IRepositoryMappingExpression>());
+			bugFixMapper
+				.Received(1)
+				.Map(commitExp);
+			fileMapper
+				.Received(1)
+				.Map(bugfixExp);
+			fileMapper
+				.Received(1)
+				.Map(Arg.Any<ICommitMappingExpression>());
+		}
+
+		[Fact]
+		public void Should_not_break_expression_chain_with_missed_expression()
+		{
+			ICommitMappingExpression commitExp = null;
+			ICodeFileMappingExpression fileExp = null;
+
+			commitMapper
+				.Map(Arg.Any<IRepositoryMappingExpression>())
+				.Returns(x =>
+				{
+					commitExp = Substitute.For<ICommitMappingExpression>();
+					return new ICommitMappingExpression[] { commitExp };
+				});
+			bugFixMapper
+				.Map(Arg.Any<ICommitMappingExpression>())
+				.Returns(x =>
+				{
+					return new IBugFixMappingExpression[] {};
+				});
+			fileMapper
+				.Map(Arg.Any<ICommitMappingExpression>())
+				.Returns(x =>
+				{
+					fileExp = Substitute.For<ICodeFileMappingExpression>();
+					return new ICodeFileMappingExpression[] { fileExp };
+				});
 
 			mapper.RegisterMapper(commitMapper);
 			mapper.RegisterMapper(bugFixMapper);
@@ -99,6 +159,7 @@ namespace Repositorch.Data.Entities.Mapping
 				.Received(1)
 				.Map(commitExp);
 		}
+
 		[Fact]
 		public void Should_not_keep_expressions_between_sessions()
 		{
@@ -168,22 +229,6 @@ namespace Repositorch.Data.Entities.Mapping
 			mapper.MapRevisions(startRevision: "2");
 
 			Assert.Equal(new string[] { "2", "3" }, revisions);
-		}
-		[Fact]
-		public void Can_replace_mappers()
-		{
-			CommitMapper commitMapper2 = Substitute.For<CommitMapper>((IVcsData)null);
-			mapper.RegisterMapper(commitMapper2);
-			mapper.RegisterMapper(commitMapper);
-
-			mapper.MapRevision("1");
-
-			commitMapper
-				.Received(1)
-				.Map(Arg.Any<RepositoryMappingExpression>());
-			commitMapper2
-				.DidNotReceive()
-				.Map(Arg.Any<RepositoryMappingExpression>());
 		}
 		[Fact]
 		public void Should_truncate_last_mapped_commits()

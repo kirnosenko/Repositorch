@@ -6,13 +6,13 @@ using Repositorch.Data.Entities.DSL.Mapping;
 
 namespace Repositorch.Data.Entities.Mapping
 {
-	public class ModificationMapper : EntityMapper<Modification,CodeFileMappingExpression,ModificationMappingExpression>
+	public class ModificationMapper : EntityMapper<ICodeFileMappingExpression,IModificationMappingExpression>
 	{
 		public ModificationMapper(IVcsData vcsData)
 			: base(vcsData)
 		{
 		}
-		public override IEnumerable<ModificationMappingExpression> Map(CodeFileMappingExpression expression)
+		public override IEnumerable<IModificationMappingExpression> Map(ICodeFileMappingExpression expression)
 		{
 			string revision = expression.CurrentEntity<Commit>().Revision;
 			string filePath = expression.CurrentEntity<CodeFile>().Path;

@@ -5,20 +5,20 @@ using Repositorch.Data.Entities.DSL.Mapping;
 
 namespace Repositorch.Data.Entities.Mapping
 {
-	public class CommitMapper : EntityMapper<Commit, RepositoryMappingExpression, CommitMappingExpression>
+	public class CommitMapper : EntityMapper<IRepositoryMappingExpression,ICommitMappingExpression>
 	{
 		public CommitMapper(IVcsData vcsData)
 			: base(vcsData)
 		{
 		}
-		public override IEnumerable<CommitMappingExpression> Map(RepositoryMappingExpression expression)
+		public override IEnumerable<ICommitMappingExpression> Map(IRepositoryMappingExpression expression)
 		{
 			return new CommitMappingExpression[]
 			{
 				ExpressionFor(expression)
 			};
 		}
-		protected virtual CommitMappingExpression ExpressionFor(RepositoryMappingExpression expression)
+		protected virtual CommitMappingExpression ExpressionFor(IRepositoryMappingExpression expression)
 		{
 			Log log = vcsData.Log(expression.Revision);
 

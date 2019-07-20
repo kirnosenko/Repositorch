@@ -33,7 +33,7 @@ namespace Repositorch.Data.Entities.Mapping
 		}
 	}
 
-	public class DataMapper : IMappingHost
+	public class DataMapper
 	{
 		public event Action<string> OnMapRevision;
 		public event Action<string> OnTruncateRevision;
@@ -43,36 +43,31 @@ namespace Repositorch.Data.Entities.Mapping
 		private IDataStore data;
 		private IVcsData vcsData;
 
-		private List<object> availableExpressions;
-		private Dictionary<Type, Action> mappers = new Dictionary<Type, Action>();
+		private List<Func<IRepositoryMappingExpression, IEnumerable<IRepositoryMappingExpression>>> mappers =
+			new List<Func<IRepositoryMappingExpression, IEnumerable<IRepositoryMappingExpression>>>();
 
 		public DataMapper(IDataStore data, IVcsData vcsData)
 		{
 			this.data = data;
 			this.vcsData = vcsData;
 		}
-		public void RegisterMapper<T, IME, OME>(EntityMapper<T, IME, OME> mapper)
+		public void RegisterMapper<IME, OME>(EntityMapper<IME, OME> mapper)
+			where IME : IRepositoryMappingExpression
+			where OME : IRepositoryMappingExpression
 		{
-			if (mappers.ContainsKey(typeof(T)))
+			mappers.Add((exp) =>
 			{
-				mappers.Remove(typeof(T));
-			}
-			mappers.Add(typeof(T), () =>
-			{
-				List<object> newExpressions = new List<object>();
+				var newExpressions = new List<IRepositoryMappingExpression>();
 
-				foreach (var iExp in availableExpressions.Where(x => x.GetType() == typeof(IME)))
+				if (typeof(IME).IsAssignableFrom(exp.GetType()))
 				{
-					foreach (var oExp in mapper.Map((IME)iExp))
+					foreach (var resultExp in mapper.Map((IME)exp))
 					{
-						newExpressions.Add(oExp);
+						newExpressions.Add(resultExp);
 					}
 				}
 
-				foreach (var exp in newExpressions)
-				{
-					availableExpressions.Add(exp);
-				}
+				return newExpressions;
 			});
 		}
 		public void MapRevisions(string startRevision = null, string stopRevision = null, bool check = false)
@@ -121,20 +116,38 @@ namespace Repositorch.Data.Entities.Mapping
 		{
 			using (var s = data.OpenSession())
 			{
-				availableExpressions = new List<object>()
-				{ 
-					new RepositoryMappingExpression(s)
-					{
-						Revision = revision
-					}
-				};
-
-				foreach (var mapper in mappers)
+				var expressionStack = new Stack<IRepositoryMappingExpression>();
+				expressionStack.Push(new RepositoryMappingExpression(s)
 				{
-					mapper.Value();
-				}
-
+					Revision = revision
+				});
+				MapData(0, expressionStack);
 				s.SubmitChanges();
+			}
+		}
+		private void MapData(int mapperIndex, Stack<IRepositoryMappingExpression> expressionsStack)
+		{
+			if (mapperIndex >= mappers.Count)
+			{
+				return;
+			}
+
+			var mapper = mappers[mapperIndex];
+			var exp = expressionsStack.Peek();
+
+			var newExpressions = mapper(exp).ToArray();
+			if (newExpressions.Length > 0)
+			{
+				foreach (var newExp in newExpressions)
+				{
+					expressionsStack.Push(newExp);
+					MapData(mapperIndex + 1, expressionsStack);
+					expressionsStack.Pop();
+				}
+			}
+			else
+			{
+				MapData(mapperIndex + 1, expressionsStack);
 			}
 		}
 		public void Truncate(int revisionsToKeep)

@@ -6,7 +6,7 @@ using Repositorch.Data.Entities.DSL.Mapping;
 
 namespace Repositorch.Data.Entities.Mapping
 {
-	public class BugFixMapper : EntityMapper<BugFix, CommitMappingExpression, BugFixMappingExpression>
+	public class BugFixMapper : EntityMapper<ICommitMappingExpression, IBugFixMappingExpression>
 	{
 		private IBugFixDetector bugFixDetector;
 
@@ -15,7 +15,7 @@ namespace Repositorch.Data.Entities.Mapping
 		{
 			this.bugFixDetector = bugFixDetector;
 		}
-		public override IEnumerable<BugFixMappingExpression> Map(CommitMappingExpression expression)
+		public override IEnumerable<IBugFixMappingExpression> Map(ICommitMappingExpression expression)
 		{
 			if (bugFixDetector.IsBugFix(expression.CurrentEntity<Commit>()))
 			{

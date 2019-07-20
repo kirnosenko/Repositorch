@@ -7,13 +7,13 @@ using Repositorch.Data.Entities.DSL.Mapping;
 
 namespace Repositorch.Data.Entities.Mapping
 {
-	public class CodeBlockMapper : EntityMapper<CodeBlock,ModificationMappingExpression,CodeBlockMappingExpression>
+	public class CodeBlockMapper : EntityMapper<IModificationMappingExpression,ICodeBlockMappingExpression>
 	{
 		public CodeBlockMapper(IVcsData vcsData)
 			: base(vcsData)
 		{
 		}
-		public override IEnumerable<CodeBlockMappingExpression> Map(ModificationMappingExpression expression)
+		public override IEnumerable<ICodeBlockMappingExpression> Map(IModificationMappingExpression expression)
 		{
 			List<CodeBlockMappingExpression> codeBlockExpressions = new List<CodeBlockMappingExpression>();
 			string revision = expression.CurrentEntity<Commit>().Revision;
