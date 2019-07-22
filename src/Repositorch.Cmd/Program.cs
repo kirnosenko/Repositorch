@@ -19,34 +19,20 @@ namespace Repositorch
 			var gitClient = new CommandLineGitClient("D:/src/git/.git");
 			var vcsData = new VcsDataCached(new GitData(gitClient), 1, 1000);
 			var mapper = CreateDataMapper(data, vcsData);
-
-			//Selection(data);
-			//Dump(vcsData);
-			Map(data, vcsData, 200, true);
-			//Truncate(data, vcsData, 120);
-			//Check(data, vcsData, 121, false);
-			Console.ReadKey();
-		}
-		static void Selection(IDataStore data)
-		{
-			using (ConsoleTimeLogger.Start("selection time"))
-			{
 			
-			}
-		}
-		static void Dump(IVcsData vcsData)
-		{
-			using (ConsoleTimeLogger.Start("dump time"))
+			using (ConsoleTimeLogger.Start("time"))
 			{
-				var r1 = vcsData.GetRevisionByNumber(123);
-				var r2 = vcsData.GetRevisionByNumber(124);
-
-				var blame1 = vcsData.Blame(r1, "/Makefile");
-				var blame2 = vcsData.Blame(r2, "/Makefile");
-				var diff = blame1.Diff(blame2);
-
-				Console.WriteLine();
+				Func<DataMapper.MappingSettings> settings = () => new DataMapper.MappingSettings()
+				{
+					StopRevision = vcsData.GetRevisionByNumber(200),
+					Check = DataMapper.CheckMode.ALL,
+				};
+				mapper.MapRevisions(settings());
+				//mapper.Truncate(125);
+				//mapper.Check(120, DataMapper.CheckMode.ALL);
 			}
+
+			Console.ReadKey();
 		}
 		static DataMapper CreateDataMapper(IDataStore data, IVcsData vcsData)
 		{
@@ -82,44 +68,6 @@ namespace Repositorch
 				Console.WriteLine(message);
 			};
 			return dataMapper;
-		}
-		static void Map(IDataStore data, IVcsData vcsData, int revisions, bool check)
-		{
-			DataMapper mapper = CreateDataMapper(data, vcsData);
-			
-			using (ConsoleTimeLogger.Start("mapping time"))
-			{
-				mapper.MapRevisions(
-					stopRevision: vcsData.GetRevisionByNumber(revisions),
-					check: check);
-			}
-		}
-		static void Truncate(IDataStore data, IVcsData vcsData, int revisionsToKeep)
-		{
-			DataMapper mapper = CreateDataMapper(data, vcsData);
-			
-			using (ConsoleTimeLogger.Start("truncating time"))
-			{
-				mapper.Truncate(revisionsToKeep);
-			}
-		}
-		static void Check(IDataStore data, IVcsData vcsData, int skipRevisions = 0, bool touchedOnly = true)
-		{
-			DataMapper mapper = CreateDataMapper(data, vcsData);
-
-			using (ConsoleTimeLogger.Start("checking time"))
-			{
-				var revisions = data.UsingSession(s =>
-					s.Get<Commit>().Skip(skipRevisions).Select(c => c.Revision).ToArray());
-
-				foreach (var r in revisions)
-				{
-					if (!mapper.CheckRevision(r, touchedOnly))
-					{
-						return;
-					}
-				}
-			}
 		}
 	}
 }

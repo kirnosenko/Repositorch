@@ -35,6 +35,19 @@ namespace Repositorch.Data.Entities.Mapping
 
 	public class DataMapper
 	{
+		public enum CheckMode
+		{
+			NOTHING,
+			TOUCHED,
+			ALL
+		}
+		public struct MappingSettings
+		{
+			public string StartRevision { get; set; }
+			public string StopRevision { get; set; }
+			public CheckMode Check { get; set; }
+		}
+
 		public event Action<string> OnMapRevision;
 		public event Action<string> OnTruncateRevision;
 		public event Action<string> OnCheckRevision;
@@ -70,27 +83,27 @@ namespace Repositorch.Data.Entities.Mapping
 				return newExpressions;
 			});
 		}
-		public void MapRevisions(string startRevision = null, string stopRevision = null, bool check = false)
+		public void MapRevisions(MappingSettings settings)
 		{
 			int nextRevisionNumber;
 			string nextRevision;
 
 			using (var s = data.OpenSession())
 			{
-				if (startRevision == null)
+				if (settings.StartRevision == null)
 				{
-					if (s.RevisionExists(stopRevision))
+					if (s.RevisionExists(settings.StopRevision))
 					{
 						return;
 					}
 					nextRevisionNumber = s.MappingStartRevision();
 					nextRevision = vcsData.GetRevisionByNumber(nextRevisionNumber);
 				}
-				else
+				else // partial mapping
 				{
-					stopRevision = s.LastMappedRevision();
-					nextRevision = startRevision;
-					nextRevisionNumber = s.NumberOfRevision(startRevision);
+					settings.StopRevision = s.LastMappedRevision();
+					nextRevision = settings.StartRevision;
+					nextRevisionNumber = s.NumberOfRevision(settings.StartRevision);
 				}
 			}
 
@@ -98,15 +111,12 @@ namespace Repositorch.Data.Entities.Mapping
 			{
 				OnMapRevision?.Invoke(GetRevisionName(nextRevision, nextRevisionNumber));
 				MapRevision(nextRevision);
-				if (check)
+				if (!CheckRevision(nextRevision, settings.Check, true))
 				{
-					if (!CheckRevision(nextRevision, true, true))
-					{
-						Truncate(nextRevisionNumber - 1);
-						break;
-					}
+					Truncate(nextRevisionNumber - 1);
+					break;
 				}
-				nextRevision = nextRevision == stopRevision ?
+				nextRevision = nextRevision == settings.StopRevision ?
 					null
 					:
 					vcsData.GetRevisionByNumber(++nextRevisionNumber);
@@ -204,10 +214,26 @@ namespace Repositorch.Data.Entities.Mapping
 				}
 			}
 		}
-		public bool CheckRevision(string revision, bool touchedOnly = true, bool mute = false)
+		public void Check(int revisionsToSkip, CheckMode mode)
 		{
-			bool result = true;
+			var revisions = data.UsingSession(s =>
+				s.Get<Commit>().Skip(revisionsToSkip).Select(c => c.Revision).ToArray());
 
+			foreach (var r in revisions)
+			{
+				if (!CheckRevision(r, mode))
+				{
+					return;
+				}
+			}
+		}
+		public bool CheckRevision(string revision, CheckMode mode, bool mute = false)
+		{
+			if (mode == CheckMode.NOTHING)
+			{
+				return true;
+			}
+			
 			using (var s = data.OpenSession())
 			{
 				if (!mute)
@@ -217,16 +243,16 @@ namespace Repositorch.Data.Entities.Mapping
 				var touchedFiles = s.SelectionDSL()
 					.Commits().RevisionIs(revision)
 					.Files().Reselect(
-						e => touchedOnly ? e.TouchedInCommits() : e)
+						e => mode == CheckMode.TOUCHED ? e.TouchedInCommits() : e)
 					.ExistInRevision(revision);
 
+				var result = true;
 				foreach (var touchedFile in touchedFiles)
 				{
 					result &= CheckLinesContent(s, revision, touchedFile);
 				}
+				return result;
 			}
-
-			return result;
 		}
 		private bool CheckLinesContent(ISession s, string revision, CodeFile file)
 		{
