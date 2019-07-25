@@ -8,7 +8,8 @@ namespace Repositorch.Data.VersionControl
 		protected List<TouchedFile> touchedFiles;
 
 		public string Revision { get; protected set; }
-		public string Author { get; protected set; }
+		public string AuthorName { get; protected set; }
+		public string AuthorEmail { get; protected set; }
 		public DateTime Date { get; protected set; }
 		public string Message { get; protected set; }
 

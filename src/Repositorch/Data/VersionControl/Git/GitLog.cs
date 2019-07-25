@@ -11,7 +11,8 @@ namespace Repositorch.Data.VersionControl.Git
 			TextReader reader = new StreamReader(log);
 
 			Revision = reader.ReadLine();
-			Author = reader.ReadLine();
+			AuthorName = reader.ReadLine();
+			AuthorEmail = reader.ReadLine();
 			Date = DateTime.Parse(reader.ReadLine()).ToUniversalTime();
 			Message = reader.ReadLine();
 

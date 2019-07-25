@@ -17,7 +17,7 @@ namespace Repositorch.Data.Entities.Mapping
 		[Fact]
 		public void Should_add_author()
 		{
-			var log = new TestLog("1", "Ivan", DateTime.Today, "none");
+			var log = new TestLog("1", "Ivan", "ivan@mail.com", DateTime.Today, "none");
 			vcsData.Log(Arg.Is<string>("1")).Returns(log);
 
 			mapper.Map(
@@ -27,7 +27,8 @@ namespace Repositorch.Data.Entities.Mapping
 			
 			Assert.Equal(1, Get<Author>().Count());
 			var author = Get<Author>().Single();
-			Assert.Equal(log.Author, author.Name);
+			Assert.Equal(log.AuthorName, author.Name);
+			Assert.Equal(log.AuthorEmail, author.Email);
 		}
 	}
 }

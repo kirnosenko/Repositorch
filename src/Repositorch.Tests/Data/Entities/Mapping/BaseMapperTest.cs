@@ -10,10 +10,11 @@ namespace Repositorch.Data.Entities.Mapping
 	{
 		protected class TestLog : Log
 		{
-			public TestLog(string revision, string author, DateTime date, string message)
+			public TestLog(string revision, string name, string email, DateTime date, string message)
 			{
 				Revision = revision;
-				Author = author;
+				AuthorName = name;
+				AuthorEmail = email;
 				Date = date;
 				Message = message;
 				touchedFiles = new List<TouchedFile>();

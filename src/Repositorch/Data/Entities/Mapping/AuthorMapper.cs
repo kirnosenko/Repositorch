@@ -17,7 +17,7 @@ namespace Repositorch.Data.Entities.Mapping
 
 			return new AuthorMappingExpression[]
 			{
-				expression.AuthorIs(log.Author)
+				expression.AuthorIs(log.AuthorName).HasEmail(log.AuthorEmail)
 			};
 		}
 	}

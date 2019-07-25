@@ -16,7 +16,7 @@ namespace Repositorch.Data.Entities.Mapping
 		[Fact]
 		public void Should_add_commit()
 		{
-			var log = new TestLog("1", "Ivan", DateTime.Today, "none");
+			var log = new TestLog("1", null, null, DateTime.Today, null);
 			vcsData.Log(Arg.Is<string>("1")).Returns(log);
 			
 			mappingDSL.Revision = "1";
