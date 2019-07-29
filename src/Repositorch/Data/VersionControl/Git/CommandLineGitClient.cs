@@ -21,7 +21,7 @@ namespace Repositorch.Data.VersionControl.Git
 		public Stream Log(string revision)
 		{
 			return RunCommand(
-				"log -n 1 -C --format=format:%H%n%cn%n%ce%n%ci%n%s --name-status {0}",
+				"log -n 1 -C -c --format=format:%H%n%cn%n%ce%n%ci%n%s --name-status {0}",
 				revision
 			);
 		}

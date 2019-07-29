@@ -51,6 +51,16 @@ M	django/contrib/staticfiles/management/commands/findstatic.py
 A	'tests/regressiontests/staticfiles_tests/apps/test/static/test/spec\314\247ial.txt'
 M	tests/regressiontests/staticfiles_tests/tests.py".Replace("'", "\"");
 
+private string log_5 =
+@"b51ad4314078298194d23d46e2b4473ffd32a88a
+Linus Torvalds
+torvalds@ppc970.osdl.org
+2005-04-18 12:12:00 -0700
+Merge the new object model thing from Daniel Barkalow
+MM	Makefile
+MM	fsck-cache.c
+MM	merge-base.c";
+
 		private GitLog log;
 		
 		[Fact]
@@ -141,6 +151,13 @@ M	tests/regressiontests/staticfiles_tests/tests.py".Replace("'", "\"");
 			Assert.Single(
 				log.TouchedFiles
 					.Where(x => x.Path == "/tests/regressiontests/staticfiles_tests/apps/test/static/test/spec\\314\\247ial.txt"));
+		}
+		[Fact]
+		public void Should_parse_filename_from_merge_log()
+		{
+			log = new GitLog(log_5.ToStream());
+
+			Assert.Equal(3, log.TouchedFiles.Count());
 		}
 	}
 }

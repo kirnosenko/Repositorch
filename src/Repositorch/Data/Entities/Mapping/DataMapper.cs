@@ -240,16 +240,16 @@ namespace Repositorch.Data.Entities.Mapping
 				{
 					OnCheckRevision?.Invoke(GetRevisionName(revision, s.NumberOfRevision(revision)));
 				}
-				var touchedFiles = s.SelectionDSL()
+				var filesToCheck = s.SelectionDSL()
 					.Commits().RevisionIs(revision)
 					.Files().Reselect(
 						e => mode == CheckMode.TOUCHED ? e.TouchedInCommits() : e)
 					.ExistInRevision(revision);
 
 				var result = true;
-				foreach (var touchedFile in touchedFiles)
+				foreach (var file in filesToCheck)
 				{
-					result &= CheckLinesContent(s, revision, touchedFile);
+					result &= CheckLinesContent(s, revision, file);
 				}
 				return result;
 			}
@@ -286,7 +286,6 @@ namespace Repositorch.Data.Entities.Mapping
 			{
 				OnError?.Invoke(string.Format("Incorrect number of lines in file {0}. {1} should be {2}",
 					file.Path, currentLOC, fileBlame.Count));
-				return false;
 			}
 
 			SmartDictionary<string, int> linesByRevision = new SmartDictionary<string, int>(x => 0);

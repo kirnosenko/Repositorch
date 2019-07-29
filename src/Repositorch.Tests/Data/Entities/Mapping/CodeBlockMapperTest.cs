@@ -185,5 +185,50 @@ namespace Repositorch.Data.Entities.Mapping
 				.Single(cb => cb.Size == 5)
 				.AddedInitiallyInCommit.Revision);
 		}
+		[Fact]
+		public void Should_compensate_code_changes_that_were_dropped_in_merge()
+		{
+			mappingDSL
+				.AddCommit("1").OnBranch(0b0001)
+					.File("file1").Added()
+						.Code(100)
+			.Submit()
+				.AddCommit("2").OnBranch(0b0011)
+					.File("file1").Modified()
+						.Code(10)
+						.Code(-10).ForCodeAddedInitiallyInRevision("1")
+			.Submit()
+				.AddCommit("3").OnBranch(0b0101)
+					.File("file1").Modified()
+						.Code(20)
+						.Code(-10).ForCodeAddedInitiallyInRevision("1")
+			.Submit();
+
+			var blame = new TestBlame()
+				.AddLinesFromRevision("1", 90)
+				.AddLinesFromRevision("2", 5)
+				.AddLinesFromRevision("3", 10);
+			vcsData.Blame("4", "file1")
+				.Returns(blame);
+			vcsData.GetRevisionParents("4")
+				.Returns(new string[] { "2", "3" });
+
+			mapper.Map(
+				mappingDSL.AddCommit("4").OnBranch(0b0111)
+					.File("file1").Modified()
+			);
+			SubmitChanges();
+
+			var mergeCodeBlocks =
+				(from cb in Get<CodeBlock>()
+				join m in Get<Modification>() on cb.ModificationId equals m.Id
+				join c in Get<Commit>() on m.CommitId equals c.Id
+				where c.Revision == "4"
+				select cb).ToArray();
+
+			Assert.Equal(new double[] { 10, -5, -10 }, mergeCodeBlocks.Select(x => x.Size));
+			var codeAddition = mergeCodeBlocks.Where(x => x.Size > 0).Single();
+			Assert.Equal("1", codeAddition.AddedInitiallyInCommit.Revision);
+		}
 	}
 }

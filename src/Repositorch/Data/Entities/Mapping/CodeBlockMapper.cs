@@ -37,13 +37,12 @@ namespace Repositorch.Data.Entities.Mapping
 				{
 					foreach (var linesForRevision in linesByRevision)
 					{
-						codeBlockExpressions.Add(
-							expression.Code(linesForRevision.Count())
-						);
+						var newExp = expression.Code(linesForRevision.Count());
 						if (linesForRevision.Key != revision)
 						{
-							codeBlockExpressions.Last().CopiedFrom(linesForRevision.Key);
+							newExp.CopiedFrom(linesForRevision.Key);
 						}
+						codeBlockExpressions.Add(newExp);
 					}
 				}
 				else
@@ -81,10 +80,20 @@ namespace Repositorch.Data.Entities.Mapping
 						double realCodeSize = linesForRevision == null ? 0 : linesForRevision.Count();
 						if (existentCode.CodeSize > realCodeSize)
 						{
-							codeBlockExpressions.Add(
-								expression.Code(realCodeSize - existentCode.CodeSize)
-							);
-							codeBlockExpressions.Last().ForCodeAddedInitiallyInRevision(existentCode.Revision);
+							var newExp = expression.Code(realCodeSize - existentCode.CodeSize);
+							newExp.ForCodeAddedInitiallyInRevision(existentCode.Revision);
+							codeBlockExpressions.Add(newExp);
+						}
+						else if (existentCode.CodeSize < realCodeSize)
+						{
+							bool isMerge = vcsData.GetRevisionParents(revision).Count() > 1;
+							if (isMerge)
+							{
+								var newExp = expression
+									.Code(realCodeSize - existentCode.CodeSize);
+								newExp.CopiedFrom(existentCode.Revision);
+								codeBlockExpressions.Add(newExp);
+							}
 						}
 					}
 				}
