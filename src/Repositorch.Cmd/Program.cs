@@ -27,11 +27,11 @@ namespace Repositorch
 					StopRevision = vcsData.GetRevisionByNumber(200),
 					Check = DataMapper.CheckMode.ALL,
 				};
-				//mapper.MapRevisions(settings());
+				mapper.MapRevisions(settings());
 				//mapper.Truncate(120);
 				//mapper.Check(120, DataMapper.CheckMode.ALL);
 
-				BlameDiff(vcsData);
+				//BlameDiff(vcsData);
 			}
 
 			Console.ReadKey();

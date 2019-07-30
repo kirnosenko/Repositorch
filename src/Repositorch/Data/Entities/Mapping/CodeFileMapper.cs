@@ -19,6 +19,10 @@ namespace Repositorch.Data.Entities.Mapping
 			string revision = expression.CurrentEntity<Commit>().Revision;
 			Log log = vcsData.Log(revision);
 			var touchedFiles = FilterTouchedFiles(log.TouchedFiles);
+			if (vcsData.IsMerge(revision))
+			{
+				touchedFiles = touchedFiles.Where(x => x.Action == TouchedFile.TouchedFileAction.MODIFIED);
+			}
 			
 			foreach (var touchedFile in touchedFiles)
 			{

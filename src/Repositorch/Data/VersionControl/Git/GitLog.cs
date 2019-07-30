@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Repositorch.Data.VersionControl.Git
 {
@@ -23,6 +24,15 @@ namespace Repositorch.Data.VersionControl.Git
 
 			while ((line = reader.ReadLine()) != null)
 			{
+				if (line == string.Empty)
+				{
+					// skip revision info section
+					for (int i = 0; i < 6; i++)
+					{
+						line = reader.ReadLine();
+					}
+				}
+
 				blocks = line.Split('	');
 				action = ParsePathAction(blocks[0]);
 
@@ -67,12 +77,20 @@ namespace Repositorch.Data.VersionControl.Git
 			{
 				sourcePath = "/" + sourcePath;
 			}
-			touchedFiles.Add(new TouchedFile()
+			var touchedFile = touchedFiles.Where(x => x.Path == path).SingleOrDefault();
+			if (touchedFile == null)
 			{
-				Path = path,
-				Action = action,
-				SourcePath = sourcePath
-			});
+				touchedFiles.Add(new TouchedFile()
+				{
+					Path = path,
+					Action = action,
+					SourcePath = sourcePath
+				});
+			}
+			else
+			{
+				touchedFile.Action = action;
+			}
 		}
 		private TouchedFileGitAction ParsePathAction(string action)
 		{

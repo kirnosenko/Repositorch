@@ -111,5 +111,22 @@ namespace Repositorch.Data.Entities.Mapping
 			Assert.Equal(1, Get<CodeFile>()
 				.Where(x => x.Path == "file1.cpp").Count());
 		}
+		[Fact]
+		public void Should_map_for_merge_modified_files_only()
+		{
+			vcsData.GetRevisionParents("10")
+				.Returns(new string[] { "8", "9" });
+			log.FileAdded("file1");
+			log.FileModified("file2");
+			log.FileRemoved("file3");
+
+			mapper.Map(
+				mappingDSL.AddCommit("10")
+			);
+			SubmitChanges();
+
+			Assert.Equal(1, Get<CodeFile>().Count());
+			Assert.Equal("file2", Get<CodeFile>().Last().Path);
+		}
 	}
 }

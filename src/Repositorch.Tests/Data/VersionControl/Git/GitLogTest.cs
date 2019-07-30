@@ -57,9 +57,35 @@ Linus Torvalds
 torvalds@ppc970.osdl.org
 2005-04-18 12:12:00 -0700
 Merge the new object model thing from Daniel Barkalow
-MM	Makefile
-MM	fsck-cache.c
-MM	merge-base.c";
+M	Makefile
+A	blob.c
+A	blob.h
+A	commit.c
+A	commit.h
+M	fsck-cache.c
+M	merge-base.c
+A	object.c
+A	object.h
+M	rev-tree.c
+A	tree.c
+A	tree.h
+
+b51ad4314078298194d23d46e2b4473ffd32a88a
+Linus Torvalds
+torvalds@ppc970.osdl.org
+2005-04-18 12:12:00 -0700
+Merge the new object model thing from Daniel Barkalow
+M	Makefile
+M	README
+M	checkout-cache.c
+M	commit-tree.c
+M	fsck-cache.c
+M	merge-base.c
+A	merge-cache.c
+M	read-cache.c
+M	revision.h
+M	show-diff.c
+M	update-cache.c";
 
 		private GitLog log;
 		
@@ -153,11 +179,18 @@ MM	merge-base.c";
 					.Where(x => x.Path == "/tests/regressiontests/staticfiles_tests/apps/test/static/test/spec\\314\\247ial.txt"));
 		}
 		[Fact]
-		public void Should_parse_filename_from_merge_log()
+		public void Should_parse_merge_log()
 		{
 			log = new GitLog(log_5.ToStream());
 
-			Assert.Equal(3, log.TouchedFiles.Count());
+			Assert.Equal(20, log.TouchedFiles.Count());
+			Assert.Equal(20, log.TouchedFiles.Select(x => x.Path).Distinct().Count());
+			var makefile = log.TouchedFiles.Where(x => x.Path == "/Makefile").Single();
+			Assert.Equal(TouchedFile.TouchedFileAction.MODIFIED, makefile.Action);
+			var blob = log.TouchedFiles.Where(x => x.Path == "/blob.c").Single();
+			Assert.Equal(TouchedFile.TouchedFileAction.ADDED, blob.Action);
+			var revtree = log.TouchedFiles.Where(x => x.Path == "/rev-tree.c").Single();
+			Assert.Equal(TouchedFile.TouchedFileAction.MODIFIED, revtree.Action);
 		}
 	}
 }

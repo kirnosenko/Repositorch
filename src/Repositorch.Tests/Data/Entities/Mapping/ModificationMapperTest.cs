@@ -121,7 +121,7 @@ namespace Repositorch.Data.Entities.Mapping
 		public void Should_map_removed_file()
 		{
 			mappingDSL
-				.AddCommit("9").At(DateTime.Today.AddDays(-1))
+				.AddCommit("9")
 					.File("file1").Added()
 			.Submit();
 

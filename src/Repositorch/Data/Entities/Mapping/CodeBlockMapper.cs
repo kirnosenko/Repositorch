@@ -84,16 +84,12 @@ namespace Repositorch.Data.Entities.Mapping
 							newExp.ForCodeAddedInitiallyInRevision(existentCode.Revision);
 							codeBlockExpressions.Add(newExp);
 						}
-						else if (existentCode.CodeSize < realCodeSize)
+						else if (existentCode.CodeSize < realCodeSize && vcsData.IsMerge(revision))
 						{
-							bool isMerge = vcsData.GetRevisionParents(revision).Count() > 1;
-							if (isMerge)
-							{
-								var newExp = expression
-									.Code(realCodeSize - existentCode.CodeSize);
-								newExp.CopiedFrom(existentCode.Revision);
-								codeBlockExpressions.Add(newExp);
-							}
+							var newExp = expression
+								.Code(realCodeSize - existentCode.CodeSize);
+							newExp.CopiedFrom(existentCode.Revision);
+							codeBlockExpressions.Add(newExp);	
 						}
 					}
 				}
