@@ -19,7 +19,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 				join m in exp.Get<Modification>() on cb.ModificationId equals m.Id
 				join f in exp.Get<CodeFile>() on m.FileId equals f.Id
 				join c in exp.Get<Commit>() on m.CommitId equals c.Id
-					let addedCodeID = cb.Size < 0 ? cb.TargetCodeBlockId : cb.Id
+					let addedCodeID = cb.TargetCodeBlockId ?? cb.Id
 				where
 					f.Id == exp.CurrentEntity<Modification>().SourceFile.Id &&
 					c.OrderedNumber <= exp.CurrentEntity<Modification>().SourceCommit.OrderedNumber
@@ -40,7 +40,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 						lastCodeBlockExp = lastCodeBlockExp.Code(currentCodeSize);
 					}
 					lastCodeBlockExp.CopiedFrom(
-						RevisionCodeBlockWasInitiallyAddedIn(exp, codeByAddedCode.Key ?? 0)
+						RevisionCodeBlockWasInitiallyAddedIn(exp, codeByAddedCode.Key)
 					);
 				}
 			}
@@ -55,7 +55,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 				from cb in exp.Get<CodeBlock>()
 				join m in exp.Get<Modification>() on cb.ModificationId equals m.Id
 				join f in exp.Get<CodeFile>() on m.FileId equals f.Id
-					let addedCodeID = cb.Size < 0 ? cb.TargetCodeBlockId : cb.Id
+					let addedCodeID = cb.TargetCodeBlockId ?? cb.Id
 				where
 					f.Id == exp.CurrentEntity<CodeFile>().Id
 				group cb.Size by addedCodeID
@@ -75,7 +75,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 						lastCodeBlockExp = lastCodeBlockExp.Code(- currentCodeSize);
 					}
 					lastCodeBlockExp.ForCodeAddedInitiallyInRevision(
-						RevisionCodeBlockWasInitiallyAddedIn(exp, codeByAddedCode.Key ?? 0)
+						RevisionCodeBlockWasInitiallyAddedIn(exp, codeByAddedCode.Key)
 					);
 				}
 			}
@@ -118,6 +118,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		}
 		public ICodeBlockMappingExpression ForCodeAddedInitiallyInRevision(string revision)
 		{
+			entity.AddedInitiallyInCommit = null;
 			entity.TargetCodeBlock = this.SelectionDSL()
 					.Commits().RevisionIs(revision)
 					.Files().IdIs(CurrentEntity<Modification>().File.Id)

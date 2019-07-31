@@ -20,7 +20,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				.AddCommit("2")
 					.File("file1").Modified()
 						.Code(+10)
-						.Code(-5)
+						.Code(-5).ForCodeAddedInitiallyInRevision("1")
 			.Submit();
 
 			Assert.Equal(new double[] { 100, 10, -5 }, selectionDSL
@@ -33,6 +33,45 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				.Modifications().InFiles()
 				.CodeBlocks().InModifications()
 				.Select(x => x.Size));
+		}
+		[Fact]
+		public void Should_select_added_removed_and_targeted_codeblocks()
+		{
+			mappingDSL
+				.AddCommit("1")
+					.File("file1").Added()
+						.Code(+100)
+					.File("file2").Added()
+						.Code(+50)
+			.Submit()
+				.AddCommit("2")
+					.File("file1").Modified()
+						.Code(+10)
+						.Code(-10).ForCodeAddedInitiallyInRevision("1")
+					.File("file2").Modified()
+						.Code(+20)
+						.Code(-10).ForCodeAddedInitiallyInRevision("1")
+			.Submit()
+				.AddCommit("3")
+					.File("file1").Modified()
+						.Code(+2).ForCodeAddedInitiallyInRevision("2")
+					.File("file2").Modified()
+						.Code(+2).ForCodeAddedInitiallyInRevision("2")
+			.Submit();
+
+			var total = selectionDSL
+				.CodeBlocks().Sum(x => x.Size);
+			var added = selectionDSL
+				.CodeBlocks().Added().Sum(x => x.Size);
+			var removed = selectionDSL
+				.CodeBlocks().Removed().Sum(x => x.Size);
+			var targeted = selectionDSL
+				.CodeBlocks().Targeted().Sum(x => x.Size);
+
+			Assert.True(total > 0);
+			Assert.True(removed < 0);
+			Assert.True(total == added + targeted);
+			Assert.True(removed == targeted - 4);
 		}
 		[Fact]
 		public void Should_select_codeblocks_modified_by_specified_codeblocks()
@@ -90,7 +129,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			.Submit()
 				.AddCommit("4").IsBugFix()
 					.File("file1").Modified()
-						.Code(-3)
+						.Code(-3).ForCodeAddedInitiallyInRevision("1")
 						.Code(3)
 			.Submit();
 
@@ -131,7 +170,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			.Submit()
 				.AddCommit("2")
 					.File("file1").Modified()
-						.Code(-10)
+						.Code(-10).ForCodeAddedInitiallyInRevision("1")
 						.Code(15)
 			.Submit();
 
@@ -139,7 +178,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				.CodeBlocks().Added()
 				.Modifications().ContainCodeBlocks().Count());
 			Assert.Equal(1, selectionDSL
-				.CodeBlocks().Deleted()
+				.CodeBlocks().Removed()
 				.Modifications().ContainCodeBlocks().Count());
 			Assert.Equal(2, selectionDSL
 				.Modifications().ContainCodeBlocks().Count());

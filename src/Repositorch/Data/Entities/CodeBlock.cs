@@ -10,14 +10,16 @@ namespace Repositorch.Data.Entities
 		public int Id { get; set; }
 		/// <summary>
 		/// Size of the code block.
-		/// Can be measured in LOC or something else.
-		/// A positive value means code addition.
-		/// A negative value means code removing.
+		/// May be measured in LOC or something else.
+		/// A positive value means real code addition 
+		/// or cancel of removing (not the same thing).
+		/// A negative value means real code removing 
+		/// or cancel of addition (the same thing).
 		/// </summary>
 		public double Size { get; set; }
 		/// <summary>
 		/// Commit in which code was added in.
-		/// Null for code removing.
+		/// Not null for code addition.
 		/// </summary>
 		public int? AddedInitiallyInCommitId { get; set; }
 		public Commit AddedInitiallyInCommit { get; set; }
@@ -27,10 +29,9 @@ namespace Repositorch.Data.Entities
 		public int ModificationId { get; set; }
 		public Modification Modification { get; set; }
 		/// <summary>
-		/// A code block being changed by this one.
-		/// Now code removing block keeps code block from which
-		/// code being removed.
-		/// Null for code addition block.
+		/// A code block (addition) being changed by this one.
+		/// Null for real code addition.
+		/// Not null for code removing or cancel of removing.
 		/// </summary>
 		public int? TargetCodeBlockId { get; set; }
 		public CodeBlock TargetCodeBlock { get; set; }

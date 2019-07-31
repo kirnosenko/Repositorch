@@ -46,7 +46,7 @@ namespace Repositorch.Web.Controllers
 							.Authors().NameIs(author.Name)
 							.Commits().ByAuthors()
 							.Modifications().InCommits()
-							.CodeBlocks().InModifications().Deleted()
+							.CodeBlocks().InModifications().Removed()
 							.Fixed(),
 						TouchedFiles = s.SelectionDSL()
 							.Authors().NameIs(author.Name)

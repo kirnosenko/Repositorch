@@ -56,7 +56,7 @@ namespace Repositorch.Web.Controllers
 					.CodeBlocks().Fixed();
 				ViewData["loc"] = code.CalculateLOC();
 				ViewData["locAdded"] = code.Added().CalculateLOC();
-				ViewData["locRemoved"] = -code.Deleted().CalculateLOC();
+				ViewData["locRemoved"] = -code.Removed().CalculateLOC();
 			}
 
 			return View();

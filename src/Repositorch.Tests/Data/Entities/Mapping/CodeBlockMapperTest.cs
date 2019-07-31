@@ -226,9 +226,13 @@ namespace Repositorch.Data.Entities.Mapping
 				where c.Revision == "4"
 				select cb).ToArray();
 
-			Assert.Equal(new double[] { 10, -5, -10 }, mergeCodeBlocks.Select(x => x.Size));
-			var codeAddition = mergeCodeBlocks.Where(x => x.Size > 0).Single();
-			Assert.Equal("1", codeAddition.AddedInitiallyInCommit.Revision);
+			Assert.Equal(new double[] { 10, -5, -10 }, mergeCodeBlocks
+				.Select(x => x.Size));
+			Assert.Equal(new double[] { 100, 10, 20 }, mergeCodeBlocks
+				.Select(x => x.TargetCodeBlock.Size));
+			Assert.True(mergeCodeBlocks
+				.Select(x => x.AddedInitiallyInCommit)
+				.All(x => x == null));
 		}
 	}
 }

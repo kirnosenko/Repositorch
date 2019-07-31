@@ -63,7 +63,7 @@ namespace Repositorch.Data.Entities.Mapping
 						join m in expression.Get<Modification>() on f.Id equals m.FileId
 						join c in commitsOnBranch on m.CommitId equals c.Id
 						join cb in expression.Get<CodeBlock>() on m.Id equals cb.ModificationId
-							let addedCodeID = cb.Size < 0 ? cb.TargetCodeBlockId : cb.Id
+							let addedCodeID = cb.TargetCodeBlockId ?? cb.Id
 							let addedCodeRevision = expression.Get<Commit>()
 								.Single(x => x.Id == expression.Get<CodeBlock>()
 									.Single(y => y.Id == addedCodeID).AddedInitiallyInCommitId
@@ -78,18 +78,12 @@ namespace Repositorch.Data.Entities.Mapping
 					{
 						var linesForRevision = linesByRevision.SingleOrDefault(x => x.Key == existentCode.Revision);
 						double realCodeSize = linesForRevision == null ? 0 : linesForRevision.Count();
-						if (existentCode.CodeSize > realCodeSize)
+						if ((existentCode.CodeSize > realCodeSize) ||
+							(existentCode.CodeSize < realCodeSize && vcsData.IsMerge(revision)))
 						{
 							var newExp = expression.Code(realCodeSize - existentCode.CodeSize);
 							newExp.ForCodeAddedInitiallyInRevision(existentCode.Revision);
 							codeBlockExpressions.Add(newExp);
-						}
-						else if (existentCode.CodeSize < realCodeSize && vcsData.IsMerge(revision))
-						{
-							var newExp = expression
-								.Code(realCodeSize - existentCode.CodeSize);
-							newExp.CopiedFrom(existentCode.Revision);
-							codeBlockExpressions.Add(newExp);	
 						}
 					}
 				}

@@ -30,7 +30,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 					select new
 					{
 						Commit = g.Key,
-						Added = g.Where(x => x.Size > 0).Sum(x => x.Size),
+						Added = g.Where(x => x.TargetCodeBlockId == null).Sum(x => x.Size),
 						Removed = -g.Where(x => x.Size < 0).Sum(x => x.Size)
 					}
 				).Where(x => x.Removed / x.Added >= 1d / 2).Select(x => x.Commit)
@@ -62,11 +62,15 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		}
 		public CodeBlockSelectionExpression Added()
 		{
-			return Reselect(s => s.Where(x => x.Size > 0));
+			return Reselect(s => s.Where(x => x.TargetCodeBlockId == null));
 		}
-		public CodeBlockSelectionExpression Deleted()
+		public CodeBlockSelectionExpression Removed()
 		{
 			return Reselect(s => s.Where(x => x.Size < 0));
+		}
+		public CodeBlockSelectionExpression Targeted()
+		{
+			return Reselect(s => s.Where(x => x.TargetCodeBlock != null ));
 		}
 		public CodeBlockSelectionExpression Modify()
 		{

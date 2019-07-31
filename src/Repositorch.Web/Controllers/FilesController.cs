@@ -45,7 +45,7 @@ namespace Repositorch.Web.Controllers
 								extFilesCount,
 								((double)extFilesCount / filesCount * 100).ToString("F02")),
 						addedLoc = code.Added().CalculateLOC(),
-						removedLoc = -code.Deleted().CalculateLOC(),
+						removedLoc = -code.Removed().CalculateLOC(),
 						remainLoc = code.Added().CalculateLOC() + code.ModifiedBy().CalculateLOC()
 					}).ToArray().Select(c => c.ToExpando());
 
@@ -67,7 +67,7 @@ namespace Repositorch.Web.Controllers
 							((double)dirFilesCount / filesCount * 100).ToString("F02")
 						),
 						addedLoc = code.Added().CalculateLOC(),
-						removedLoc = -code.Deleted().CalculateLOC(),
+						removedLoc = -code.Removed().CalculateLOC(),
 						remainLoc = code.Added().CalculateLOC() + code.ModifiedBy().CalculateLOC()
 					}).ToArray().Select(c => c.ToExpando());
 			}

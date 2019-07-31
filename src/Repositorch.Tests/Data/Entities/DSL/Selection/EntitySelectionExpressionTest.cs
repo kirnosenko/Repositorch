@@ -43,7 +43,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			.Submit()
 				.AddCommit("2")
 					.File("file1").Modified()
-						.Code(-5)
+						.Code(-5).ForCodeAddedInitiallyInRevision("1")
 						.Code(20)
 			.Submit();
 
@@ -55,7 +55,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 
 			Assert.Equal(2, commit2code.Count());
 			Assert.Equal(1, commit2code.Added().Count());
-			Assert.Equal(1, commit2code.Deleted().Count());
+			Assert.Equal(1, commit2code.Removed().Count());
 			Assert.Equal(1, commit2code.Reselect(e => e.Added()).Count());
 			Assert.Equal(2, commit2code.Added().Again().Count());
 			Assert.Equal(2, commit2code.Count());

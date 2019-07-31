@@ -70,8 +70,8 @@ namespace Repositorch.Web.Controllers
 							totalCode.Added().CalculateLOC()
 						),
 						locRemoved = string.Format("{0} ({1})",
-							-code.Deleted().CalculateLOC(),
-							-totalCode.Deleted().CalculateLOC()
+							-code.Removed().CalculateLOC(),
+							-totalCode.Removed().CalculateLOC()
 						),
 						loc = totalCode.CalculateLOC()
 					}).OrderBy(x => x.title).ToArray().Select(c => c.ToExpando());

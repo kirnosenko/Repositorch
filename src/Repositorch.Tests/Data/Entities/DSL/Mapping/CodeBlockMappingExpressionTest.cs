@@ -63,6 +63,27 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 				select c.Revision);
 		}
 		[Fact]
+		public void Should_clear_added_initially_in_commit_field_for_targeted_code_block()
+		{
+			mappingDSL
+				.AddCommit("1")
+					.File("file1").Added()
+						.Code(100)
+			.Submit()
+				.AddCommit("2")
+					.File("file1").Modified()
+						.Code(20)
+						.Code(-20).ForCodeAddedInitiallyInRevision("1")
+			.Submit()
+				.AddCommit("3")
+					.File("file1").Modified()
+						.Code(10).ForCodeAddedInitiallyInRevision("1")
+			.Submit();
+
+			var codeBlock = Get<CodeBlock>().Last();
+			Assert.Null(codeBlock.AddedInitiallyInCommit);
+		}
+		[Fact]
 		public void Should_set_correct_target_code_block_for_copied_files()
 		{
 			mappingDSL

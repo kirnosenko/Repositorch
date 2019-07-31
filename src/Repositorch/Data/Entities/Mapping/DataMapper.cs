@@ -301,7 +301,7 @@ namespace Repositorch.Data.Entities.Mapping
 				join cb in s.Get<CodeBlock>() on m.Id equals cb.ModificationId
 				join c in commitsToLookAt on m.CommitId equals c.Id
 				let addedCodeBlock = s.Get<CodeBlock>()
-					.Single(x => x.Id == (cb.Size < 0 ? cb.TargetCodeBlockId : cb.Id))
+					.Single(x => x.Id == (cb.TargetCodeBlockId ?? cb.Id))
 				let codeAddedInitiallyInRevision = s.Get<Commit>()
 					.Single(x => x.Id == addedCodeBlock.AddedInitiallyInCommitId)
 					.Revision
