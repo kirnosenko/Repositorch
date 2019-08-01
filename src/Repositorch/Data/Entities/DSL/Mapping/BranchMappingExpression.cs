@@ -45,12 +45,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			}
 			else
 			{
-				var branchWithMaxMask = GetBranchWithMaxMask();
-				entity = NewBranch(
-					branchWithMaxMask.Mask,
-					branchWithMaxMask.MaskOffset,
-					true,
-					false);
+				entity = NewBranch(0, 0, true, false);
 			}
 			Add(entity);
 			entity.Commits.Add(CurrentEntity<Commit>());
@@ -87,15 +82,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			}
 			entity.Commits.Add(CurrentEntity<Commit>());
 		}
-
-		private Branch GetBranchWithMaxMask()
-		{
-			var maxOffset = GetReadOnly<Branch>().Max(b => b.MaskOffset);
-			return GetReadOnly<Branch>()
-				.Where(b => (maxOffset - b.MaskOffset) < Branch.MaskSize)
-				.OrderByDescending(b => b.Mask >> (int)(maxOffset - b.MaskOffset))
-				.First();
-		}
+		
 		private Branch NewBranch(uint mask, uint maskOffset, bool createMask, bool combineMask)
 		{
 			var newBranch = new Branch()
@@ -107,19 +94,32 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			// create a new branch mask
 			if (createMask)
 			{
-				var branchWithMaxMask = GetBranchWithMaxMask();
+				var branchWithMaxMask = GetReadOnly<Branch>().Last();
+				if ((branchWithMaxMask.Mask & 0x80000000) != 0)
+				{
+					throw new InvalidOperationException("Branch mask overflow.");
+				}
 				int shift = 0;
 				while (branchWithMaxMask.Mask != 0)
 				{
 					shift++;
 					branchWithMaxMask.Mask >>= 1;
 				}
-				if (shift >= Branch.MaskSize)
+				newBranch.Mask = 1u << shift;
+				newBranch.MaskOffset = branchWithMaxMask.MaskOffset;
+			}
+
+			// combine masks for subbranch
+			if (combineMask)
+			{
+				var offsetDiff = newBranch.MaskOffset - maskOffset;
+				newBranch.Mask <<= (int)offsetDiff;
+				newBranch.MaskOffset -= offsetDiff;
+				if (newBranch.Mask == 0)
 				{
 					throw new InvalidOperationException("Branch mask overflow.");
 				}
-				newBranch.Mask = 1u << shift;
-				newBranch.MaskOffset = branchWithMaxMask.MaskOffset;
+				newBranch.Mask |= mask;
 			}
 
 			// mask shift when possible
@@ -127,12 +127,6 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			{
 				newBranch.Mask >>= 1;
 				newBranch.MaskOffset++;
-			}
-
-			// combine masks for subbranch
-			if (combineMask)
-			{
-				newBranch.Mask |= mask;
 			}
 
 			return newBranch;

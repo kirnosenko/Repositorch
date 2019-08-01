@@ -106,7 +106,23 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 				Get<Branch>().Select(b => b.Mask));
 		}
 		[Fact]
-		public void Can_create_subbranch_from_combined_mask()
+		public void Should_get_correct_max_branch_mask_in_case_of_shifted_mask()
+		{
+			mappingDSL
+				.AddCommit("1").OnBranch(0b0101)
+			.Submit()
+				.AddCommit("2").OnBranch(0b0001, 2)
+			.Submit()
+				.AddCommit("3").OnSubBranch(0b0001, 2)
+			.Submit();
+
+			Assert.Equal(3, Get<Branch>().Count());
+			var branch = Get<Branch>().Last();
+			Assert.True(0b0001 == branch.Mask);
+			Assert.True(3 == branch.MaskOffset);
+		}
+		[Fact]
+		public void Should_create_subbranch_from_combined_mask()
 		{
 			mappingDSL
 				.AddCommit("1").OnBranch(0b0001)
@@ -117,13 +133,30 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			.Submit();
 
 			Assert.Equal(3, Get<Branch>().Count());
-			Assert.Equal(new uint[] { 0, 0, 0 },
-				Get<Branch>().Select(b => b.MaskOffset));
-			Assert.Equal(new uint[] { 0b0001, 0b0010, 0b0111 },
+			Assert.Equal(new uint[] { 0b0001, 0b0010, 0b0001 },
 				Get<Branch>().Select(b => b.Mask));
+			Assert.Equal(new uint[] { 0, 0, 2 },
+				Get<Branch>().Select(b => b.MaskOffset));
 		}
 		[Fact]
-		public void Can_not_create_subbranch_with_mask_overflow()
+		public void Should_create_correct_combined_mask_for_branches_with_different_mask_offsets()
+		{
+			mappingDSL
+				.AddCommit("1").OnBranch(0b0001)
+			.Submit()
+				.AddCommit("2").OnBranch(0b0011)
+			.Submit()
+				.AddCommit("3").OnSubBranch(0b0001)
+			.Submit();
+
+			Assert.Equal(3, Get<Branch>().Count());
+			Assert.Equal(new uint[] { 0b0001, 0b0001, 0b0101 },
+				Get<Branch>().Select(b => b.Mask));
+			Assert.Equal(new uint[] { 0, 1, 0 },
+				Get<Branch>().Select(b => b.MaskOffset));
+		}
+		[Fact]
+		public void Should_check_mask_overflow_while_creating_subbranch()
 		{
 			mappingDSL
 				.AddCommit("1").OnBranch(0xFFFFFFFF - 1)
@@ -131,6 +164,18 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 
 			Assert.Throws<InvalidOperationException>(() =>
 				mappingDSL.AddCommit("2").OnSubBranch(0xFFFFFFFF - 1));
+		}
+		[Fact]
+		public void Should_check_mask_overflow_in_case_of_different_mask_offsets()
+		{
+			mappingDSL
+				.AddCommit("1").OnBranch(0x0FFFFFFE, 0)
+			.Submit()
+				.AddCommit("2").OnBranch(0x0FFFFFFE, 10)
+			.Submit();
+			
+			Assert.Throws<InvalidOperationException>(() =>
+				mappingDSL.AddCommit("2").OnSubBranch(0x0FFFFFFE));
 		}
 	}
 }
