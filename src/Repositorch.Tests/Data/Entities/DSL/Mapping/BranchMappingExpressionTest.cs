@@ -118,8 +118,8 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 
 			Assert.Equal(3, Get<Branch>().Count());
 			var branch = Get<Branch>().Last();
-			Assert.True(0b0001 == branch.Mask);
-			Assert.True(3 == branch.MaskOffset);
+			Assert.Equal(0b0001u, branch.Mask);
+			Assert.Equal(3u, branch.MaskOffset);
 		}
 		[Fact]
 		public void Should_create_subbranch_from_combined_mask()
@@ -133,10 +133,9 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			.Submit();
 
 			Assert.Equal(3, Get<Branch>().Count());
-			Assert.Equal(new uint[] { 0b0001, 0b0010, 0b0001 },
-				Get<Branch>().Select(b => b.Mask));
-			Assert.Equal(new uint[] { 0, 0, 2 },
-				Get<Branch>().Select(b => b.MaskOffset));
+			var branch = Get<Branch>().Last();
+			Assert.Equal(0b0001u, branch.Mask);
+			Assert.Equal(2u, branch.MaskOffset);
 		}
 		[Fact]
 		public void Should_create_correct_combined_mask_for_branches_with_different_mask_offsets()
@@ -150,10 +149,25 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			.Submit();
 
 			Assert.Equal(3, Get<Branch>().Count());
-			Assert.Equal(new uint[] { 0b0001, 0b0001, 0b0101 },
-				Get<Branch>().Select(b => b.Mask));
-			Assert.Equal(new uint[] { 0, 1, 0 },
-				Get<Branch>().Select(b => b.MaskOffset));
+			var branch = Get<Branch>().Last();
+			Assert.Equal(0b0101u, branch.Mask);
+			Assert.Equal(0u, branch.MaskOffset);
+		}
+		[Fact]
+		public void Should_create_correct_combined_mask_when_last_branch_mask_offset_is_not_the_max()
+		{
+			mappingDSL
+				.AddCommit("1").OnBranch(0b0001, 18)
+			.Submit()
+				.AddCommit("2").OnBranch(0b1010, 16)
+			.Submit()
+				.AddCommit("3").OnSubBranch(0b0011, 18)
+			.Submit();
+
+			Assert.Equal(3, Get<Branch>().Count());
+			var branch = Get<Branch>().Last();
+			Assert.Equal(1u, branch.Mask);
+			Assert.Equal(20u, branch.MaskOffset);
 		}
 		[Fact]
 		public void Should_check_mask_overflow_while_creating_subbranch()

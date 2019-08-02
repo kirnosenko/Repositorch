@@ -95,6 +95,11 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			if (createMask)
 			{
 				var branchWithMaxMask = GetReadOnly<Branch>().Last();
+				while (branchWithMaxMask.MaskOffset < maskOffset)
+				{
+					branchWithMaxMask.Mask >>= 1;
+					branchWithMaxMask.MaskOffset++;
+				}
 				if ((branchWithMaxMask.Mask & 0x80000000) != 0)
 				{
 					throw new InvalidOperationException("Branch mask overflow.");
