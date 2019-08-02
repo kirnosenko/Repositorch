@@ -58,17 +58,16 @@ namespace Repositorch.Data.Entities.Mapping
 					var currentBranch = expression.CurrentEntity<Branch>();
 					var commitsOnBranch = expression.SelectionDSL().Commits()
 						.OnBranchBack(currentBranch.Mask, currentBranch.MaskOffset);
+					var isMerge = vcsData.IsMerge(revision);
+
 					foreach (var existentCode in (
 						from f in expression.Get<CodeFile>().Where(x => x.Id == file.Id)
 						join m in expression.Get<Modification>() on f.Id equals m.FileId
 						join c in commitsOnBranch on m.CommitId equals c.Id
 						join cb in expression.Get<CodeBlock>() on m.Id equals cb.ModificationId
-							let addedCodeID = cb.TargetCodeBlockId ?? cb.Id
-							let addedCodeRevision = expression.Get<Commit>()
-								.Single(x => x.Id == expression.Get<CodeBlock>()
-									.Single(y => y.Id == addedCodeID).AddedInitiallyInCommitId
-								).Revision
-						group cb.Size by addedCodeRevision into g
+						join tcb in expression.Get<CodeBlock>() on cb.TargetCodeBlockId ?? cb.Id equals tcb.Id
+						join tcbc in expression.Get<Commit>() on tcb.AddedInitiallyInCommitId equals tcbc.Id
+						group cb.Size by tcbc.Revision into g
 						select new
 						{
 							Revision = g.Key,
@@ -79,7 +78,7 @@ namespace Repositorch.Data.Entities.Mapping
 						var linesForRevision = linesByRevision.SingleOrDefault(x => x.Key == existentCode.Revision);
 						double realCodeSize = linesForRevision == null ? 0 : linesForRevision.Count();
 						if ((existentCode.CodeSize > realCodeSize) ||
-							(existentCode.CodeSize < realCodeSize && vcsData.IsMerge(revision)))
+							(existentCode.CodeSize < realCodeSize && isMerge))
 						{
 							var newExp = expression.Code(realCodeSize - existentCode.CodeSize);
 							newExp.ForCodeAddedInitiallyInRevision(existentCode.Revision);

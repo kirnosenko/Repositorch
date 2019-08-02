@@ -296,40 +296,30 @@ namespace Repositorch.Data.Entities.Mapping
 
 			var codeBySourceRevision =
 			(
-				from f in s.Get<CodeFile>()
+				from f in s.Get<CodeFile>().Where(x => x.Id == file.Id)
 				join m in s.Get<Modification>() on f.Id equals m.FileId
-				join cb in s.Get<CodeBlock>() on m.Id equals cb.ModificationId
 				join c in commitsToLookAt on m.CommitId equals c.Id
-				let addedCodeBlock = s.Get<CodeBlock>()
-					.Single(x => x.Id == (cb.TargetCodeBlockId ?? cb.Id))
-				let codeAddedInitiallyInRevision = s.Get<Commit>()
-					.Single(x => x.Id == addedCodeBlock.AddedInitiallyInCommitId)
-					.Revision
-				let testRevisionNumber = s.Get<Commit>()
-					.Single(x => x.Revision == revision)
-					.OrderedNumber
-				where
-					f.Id == file.Id
-					&&
-					c.OrderedNumber <= testRevisionNumber
-				group cb.Size by codeAddedInitiallyInRevision into g
+				join cb in s.Get<CodeBlock>() on m.Id equals cb.ModificationId
+				join tcb in s.Get<CodeBlock>() on cb.TargetCodeBlockId ?? cb.Id equals tcb.Id
+				join tcbc in s.Get<Commit>() on tcb.AddedInitiallyInCommitId equals tcbc.Id
+				group cb.Size by tcbc.Revision into g
 				select new
 				{
-					FromRevision = g.Key,
+					Revision = g.Key,
 					CodeSize = g.Sum()
 				}
-			).Where(x => x.CodeSize != 0).ToList();
+			).Where(x => x.CodeSize != 0).ToArray();
 
 			var errorCode =
 				(
 					from codeFromRevision in codeBySourceRevision
 					where
-						codeFromRevision.CodeSize != linesByRevision[codeFromRevision.FromRevision]
+						codeFromRevision.CodeSize != linesByRevision[codeFromRevision.Revision]
 					select new
 					{
-						SourceRevision = codeFromRevision.FromRevision,
+						SourceRevision = codeFromRevision.Revision,
 						CodeSize = codeFromRevision.CodeSize,
-						RealCodeSize = linesByRevision[codeFromRevision.FromRevision]
+						RealCodeSize = linesByRevision[codeFromRevision.Revision]
 					}
 				).ToList();
 
