@@ -3,6 +3,7 @@ using System.Linq;
 using Xunit;
 using NSubstitute;
 using Repositorch.Data.Entities.DSL.Mapping;
+using Repositorch.Data.Entities.DSL.Selection;
 
 namespace Repositorch.Data.Entities.Mapping
 {
@@ -112,21 +113,37 @@ namespace Repositorch.Data.Entities.Mapping
 				.Where(x => x.Path == "file1.cpp").Count());
 		}
 		[Fact]
-		public void Should_map_for_merge_modified_files_only()
+		public void Should_map_added_or_removed_in_merge_file_only_if_it_has_different_history_state()
 		{
+			mappingDSL
+				.AddCommit("1").OnBranch(0b0001)
+					.File("file1").Added()
+					.File("file2").Added()
+			.Submit()
+				.AddCommit("2").OnBranch(0b0011)
+					.File("file1").Modified()
+					.File("file2").Removed()
+					.File("file3").Added()
+			.Submit()
+				.AddCommit("3").OnBranch(0b0101)
+					.File("file1").Removed()
+					.File("file2").Modified()
+					.File("file4").Added()
+			.Submit();
+
 			vcsData.GetRevisionParents("10")
-				.Returns(new string[] { "8", "9" });
+				.Returns(new string[] { "2", "3" });
 			log.FileAdded("file1");
-			log.FileModified("file2");
-			log.FileRemoved("file3");
+			log.FileRemoved("file2");
+			log.FileAdded("file3");
+			log.FileAdded("file4");
 
-			mapper.Map(
-				mappingDSL.AddCommit("10")
+			var expressions = mapper.Map(
+				mappingDSL.AddCommit("10").OnBranch(0b0111)
 			);
-			SubmitChanges();
 
-			Assert.Equal(1, Get<CodeFile>().Count());
-			Assert.Equal("file2", Get<CodeFile>().Last().Path);
+			Assert.Equal(new string[] { "file1", "file2" }, expressions
+				.Select(x => x.CurrentEntity<CodeFile>().Path));
 		}
 	}
 }

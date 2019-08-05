@@ -89,7 +89,11 @@ namespace Repositorch.Data.VersionControl.Git
 			}
 			else
 			{
-				touchedFile.Action = action;
+				if (touchedFile.Action == TouchedFile.TouchedFileAction.MODIFIED
+					&& action != TouchedFile.TouchedFileAction.MODIFIED)
+				{
+					touchedFile.Action = action;
+				}
 			}
 		}
 		private TouchedFileGitAction ParsePathAction(string action)

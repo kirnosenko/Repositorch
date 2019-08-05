@@ -86,47 +86,52 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				s.Where(x => x.Path.EndsWith(pathEnding))
 			);
 		}
+		/// <summary>
+		/// Get files were added before the last mapped revision 
+		/// and still exist in it.
+		/// </summary>
 		public CodeFileSelectionExpression Exist()
 		{
-			// This code is the result of exorcism to evict EF 'must be reducible node' error.
-			// Reproduced on real DB not in-memory.
-
-			var filesWithLastAction =
-				from f in Queryable<CodeFile>()
-				join m in Queryable<Modification>() on f.Id equals m.FileId
-				group m by f into fileModifications
-				select new
-				{
-					File = fileModifications.Key,
-					LastAction = fileModifications.OrderByDescending(x => x.Id).First().Action
-				};
-
-			return Reselect(s =>
-				(
-					from f in s
-					join fa in filesWithLastAction on f.Id equals fa.File.Id
-					select fa
-				).Where(x => x.LastAction != Modification.FileAction.REMOVED)
-				.Select(x => x.File));
+			return TouchedInAndStillExistAfterCommits(null);
 		}
+		/// <summary>
+		/// Get files were added before the revision and still exist in it.
+		/// </summary>
 		public CodeFileSelectionExpression ExistInRevision(string revision)
+		{
+			var allCommitsTillRevision = this.Commits().TillRevision(revision);
+
+			return TouchedInAndStillExistAfterCommits(allCommitsTillRevision);
+		}
+		/// <summary>
+		/// Get files were touched in selected commits and still exist 
+		/// in the last revision from selected commits.
+		/// </summary>
+		public CodeFileSelectionExpression TouchedInAndStillExistAfterCommits()
+		{
+			return TouchedInAndStillExistAfterCommits(Selection<Commit>());
+		}
+		private CodeFileSelectionExpression TouchedInAndStillExistAfterCommits(IQueryable<Commit> commits)
 		{
 			// This code is the result of exorcism to evict EF 'must be reducible node' error.
 			// Reproduced on real DB not in-memory.
 
-			var allCommitsTillRevision = this.Commits().TillRevision(revision);
-
-			var filesWithLastAction =
-				from c in allCommitsTillRevision
+			IQueryable<IGrouping<CodeFile,Modification>> modificationsByFile = commits == null ?
+				from f in Queryable<CodeFile>()
+				join m in Queryable<Modification>() on f.Id equals m.FileId
+				group m by f
+				:
+				from c in commits
 				join m in Queryable<Modification>() on c.Id equals m.CommitId
 				join f in Queryable<CodeFile>() on m.FileId equals f.Id
-				group m by f into fileModifications
-				select new
+				group m by f;
+			var filesWithLastAction = modificationsByFile
+				.Select(fileModifications => new
 				{
 					File = fileModifications.Key,
 					LastAction = fileModifications.OrderByDescending(x => x.Id).First().Action
-				};
-
+				});
+				
 			return Reselect(s =>
 				(
 					from f in s
@@ -135,6 +140,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				).Where(x => x.LastAction != Modification.FileAction.REMOVED)
 				.Select(x => x.File));
 		}
+
 		protected override CodeFileSelectionExpression Recreate()
 		{
 			return new CodeFileSelectionExpression(this);

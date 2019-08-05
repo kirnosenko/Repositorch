@@ -142,6 +142,36 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				.Select(f => f.Path));
 		}
 		[Fact]
+		public void Should_get_existent_files_for_selected_commits()
+		{
+			mappingDSL
+				.AddCommit("1").OnBranch(1)
+					.File("file1").Added()
+					.File("file2").Added()
+			.Submit()
+				.AddCommit("2").OnBranch(1)
+					.File("file1").Removed()
+					.File("file2").Modified()
+					.File("file3").Added()
+			.Submit()
+				.AddCommit("3").OnBranch(1)
+					.File("file2").Removed()
+			.Submit();
+
+			Assert.Equal(new string[] { "file1", "file2" }, selectionDSL
+				.Commits().TillRevision("1")
+				.Files().TouchedInAndStillExistAfterCommits()
+				.Select(f => f.Path));
+			Assert.Equal(new string[] { "file2", "file3" }, selectionDSL
+				.Commits().TillRevision("2")
+				.Files().TouchedInAndStillExistAfterCommits()
+				.Select(f => f.Path));
+			Assert.Equal(new string[] { "file3" }, selectionDSL
+				.Commits().FromRevision("2").TillRevision("3")
+				.Files().TouchedInAndStillExistAfterCommits()
+				.Select(f => f.Path));
+		}
+		[Fact]
 		public void Should_get_existent_files_on_different_branches()
 		{
 			mappingDSL

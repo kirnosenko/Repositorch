@@ -87,6 +87,25 @@ M	revision.h
 M	show-diff.c
 M	update-cache.c";
 
+private string log_6 =
+@"10
+alan
+alan@mail
+2000-01-01 00:00:00 -0700
+message
+M	file1
+A	file2
+M	file3
+
+10
+alan
+alan@mail
+2000-01-01 00:00:00 -0700
+message
+M	file1
+M	file2
+D	file3";
+
 		private GitLog log;
 		
 		[Fact]
@@ -191,6 +210,22 @@ M	update-cache.c";
 			Assert.Equal(TouchedFile.TouchedFileAction.ADDED, blob.Action);
 			var revtree = log.TouchedFiles.Where(x => x.Path == "/rev-tree.c").Single();
 			Assert.Equal(TouchedFile.TouchedFileAction.MODIFIED, revtree.Action);
+		}
+		[Fact]
+		public void Should_prefer_file_addition_or_removing_over_modification_in_merge_log()
+		{
+			log = new GitLog(log_6.ToStream());
+
+			Assert.Equal(3, log.TouchedFiles.Count());
+			Assert.Equal(new string[] { "/file1", "/file2", "/file3" },
+				log.TouchedFiles.Select(x => x.Path));
+			Assert.Equal(new TouchedFile.TouchedFileAction[]
+				{
+					TouchedFile.TouchedFileAction.MODIFIED,
+					TouchedFile.TouchedFileAction.ADDED,
+					TouchedFile.TouchedFileAction.REMOVED
+				},
+				log.TouchedFiles.Select(x => x.Action));
 		}
 	}
 }
