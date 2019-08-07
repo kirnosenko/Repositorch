@@ -11,14 +11,14 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		public void Should_get_files_added_in_specified_commits()
 		{
 			mappingDSL
-				.AddCommit("1").OnBranch(1)
+				.AddCommit("1").OnBranch("1")
 					.File("file1").Added()
 			.Submit()
-				.AddCommit("2").OnBranch(1)
+				.AddCommit("2").OnBranch("1")
 					.File("file1").Modified()
 					.File("file2").Added()
 			.Submit()
-				.AddCommit("3").OnBranch(1)
+				.AddCommit("3").OnBranch("1")
 					.File("file3").CopiedFrom("file1", "1")
 			.Submit();
 
@@ -35,15 +35,15 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		public void Should_get_files_removed_in_specified_commits()
 		{
 			mappingDSL
-				.AddCommit("1").OnBranch(1)
+				.AddCommit("1").OnBranch("1")
 					.File("file1").Added()
 			.Submit()
-				.AddCommit("2").OnBranch(1)
+				.AddCommit("2").OnBranch("1")
 					.File("file1").Removed()
 					.File("file2").CopiedFrom("file1", "1")
 					.File("file3").Added()
 			.Submit()
-				.AddCommit("3").OnBranch(1)
+				.AddCommit("3").OnBranch("1")
 					.File("file3").Removed()
 			.Submit();
 
@@ -118,15 +118,15 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		public void Should_get_existent_files_for_revision()
 		{
 			mappingDSL
-				.AddCommit("1").OnBranch(1)
+				.AddCommit("1").OnBranch("1")
 					.File("file1").Added()
 			.Submit()
-				.AddCommit("2").OnBranch(1)
+				.AddCommit("2").OnBranch("1")
 					.File("file1").Removed()
 					.File("file2").Added()
 					.File("file3").Added()
 			.Submit()
-				.AddCommit("3").OnBranch(1)
+				.AddCommit("3").OnBranch("1")
 					.File("file2").Removed()
 					.File("file4").CopiedFrom("file2", "2")
 			.Submit();
@@ -145,16 +145,16 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		public void Should_get_existent_files_for_selected_commits()
 		{
 			mappingDSL
-				.AddCommit("1").OnBranch(1)
+				.AddCommit("1").OnBranch("1")
 					.File("file1").Added()
 					.File("file2").Added()
 			.Submit()
-				.AddCommit("2").OnBranch(1)
+				.AddCommit("2").OnBranch("1")
 					.File("file1").Removed()
 					.File("file2").Modified()
 					.File("file3").Added()
 			.Submit()
-				.AddCommit("3").OnBranch(1)
+				.AddCommit("3").OnBranch("1")
 					.File("file2").Removed()
 			.Submit();
 
@@ -175,14 +175,14 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		public void Should_get_existent_files_on_different_branches()
 		{
 			mappingDSL
-				.AddCommit("1").OnBranch(0001)
+				.AddCommit("1").OnBranch("1")
 					.File("file1").Added()
 			.Submit()
-				.AddCommit("2").OnBranch(0011)
+				.AddCommit("2").OnBranch("11")
 					.File("file1").Removed()
 					.File("file2").Added()
 			.Submit()
-				.AddCommit("3").OnBranch(0101)
+				.AddCommit("3").OnBranch("101")
 					.File("file2").Added()
 					.File("file3").Added()
 			.Submit();
@@ -226,18 +226,18 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		public void Should_get_defective_files()
 		{
 			mappingDSL
-				.AddCommit("1").OnBranch(1)
+				.AddCommit("1").OnBranch("1")
 					.File("file1").Added()
 						.Code(100)
 					.File("file2").Added()
 						.Code(200)
 			.Submit()
-				.AddCommit("2").OnBranch(1).IsBugFix()
+				.AddCommit("2").OnBranch("1").IsBugFix()
 					.File("file1").Modified()
 						.Code(-10).ForCodeAddedInitiallyInRevision("1")
 						.Code(20)
 			.Submit()
-				.AddCommit("3").OnBranch(1)
+				.AddCommit("3").OnBranch("1")
 					.File("file1").Modified()
 						.Code(-10).ForCodeAddedInitiallyInRevision("1")
 						.Code(20)
@@ -247,12 +247,12 @@ namespace Repositorch.Data.Entities.DSL.Selection
 					.File("file3").Added()
 						.Code(300)
 			.Submit()
-				.AddCommit("4").OnBranch(1).IsBugFix()
+				.AddCommit("4").OnBranch("1").IsBugFix()
 					.File("file3").Modified()
 						.Code(-10).ForCodeAddedInitiallyInRevision("3")
 						.Code(10)
 			.Submit()
-				.AddCommit("5").OnBranch(1).IsBugFix()
+				.AddCommit("5").OnBranch("1").IsBugFix()
 					.File("file1").Modified()
 						.Code(-10).ForCodeAddedInitiallyInRevision("2")
 						.Code(10)

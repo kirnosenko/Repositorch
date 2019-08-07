@@ -267,14 +267,14 @@ namespace Repositorch.Data.Entities.Mapping
 		{
 			data.UsingSession(s =>
 				s.MappingDSL()
-					.AddCommit("1").OnBranch(0b001).AuthorIs("alan")
+					.AddCommit("1").OnBranch("1").AuthorIs("alan")
 						.File("file1").Added().Code(100)
 				.Submit()
-					.AddCommit("2").OnBranch(0b011).AuthorIs("bob").IsBugFix()
+					.AddCommit("2").OnBranch("11").AuthorIs("bob").IsBugFix()
 						.File("file1").Modified().Code(-10)
 						.File("file2").Added().Code(20)
 				.Submit()
-					.AddCommit("3").OnBranch(0b111).AuthorIs("ivan")
+					.AddCommit("3").OnBranch("111").AuthorIs("ivan")
 						.File("file2").Modified().Code(20)
 				.Submit());
 			
@@ -311,7 +311,7 @@ namespace Repositorch.Data.Entities.Mapping
 		{
 			data.UsingSession(s =>
 				s.MappingDSL()
-					.AddCommit("1").OnBranch(0b001).AuthorIs("alan")
+					.AddCommit("1").OnBranch("1").AuthorIs("alan")
 						.File("file1").Added()
 							.Code(100)
 				.Submit());
@@ -323,7 +323,7 @@ namespace Repositorch.Data.Entities.Mapping
 
 			data.UsingSession(s =>
 				s.MappingDSL()
-					.AddCommit("2").OnBranch(0b001).AuthorIs("alan")
+					.AddCommit("2").OnBranch("1").AuthorIs("alan")
 						.File("file1").Modified()
 							.Code(10)
 							.Code(-10).ForCodeAddedInitiallyInRevision("1")
@@ -348,7 +348,7 @@ namespace Repositorch.Data.Entities.Mapping
 		{
 			data.UsingSession(s =>
 				s.MappingDSL()
-					.AddCommit("1").OnBranch(0b001).AuthorIs("alan")
+					.AddCommit("1").OnBranch("1").AuthorIs("alan")
 						.File("file1").Added()
 							.Code(100)
 				.Submit());

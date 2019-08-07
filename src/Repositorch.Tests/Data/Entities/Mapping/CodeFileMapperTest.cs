@@ -116,16 +116,16 @@ namespace Repositorch.Data.Entities.Mapping
 		public void Should_map_added_or_removed_in_merge_file_only_if_it_has_different_history_state()
 		{
 			mappingDSL
-				.AddCommit("1").OnBranch(0b0001)
+				.AddCommit("1").OnBranch("1")
 					.File("file1").Added()
 					.File("file2").Added()
 			.Submit()
-				.AddCommit("2").OnBranch(0b0011)
+				.AddCommit("2").OnBranch("11")
 					.File("file1").Modified()
 					.File("file2").Removed()
 					.File("file3").Added()
 			.Submit()
-				.AddCommit("3").OnBranch(0b0101)
+				.AddCommit("3").OnBranch("101")
 					.File("file1").Removed()
 					.File("file2").Modified()
 					.File("file4").Added()
@@ -139,7 +139,7 @@ namespace Repositorch.Data.Entities.Mapping
 			log.FileAdded("file4");
 
 			var expressions = mapper.Map(
-				mappingDSL.AddCommit("10").OnBranch(0b0111)
+				mappingDSL.AddCommit("10").OnBranch("111")
 			);
 
 			Assert.Equal(new string[] { "file1", "file2" }, expressions

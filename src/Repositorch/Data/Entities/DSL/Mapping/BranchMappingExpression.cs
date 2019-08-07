@@ -17,7 +17,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		/// Create a new branch or use the existent one with specified mask and offset.
 		/// </summary>
 		public static BranchMappingExpression OnBranch(
-			this ICommitMappingExpression exp, uint mask, uint maskOffset = 0)
+			this ICommitMappingExpression exp, string mask, int maskOffset = 0)
 		{
 			return new BranchMappingExpression(exp, mask, maskOffset, false);
 		}
@@ -25,7 +25,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		/// Create a new sub-branch based on parent branch mask and offset.
 		/// </summary>
 		public static BranchMappingExpression OnSubBranch(
-			this ICommitMappingExpression exp, uint parentMask, uint parentMaskOffset = 0)
+			this ICommitMappingExpression exp, string parentMask, int parentMaskOffset = 0)
 		{
 			return new BranchMappingExpression(exp, parentMask, parentMaskOffset, true);
 		}
@@ -41,11 +41,11 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		{
 			if (GetReadOnly<Branch>().Count() == 0)
 			{
-				entity = NewBranch(1, 0, false, false);
+				entity = NewBranch("1", 0, false, false);
 			}
 			else
 			{
-				entity = NewBranch(0, 0, true, false);
+				entity = NewBranch(null, 0, true, false);
 			}
 			Add(entity);
 			entity.Commits.Add(CurrentEntity<Commit>());
@@ -53,8 +53,8 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 
 		public BranchMappingExpression(
 			IRepositoryMappingExpression parentExp,
-			uint mask,
-			uint maskOffset,
+			string mask,
+			int maskOffset,
 			bool subBranch)
 			: base(parentExp)
 		{
@@ -83,7 +83,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			entity.Commits.Add(CurrentEntity<Commit>());
 		}
 		
-		private Branch NewBranch(uint mask, uint maskOffset, bool createMask, bool combineMask)
+		private Branch NewBranch(string mask, int maskOffset, bool createMask, bool combineMask)
 		{
 			var newBranch = new Branch()
 			{
@@ -94,46 +94,16 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			// create a new branch mask
 			if (createMask)
 			{
-				var branchWithMaxMask = GetReadOnly<Branch>().Last();
-				while (branchWithMaxMask.MaskOffset < maskOffset)
+				newBranch.Mask = new String('0', GetReadOnly<Branch>().Count()) +  "1";
+				newBranch.MaskOffset = 0;
+				
+				// combine masks for subbranch
+				if (combineMask)
 				{
-					branchWithMaxMask.Mask >>= 1;
-					branchWithMaxMask.MaskOffset++;
+					newBranch.CombineMask(mask, maskOffset);
 				}
-				if ((branchWithMaxMask.Mask & 0x80000000) != 0)
-				{
-					throw new InvalidOperationException("Branch mask overflow.");
-				}
-				int shift = 0;
-				while (branchWithMaxMask.Mask != 0)
-				{
-					shift++;
-					branchWithMaxMask.Mask >>= 1;
-				}
-				newBranch.Mask = 1u << shift;
-				newBranch.MaskOffset = branchWithMaxMask.MaskOffset;
 			}
-
-			// combine masks for subbranch
-			if (combineMask)
-			{
-				var offsetDiff = newBranch.MaskOffset - maskOffset;
-				newBranch.Mask <<= (int)offsetDiff;
-				newBranch.MaskOffset -= offsetDiff;
-				if (newBranch.Mask == 0)
-				{
-					throw new InvalidOperationException("Branch mask overflow.");
-				}
-				newBranch.Mask |= mask;
-			}
-
-			// mask shift when possible
-			while ((newBranch.Mask & 3u) == 3u)
-			{
-				newBranch.Mask >>= 1;
-				newBranch.MaskOffset++;
-			}
-
+			
 			return newBranch;
 		}
 	}

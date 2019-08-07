@@ -146,11 +146,11 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		public void Should_select_code_added_initially_in_commit()
 		{
 			mappingDSL
-				.AddCommit("1").OnBranch(1)
+				.AddCommit("1").OnBranch("1")
 					.File("file1").Added()
 						.Code(100)
 			.Submit()
-				.AddCommit("2").OnBranch(1)
+				.AddCommit("2").OnBranch("1")
 					.File("file2").CopiedFrom("file1", "1")
 						.CopyCode()
 			.Submit();

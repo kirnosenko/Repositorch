@@ -62,16 +62,16 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		public void Should_add_modification_for_copied_file()
 		{
 			mappingDSL
-				.AddCommit("1").OnBranch(1)
+				.AddCommit("1").OnBranch("1")
 					.File("file1").Added()
 			.Submit()
-				.AddCommit("2").OnBranch(1)
+				.AddCommit("2").OnBranch("1")
 					.File("file1").Removed()
 			.Submit()
-				.AddCommit("3").OnBranch(1)
+				.AddCommit("3").OnBranch("1")
 					.File("file1").Added()
 			.Submit()
-				.AddCommit("10").OnBranch(1)
+				.AddCommit("10").OnBranch("1")
 					.File("file2").CopiedFrom("file1", "1")
 					.File("file3").CopiedFrom("file1", "3")
 			.Submit();

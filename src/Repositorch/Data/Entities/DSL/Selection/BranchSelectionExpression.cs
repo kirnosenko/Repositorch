@@ -11,53 +11,29 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			return new BranchSelectionExpression(parentExp);
 		}
 		public static CommitSelectionExpression OnBranchBack(
-			this CommitSelectionExpression parentExp, uint mask, uint maskOffset = 0)
+			this CommitSelectionExpression parentExp, string mask, int maskOffset = 0)
 		{
 			return parentExp.Reselect(s =>
 				from c in s
 				join br in parentExp.Queryable<Branch>() on c.BranchId equals br.Id
-				let offset_delta = (int)(maskOffset - br.MaskOffset)
-				let right_shifted_mask = offset_delta < 0 ? ((mask >> -offset_delta) | (Branch.MaskMax << (Branch.MaskSize + offset_delta))) : 0
-				let left_shifted_mask = offset_delta > 0 ? ((mask << offset_delta) | (Branch.MaskMax >> (Branch.MaskSize - offset_delta))) : 0
+				let branch_bit_pos = br.Mask.Length + br.MaskOffset - 1 - maskOffset
 				where
-					offset_delta >= Branch.MaskSize
+					(branch_bit_pos < 0)
 					||
-					(
-						offset_delta > -Branch.MaskSize
-						&&
-						(
-							(offset_delta == 0 && (br.Mask | mask) == mask)
-							||
-							(offset_delta < 0 && ((br.Mask | right_shifted_mask) == right_shifted_mask))
-							||
-							(offset_delta > 0 && ((br.Mask | left_shifted_mask) == left_shifted_mask))
-						)
-					)
+					(branch_bit_pos < mask.Length && mask[branch_bit_pos] == '1')
 				select c);
 		}
 		public static CommitSelectionExpression OnBranchForward(
-			this CommitSelectionExpression parentExp, uint mask, uint maskOffset = 0)
+			this CommitSelectionExpression parentExp, string mask, int maskOffset = 0)
 		{
 			return parentExp.Reselect(s =>
 				from c in s
 				join br in parentExp.Queryable<Branch>() on c.BranchId equals br.Id
-				let offset_delta = (int)(maskOffset - br.MaskOffset)
-				let right_shifted_mask = offset_delta < 0 ? (mask >> -offset_delta) : 0
-				let left_shifted_mask = offset_delta > 0 ? (mask << offset_delta) : 0
+				let branch_bit_pos = mask.Length + maskOffset - 1 - br.MaskOffset
 				where
-					offset_delta <= -Branch.MaskSize
+					(branch_bit_pos < 0)
 					||
-					(
-						offset_delta < Branch.MaskSize
-						&&
-						(
-							(offset_delta == 0 && (br.Mask & mask) == mask)
-							||
-							(offset_delta < 0 && ((br.Mask & right_shifted_mask) == right_shifted_mask))
-							||
-							(offset_delta > 0 && ((br.Mask & left_shifted_mask) == left_shifted_mask))
-						)
-					)
+					(branch_bit_pos < br.Mask.Length && br.Mask[branch_bit_pos] == '1')
 				select c);
 		}
 		public static CommitSelectionExpression BeforeRevision(
@@ -101,7 +77,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			this CommitSelectionExpression parentExp,
 			string revision,
 			Func<CommitSelectionExpression,int,CommitSelectionExpression> numberFilter,
-			Func<CommitSelectionExpression,uint,uint,CommitSelectionExpression> branchFilter)
+			Func<CommitSelectionExpression,string,int,CommitSelectionExpression> branchFilter)
 		{
 			if (revision == null)
 			{

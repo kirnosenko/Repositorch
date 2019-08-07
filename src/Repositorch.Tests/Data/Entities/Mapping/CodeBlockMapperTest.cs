@@ -24,7 +24,7 @@ namespace Repositorch.Data.Entities.Mapping
 				.Returns(blame);
 
 			mapper.Map(
-				mappingDSL.AddCommit("abc").OnBranch(1)
+				mappingDSL.AddCommit("abc").OnBranch("1")
 					.File("file1").Added().Modified()
 			);
 			SubmitChanges();
@@ -38,12 +38,12 @@ namespace Repositorch.Data.Entities.Mapping
 		public void Should_not_take_blame_for_deleted_file()
 		{
 			mappingDSL
-				.AddCommit("ab").OnBranch(1)
+				.AddCommit("ab").OnBranch("1")
 					.File("file1").Added()
 						.Code(100)
 				.Submit();
 			mapper.Map(
-				mappingDSL.AddCommit("abc").OnBranch(1)
+				mappingDSL.AddCommit("abc").OnBranch("1")
 					.File("file1").Removed()
 			);
 			SubmitChanges();
@@ -56,11 +56,11 @@ namespace Repositorch.Data.Entities.Mapping
 		public void Should_remove_code_that_no_more_exists()
 		{
 			mappingDSL
-				.AddCommit("a").OnBranch(1)
+				.AddCommit("a").OnBranch("1")
 					.File("file1").Added()
 						.Code(10)
 			.Submit()
-				.AddCommit("ab").OnBranch(1)
+				.AddCommit("ab").OnBranch("1")
 					.File("file1").Modified()
 						.Code(20)
 			.Submit();
@@ -72,7 +72,7 @@ namespace Repositorch.Data.Entities.Mapping
 				.Returns(blame);
 			
 			mapper.Map(
-				mappingDSL.AddCommit("abc").OnBranch(1)
+				mappingDSL.AddCommit("abc").OnBranch("1")
 					.File("file1").Modified()
 			);
 			SubmitChanges();
@@ -90,16 +90,16 @@ namespace Repositorch.Data.Entities.Mapping
 		public void Should_not_take_into_account_code_on_another_branch()
 		{
 			mappingDSL
-				.AddCommit("1").OnBranch(0b001)
+				.AddCommit("1").OnBranch("1")
 					.File("file1").Added()
 						.Code(100)
 			.Submit()
-				.AddCommit("2").OnBranch(0b011)
+				.AddCommit("2").OnBranch("11")
 					.File("file1").Modified()
 						.Code(10)
 						.Code(-10).ForCodeAddedInitiallyInRevision("1")
 			.Submit()
-				.AddCommit("3").OnBranch(0b101)
+				.AddCommit("3").OnBranch("101")
 					.File("file1").Modified()
 						.Code(20)
 						.Code(-20).ForCodeAddedInitiallyInRevision("1")
@@ -113,7 +113,7 @@ namespace Repositorch.Data.Entities.Mapping
 				.Returns(blame);
 
 			mapper.Map(
-				mappingDSL.AddCommit("4").OnBranch(0b011)
+				mappingDSL.AddCommit("4").OnBranch("11")
 					.File("file1").Modified()
 			);
 			SubmitChanges();
@@ -131,11 +131,11 @@ namespace Repositorch.Data.Entities.Mapping
 		public void Should_map_all_code_as_is_for_copied_file()
 		{
 			mappingDSL
-				.AddCommit("a").OnBranch(1)
+				.AddCommit("a").OnBranch("1")
 					.File("file1").Added()
 						.Code(10)
 			.Submit()
-				.AddCommit("ab").OnBranch(1)
+				.AddCommit("ab").OnBranch("1")
 					.File("file1").Modified()
 						.Code(5)
 			.Submit();
@@ -147,7 +147,7 @@ namespace Repositorch.Data.Entities.Mapping
 				.Returns(blame);
 
 			mapper.Map(
-				mappingDSL.AddCommit("abc").OnBranch(1)
+				mappingDSL.AddCommit("abc").OnBranch("1")
 					.File("file2").CopiedFrom("file1", "ab")
 			);
 			SubmitChanges();
@@ -164,7 +164,7 @@ namespace Repositorch.Data.Entities.Mapping
 		public void Should_map_new_code_in_copied_file_as_new()
 		{
 			mappingDSL
-				.AddCommit("a").OnBranch(1)
+				.AddCommit("a").OnBranch("1")
 					.File("file1").Added()
 						.Code(10)
 			.Submit();
@@ -176,7 +176,7 @@ namespace Repositorch.Data.Entities.Mapping
 				.Returns(blame);
 			
 			mapper.Map(
-				mappingDSL.AddCommit("abc").OnBranch(1)
+				mappingDSL.AddCommit("abc").OnBranch("1")
 					.File("file2").CopiedFrom("file1", "a")
 			);
 			SubmitChanges();
@@ -189,16 +189,16 @@ namespace Repositorch.Data.Entities.Mapping
 		public void Should_compensate_code_changes_that_were_dropped_in_merge()
 		{
 			mappingDSL
-				.AddCommit("1").OnBranch(0b0001)
+				.AddCommit("1").OnBranch("1")
 					.File("file1").Added()
 						.Code(100)
 			.Submit()
-				.AddCommit("2").OnBranch(0b0011)
+				.AddCommit("2").OnBranch("11")
 					.File("file1").Modified()
 						.Code(10)
 						.Code(-10).ForCodeAddedInitiallyInRevision("1")
 			.Submit()
-				.AddCommit("3").OnBranch(0b0101)
+				.AddCommit("3").OnBranch("101")
 					.File("file1").Modified()
 						.Code(20)
 						.Code(-10).ForCodeAddedInitiallyInRevision("1")
@@ -214,7 +214,7 @@ namespace Repositorch.Data.Entities.Mapping
 				.Returns(new string[] { "2", "3" });
 
 			mapper.Map(
-				mappingDSL.AddCommit("4").OnBranch(0b0111)
+				mappingDSL.AddCommit("4").OnBranch("111")
 					.File("file1").Modified()
 			);
 			SubmitChanges();

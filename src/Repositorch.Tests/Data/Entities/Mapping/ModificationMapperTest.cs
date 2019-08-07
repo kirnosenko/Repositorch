@@ -73,14 +73,14 @@ namespace Repositorch.Data.Entities.Mapping
 		public void Should_map_copied_file_with_source()
 		{
 			mappingDSL
-				.AddCommit("9").OnBranch(1)
+				.AddCommit("9").OnBranch("1")
 					.File("file1").Added()
 			.Submit();
 
 			log.FileCopied("file2", "file1", "9");
 
 			mapper.Map(
-				mappingDSL.AddCommit("10").OnBranch(1).File("file2")
+				mappingDSL.AddCommit("10").OnBranch("1").File("file2")
 			);
 			SubmitChanges();
 
@@ -97,14 +97,14 @@ namespace Repositorch.Data.Entities.Mapping
 		public void Should_set_previous_revision_as_source_for_file_copied_without_source_revision()
 		{
 			mappingDSL
-				.AddCommit("9").OnBranch(1)
+				.AddCommit("9").OnBranch("1")
 					.File("file1").Added()
 			.Submit();
 
 			log.FileRenamed("file2", "file1");
 
 			mapper.Map(
-				mappingDSL.AddCommit("10").OnBranch(1).File("file2")
+				mappingDSL.AddCommit("10").OnBranch("1").File("file2")
 			);
 			SubmitChanges();
 

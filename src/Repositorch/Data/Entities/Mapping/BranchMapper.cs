@@ -17,7 +17,7 @@ namespace Repositorch.Data.Entities.Mapping
 			var parentRevisions = vcsData.GetRevisionParents(
 				expression.CurrentEntity<Commit>().Revision).ToArray();
 
-			if (parentRevisions.Length == 0) // the very first revision or no parent revision
+			if (parentRevisions.Length == 0) // the very first revision or no-parent revision
 			{
 				return new BranchMappingExpression[]
 				{
@@ -56,26 +56,22 @@ namespace Repositorch.Data.Entities.Mapping
 				}
 				else // multi-parent revision (merge)
 				{
-					var maxParentOffset = parentBranches.Max(x => x.MaskOffset);
-					uint combinedMask = 0;
-					foreach (var b in parentBranches)
-					{
-						combinedMask |= b.Mask >> (int)(maxParentOffset - b.MaskOffset);
-					}
+					var combinedMask = parentBranches.Select(x => (x.Mask, x.MaskOffset)).Aggregate(
+						(b1, b2) => Branch.CombineMask(b1.Mask, b1.MaskOffset, b2.Mask, b2.MaskOffset)
+					);
+					
 					if (parentChildren == 1)
 					{
 						return new BranchMappingExpression[]
 						{
-							expression.OnBranch(
-								combinedMask, maxParentOffset)
+							expression.OnBranch(combinedMask.Mask, combinedMask.MaskOffset)
 						};
 					}
 					else
 					{
 						return new BranchMappingExpression[]
 						{
-							expression.OnSubBranch(
-								combinedMask, maxParentOffset)
+							expression.OnSubBranch(combinedMask.Mask, combinedMask.MaskOffset)
 						};
 					}
 				}
