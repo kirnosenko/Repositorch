@@ -39,14 +39,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		public BranchMappingExpression(IRepositoryMappingExpression parentExp)
 			: base(parentExp)
 		{
-			if (GetReadOnly<Branch>().Count() == 0)
-			{
-				entity = NewBranch("1", 0, false, false);
-			}
-			else
-			{
-				entity = NewBranch(null, 0, true, false);
-			}
+			entity = NewBranch(null, 0, true, false);
 			Add(entity);
 			entity.Commits.Add(CurrentEntity<Commit>());
 		}
@@ -62,14 +55,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 				.SingleOrDefault(b => b.Mask == mask && b.MaskOffset == maskOffset);
 			if (entity == null)
 			{
-				if (subBranch)
-				{
-					entity = NewBranch(mask, maskOffset, true, true);
-				}
-				else
-				{
-					entity = NewBranch(mask, maskOffset, false, false);
-				}
+				entity = NewBranch(mask, maskOffset, subBranch, subBranch);
 				Add(entity);
 			}
 			else

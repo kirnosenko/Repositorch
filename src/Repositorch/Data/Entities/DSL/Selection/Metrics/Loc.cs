@@ -7,7 +7,7 @@ namespace Repositorch.Data.Entities.DSL.Selection.Metrics
 	{
 		public static double CalculateLOC(this CodeBlockSelectionExpression code)
 		{
-			return code.Sum(x => (double?)x.Size) ?? 0;
+			return code.Sum(x => x.Size);
 		}
 	}
 }
