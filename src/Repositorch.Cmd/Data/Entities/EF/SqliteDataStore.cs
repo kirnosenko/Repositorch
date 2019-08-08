@@ -3,17 +3,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Repositorch.Data.Entities.EF
 {
-	public class SqliteDataStore : IDataStore
+	public class SqliteDataStore : NamedDataStore
 	{
-		private string fileName;
-		
 		public SqliteDataStore(string fileName)
+			: base(fileName)
 		{
-			this.fileName = fileName;
 		}
-		public ISession OpenSession()
+		protected override void Configure(DbContextOptionsBuilder options)
 		{
-			return new EfSession(c => c.UseSqlite(string.Format("Data Source={0}", fileName)));
+			options.UseSqlite(string.Format("Data Source={0}", name));
 		}
 	}
 }
