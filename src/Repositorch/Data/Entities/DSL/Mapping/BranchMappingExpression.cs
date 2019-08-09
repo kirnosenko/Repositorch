@@ -80,7 +80,12 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			// create a new branch mask
 			if (createMask)
 			{
-				newBranch.Mask = new String('0', GetReadOnly<Branch>().Count()) +  "1";
+				var branchWithMaxMask = GetReadOnly<Branch>()
+					.OrderByDescending(x => x.Mask.Length + x.MaskOffset)
+					.FirstOrDefault();
+				newBranch.Mask = string.Format("{0}1",
+					branchWithMaxMask == null ? string.Empty
+					: new String('0', branchWithMaxMask.Mask.Length + branchWithMaxMask.MaskOffset));
 				newBranch.MaskOffset = 0;
 				
 				// combine masks for subbranch
