@@ -78,6 +78,8 @@ namespace Repositorch.Data.Entities.EF
 				.HasMany(b => b.Commits)
 				.WithOne((string)null)
 				.HasForeignKey(c => c.BranchId);
+			modelBuilder.Entity<Branch>()
+				.OwnsOne(b => b.Mask);
 			modelBuilder.Entity<BugFix>()
 				.HasOne(bf => bf.Commit)
 				.WithOne((string)null)

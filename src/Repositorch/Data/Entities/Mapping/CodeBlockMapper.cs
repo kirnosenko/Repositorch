@@ -57,7 +57,7 @@ namespace Repositorch.Data.Entities.Mapping
 
 					var currentBranch = expression.CurrentEntity<Branch>();
 					var commitsOnBranch = expression.SelectionDSL().Commits()
-						.OnBranchBack(currentBranch.Mask, currentBranch.MaskOffset);
+						.OnBranchBack(currentBranch.Mask);
 					var isMerge = vcsData.IsMerge(revision);
 
 					foreach (var existentCode in (

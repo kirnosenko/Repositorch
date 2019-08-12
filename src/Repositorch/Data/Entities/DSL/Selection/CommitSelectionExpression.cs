@@ -25,6 +25,10 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			return Reselect(s => s.Where(x => x.Revision != revision));
 		}
+		public CommitSelectionExpression RevisionIsIn(string[] revisions)
+		{
+			return Reselect(s => s.Where(x => revisions.Contains(x.Revision)));
+		}
 		public CommitSelectionExpression BeforeDate(DateTime date)
 		{
 			return Reselect(s => s.Where(x => x.Date < date));

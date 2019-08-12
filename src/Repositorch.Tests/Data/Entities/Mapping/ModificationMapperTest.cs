@@ -141,5 +141,27 @@ namespace Repositorch.Data.Entities.Mapping
 			Assert.Null(modification.SourceCommit);
 			Assert.Null(modification.SourceFile);
 		}
+		[Fact]
+		public void Should_map_file_as_modified_if_log_does_not_keep_it()
+		{
+			mappingDSL
+				.AddCommit("9")
+					.File("file1").Added()
+			.Submit();
+			
+			mapper.Map(
+				mappingDSL.AddCommit("10").File("file1")
+			);
+			SubmitChanges();
+
+			Assert.Equal(2, Get<Modification>().Count());
+
+			var modification = Get<Modification>().Last();
+			Assert.Equal("10", modification.Commit.Revision);
+			Assert.Equal("file1", modification.File.Path);
+			Assert.Equal(Modification.FileAction.MODIFIED, modification.Action);
+			Assert.Null(modification.SourceCommit);
+			Assert.Null(modification.SourceFile);
+		}
 	}
 }

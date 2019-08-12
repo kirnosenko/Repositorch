@@ -8,6 +8,26 @@ namespace Repositorch.Data.Entities.DSL.Selection
 	public class CommitSelectionExpressionTest : BaseRepositoryTest
 	{
 		[Fact]
+		public void Should_select_commits_by_revision()
+		{
+			mappingDSL
+				.AddCommit("1")
+			.Submit()
+				.AddCommit("2")
+			.Submit()
+				.AddCommit("5")
+			.Submit();
+
+			Assert.Equal(new string[] { "2" }, selectionDSL
+				.Commits().RevisionIs("2").Select(x => x.Revision));
+			Assert.Equal(new string[] { }, selectionDSL
+				.Commits().RevisionIs("3").Select(x => x.Revision));
+			Assert.Equal(new string[] { "1", "5" }, selectionDSL
+				.Commits().RevisionIsNot("2").Select(x => x.Revision));
+			Assert.Equal(new string[] { "1", "2" }, selectionDSL
+				.Commits().RevisionIsIn(new string[] { "1", "2", "3" }).Select(x => x.Revision));
+		}
+		[Fact]
 		public void Should_select_commits_by_date()
 		{
 			mappingDSL
@@ -18,22 +38,14 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				.AddCommit("5").At(DateTime.Today.AddDays(-5))
 			.Submit();
 
-			Assert.Equal(
-				1,
-				selectionDSL
-					.Commits().AfterDate(DateTime.Today.AddDays(-8)).Count());
-			Assert.Equal(
-				2,
-				selectionDSL
-					.Commits().FromDate(DateTime.Today.AddDays(-8)).Count());
-			Assert.Equal(
-				1,
-				selectionDSL
-					.Commits().BeforeDate(DateTime.Today.AddDays(-8)).Count());
-			Assert.Equal(
-				2,
-				selectionDSL
-					.Commits().TillDate(DateTime.Today.AddDays(-8)).Count());
+			Assert.Equal(1, selectionDSL
+				.Commits().AfterDate(DateTime.Today.AddDays(-8)).Count());
+			Assert.Equal(2, selectionDSL
+				.Commits().FromDate(DateTime.Today.AddDays(-8)).Count());
+			Assert.Equal(1, selectionDSL
+				.Commits().BeforeDate(DateTime.Today.AddDays(-8)).Count());
+			Assert.Equal(2, selectionDSL
+				.Commits().TillDate(DateTime.Today.AddDays(-8)).Count());
 		}
 		[Fact]
 		public void Should_select_commits_relatively_specified()

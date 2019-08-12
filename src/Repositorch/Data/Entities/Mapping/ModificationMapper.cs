@@ -14,10 +14,14 @@ namespace Repositorch.Data.Entities.Mapping
 		}
 		public override IEnumerable<IModificationMappingExpression> Map(ICodeFileMappingExpression expression)
 		{
-			string revision = expression.CurrentEntity<Commit>().Revision;
-			string filePath = expression.CurrentEntity<CodeFile>().Path;
-			Log log = vcsData.Log(revision);
-			var touchedFile = log.TouchedFiles.Single(x => x.Path == filePath);
+			var commit = expression.CurrentEntity<Commit>();
+			var filePath = expression.CurrentEntity<CodeFile>().Path;
+			Log log = vcsData.Log(commit.Revision);
+			var touchedFile = log.TouchedFiles.SingleOrDefault(x => x.Path == filePath);
+			if (touchedFile == null)
+			{
+				return Result(expression.Modified());
+			}
 
 			switch (touchedFile.Action)
 			{
@@ -29,7 +33,7 @@ namespace Repositorch.Data.Entities.Mapping
 					if (touchedFile.SourceRevision == null)
 					{
 						touchedFile.SourceRevision = expression.Get<Commit>()
-							.Single(c => c.OrderedNumber == expression.CurrentEntity<Commit>().OrderedNumber - 1)
+							.Single(c => c.OrderedNumber == commit.OrderedNumber - 1)
 							.Revision;
 					}
 					return Result(expression.CopiedFrom(touchedFile.SourcePath, touchedFile.SourceRevision));

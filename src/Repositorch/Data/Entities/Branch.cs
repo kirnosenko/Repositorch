@@ -5,7 +5,111 @@ using System.Linq;
 using System.Text;
 
 namespace Repositorch.Data.Entities
-{
+{	
+	public class BranchMask
+	{
+		/// <summary>
+		/// Binary mask with little-endian order.
+		/// </summary>
+		public string Data { get; set; }
+		/// <summary>
+		/// Offset of the mask in bits.
+		/// </summary>
+		public int Offset { get; set; }
+		/// <summary>
+		/// Total size of the mask in bits.
+		/// </summary>
+		public int Size
+		{
+			get
+			{
+				return Data.Length + Offset;
+			}
+		}
+
+		public static implicit operator BranchMask(string mask)
+		{
+			return Create(mask);
+		}
+		public static implicit operator BranchMask((string data, int offset) mask)
+		{
+			return Create(mask.data, mask.offset);
+		}
+		public static BranchMask Create(string mask, int offset = 0)
+		{
+			return new BranchMask()
+			{
+				Data = mask,
+				Offset = offset
+			};
+		}
+		public static BranchMask And(params BranchMask[] masks)
+		{
+			return Logic((b1, b2) => (b1 == '1' && b2 == '1') ? '1' : '0', masks);
+		}
+		public static BranchMask Or(params BranchMask[] masks)
+		{
+			return Logic((b1, b2) => (b1 == '1' || b2 == '1') ? '1' : '0', masks);
+		}
+		public static BranchMask Xor(params BranchMask[] masks)
+		{
+			return Logic((b1, b2) => (b1 != b2) ? '1' : '0', masks);
+		}
+		private static BranchMask Logic(Func<char,char,char> op, params BranchMask[] masks)
+		{
+			masks = masks.OrderByDescending(m => m.Size).ToArray();
+			StringBuilder result = new StringBuilder(Unshift(masks[0]));
+
+			foreach (var m in masks.Skip(1))
+			{
+				for (int i = 0; i < result.Length; i++)
+				{
+					var maskBit = (i < m.Offset) ? '1' : (i >= m.Size) ? '0' : m.Data[i-m.Offset];
+					result[i] = op(result[i], maskBit);
+				}
+			}
+
+			return Shift(result.ToString());
+		}
+		private static string Unshift(BranchMask mask)
+		{
+			if (mask.Offset == 0)
+			{
+				return mask.Data;
+			}
+			return new string('1', mask.Offset) + mask.Data;
+		}
+		private static BranchMask Shift(string mask)
+		{
+			int offset = 0;
+			int ones = 0;
+			while (ones < mask.Length && mask[ones] == '1')
+			{
+				ones++;
+			}
+			int zeros = 0;
+			while (zeros < mask.Length && mask[mask.Length-1-zeros] == '0')
+			{
+				zeros++;
+			}
+			if (ones > 1 || zeros > 0)
+			{
+				if (ones > 1)
+				{
+					ones--;
+				}
+				mask = mask.Substring(ones, mask.Length-ones-zeros);
+				offset += ones;
+			}
+
+			return new BranchMask()
+			{
+				Data = mask,
+				Offset = offset
+			};
+		}
+	}
+
 	/// <summary>
 	/// Branch the commit is sitting on.
 	/// Not a branch in terms of git, but a separate line of code evolution
@@ -17,50 +121,13 @@ namespace Repositorch.Data.Entities
 	{
 		public int Id { get; set; }
 		/// <summary>
-		/// Binary mask with little-endian order to encode parent branches.
+		/// Branch mask to encode another branches were merged to this one.
 		/// </summary>
-		public string Mask { get; set; }
+		public BranchMask Mask { get; set; }
+		
 		/// <summary>
-		/// Offset of the mask in bits.
+		/// Commits on the branch.
 		/// </summary>
-		public int MaskOffset { get; set; }
-
 		public List<Commit> Commits { get; set; } = new List<Commit>();
-
-		public void CombineMask(string mask, int maskOffset)
-		{
-			(Mask, MaskOffset) = CombineMask(Mask, MaskOffset, mask, maskOffset);
-		}
-		public static (string mask, int maskOffset) CombineMask(
-			string mask1, int mask1Offset, string mask2, int mask2Offset)
-		{
-			int resultOffset = Math.Min(mask1Offset, mask2Offset);
-			int resultMaskLength = Math.Max(
-				mask1.Length + mask1Offset - resultOffset,
-				mask2.Length + mask2Offset - resultOffset);
-
-			StringBuilder resultMask = new StringBuilder(resultMaskLength);
-			for (int i = 0; i < resultMaskLength; i++)
-			{
-				int bit1pos = i + resultOffset - mask1Offset;
-				int bit2pos = i + resultOffset - mask2Offset;
-				bool bit1 = bit1pos < 0 ? true : (bit1pos > mask1.Length-1 ? false : (mask1[bit1pos] == '1'));
-				bool bit2 = bit2pos < 0 ? true : (bit2pos > mask2.Length-1 ? false : (mask2[bit2pos] == '1'));
-
-				resultMask.Append(bit1 | bit2 ? '1' : '0');
-			}
-			int ones = 0;
-			while (ones < resultMask.Length && resultMask[ones] == '1')
-			{
-				ones++;
-			}
-			if (ones > 1)
-			{
-				resultMask.Remove(0, ones - 1);
-				resultOffset += ones - 1;
-			}
-			
-			return (resultMask.ToString(), resultOffset);
-		}
 	}
 }

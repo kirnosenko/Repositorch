@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Linq.Expressions;
 
 namespace Repositorch.Data.Entities.DSL.Selection
 {
@@ -11,29 +10,29 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			return new BranchSelectionExpression(parentExp);
 		}
 		public static CommitSelectionExpression OnBranchBack(
-			this CommitSelectionExpression parentExp, string mask, int maskOffset = 0)
+			this CommitSelectionExpression parentExp, BranchMask mask)
 		{
 			return parentExp.Reselect(s =>
 				from c in s
 				join br in parentExp.Queryable<Branch>() on c.BranchId equals br.Id
-				let branch_bit_pos = br.Mask.Length + br.MaskOffset - 1 - maskOffset
+				let branch_bit_pos = br.Mask.Size - 1 - mask.Offset
 				where
 					(branch_bit_pos < 0)
 					||
-					(branch_bit_pos < mask.Length && mask[branch_bit_pos] == '1')
+					(branch_bit_pos < mask.Data.Length && mask.Data[branch_bit_pos] == '1')
 				select c);
 		}
 		public static CommitSelectionExpression OnBranchForward(
-			this CommitSelectionExpression parentExp, string mask, int maskOffset = 0)
+			this CommitSelectionExpression parentExp, BranchMask mask)
 		{
 			return parentExp.Reselect(s =>
 				from c in s
 				join br in parentExp.Queryable<Branch>() on c.BranchId equals br.Id
-				let branch_bit_pos = mask.Length + maskOffset - 1 - br.MaskOffset
+				let branch_bit_pos = mask.Size - 1 - br.Mask.Offset
 				where
 					(branch_bit_pos < 0)
 					||
-					(branch_bit_pos < br.Mask.Length && br.Mask[branch_bit_pos] == '1')
+					(branch_bit_pos < br.Mask.Data.Length && br.Mask.Data[branch_bit_pos] == '1')
 				select c);
 		}
 		public static CommitSelectionExpression BeforeRevision(
@@ -43,7 +42,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				parentExp,
 				revision,
 				(s, number) => s.BeforeNumber(number),
-				(s, mask, offset) => s.OnBranchBack(mask, offset));
+				(s, mask) => s.OnBranchBack(mask));
 		}
 		public static CommitSelectionExpression TillRevision(
 			this CommitSelectionExpression parentExp, string revision)
@@ -52,7 +51,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				parentExp,
 				revision,
 				(s, number) => s.TillNumber(number),
-				(s, mask, offset) => s.OnBranchBack(mask, offset));
+				(s, mask) => s.OnBranchBack(mask));
 		}
 		public static CommitSelectionExpression AfterRevision(
 			this CommitSelectionExpression parentExp, string revision)
@@ -61,7 +60,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				parentExp,
 				revision,
 				(s, number) => s.AfterNumber(number),
-				(s, mask, offset) => s.OnBranchForward(mask, offset));
+				(s, mask) => s.OnBranchForward(mask));
 		}
 		public static CommitSelectionExpression FromRevision(
 			this CommitSelectionExpression parentExp, string revision)
@@ -70,14 +69,14 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				parentExp,
 				revision,
 				(s, number) => s.FromNumber(number),
-				(s, mask, offset) => s.OnBranchForward(mask, offset));
+				(s, mask) => s.OnBranchForward(mask));
 		}
 
 		private static CommitSelectionExpression RelativeCommitSelection(
 			this CommitSelectionExpression parentExp,
 			string revision,
 			Func<CommitSelectionExpression,int,CommitSelectionExpression> numberFilter,
-			Func<CommitSelectionExpression,string,int,CommitSelectionExpression> branchFilter)
+			Func<CommitSelectionExpression,BranchMask,CommitSelectionExpression> branchFilter)
 		{
 			if (revision == null)
 			{
@@ -90,11 +89,10 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				{
 					Number = c.OrderedNumber,
 					Mask = b.Mask,
-					MaskOffset = b.MaskOffset
 				}).Single();
 			return parentExp
 				.Reselect(s => numberFilter(s, revisionData.Number))
-				.Reselect(s => branchFilter(s, revisionData.Mask, revisionData.MaskOffset));
+				.Reselect(s => branchFilter(s, revisionData.Mask));
 		}
 	}
 
@@ -103,6 +101,14 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		public BranchSelectionExpression(IRepositorySelectionExpression parentExp)
 			: base(parentExp)
 		{
+		}
+		public BranchSelectionExpression OfCommits()
+		{
+			return Reselect((s) =>
+				(from c in Selection<Commit>()
+				 join b in s on c.BranchId equals b.Id
+				 select b).Distinct()
+			);
 		}
 		protected override BranchSelectionExpression Recreate()
 		{

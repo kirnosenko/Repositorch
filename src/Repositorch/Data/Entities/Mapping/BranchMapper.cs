@@ -41,37 +41,33 @@ namespace Repositorch.Data.Entities.Mapping
 					{
 						return new BranchMappingExpression[]
 						{
-							expression.OnBranch(
-								parentBranches[0].Mask, parentBranches[0].MaskOffset)
+							expression.OnBranch(parentBranches[0].Mask)
 						};
 					}
 					else
 					{
 						return new BranchMappingExpression[]
 						{
-							expression.OnSubBranch(
-								parentBranches[0].Mask, parentBranches[0].MaskOffset)
+							expression.OnSubBranch(parentBranches[0].Mask)
 						};
 					}
 				}
 				else // multi-parent revision (merge)
 				{
-					var combinedMask = parentBranches.Select(x => (x.Mask, x.MaskOffset)).Aggregate(
-						(b1, b2) => Branch.CombineMask(b1.Mask, b1.MaskOffset, b2.Mask, b2.MaskOffset)
-					);
+					var combinedMask = BranchMask.Or(parentBranches.Select(x => x.Mask).ToArray());
 					
 					if (parentChildren == 1)
 					{
 						return new BranchMappingExpression[]
 						{
-							expression.OnBranch(combinedMask.Mask, combinedMask.MaskOffset)
+							expression.OnBranch(combinedMask)
 						};
 					}
 					else
 					{
 						return new BranchMappingExpression[]
 						{
-							expression.OnSubBranch(combinedMask.Mask, combinedMask.MaskOffset)
+							expression.OnSubBranch(combinedMask)
 						};
 					}
 				}

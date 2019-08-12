@@ -50,82 +50,82 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			mappingDSL
 				.AddCommit("100").OnBranch("1")
-				.AddCommit("200").OnBranch("1", 40)
-				.AddCommit("300").OnBranch("1", 80)
+				.AddCommit("200").OnBranch(("1", 40))
+				.AddCommit("300").OnBranch(("1", 80))
 			.Submit();
 
 			Assert.Equal(new string[] { "100" }, selectionDSL
 				.Commits().OnBranchBack("1").Select(x => x.Revision));
 			Assert.Equal(new string[] { "100", "200" }, selectionDSL
-				.Commits().OnBranchBack("1", 40).Select(x => x.Revision));
+				.Commits().OnBranchBack(("1", 40)).Select(x => x.Revision));
 			Assert.Equal(new string[] { "100", "200", "300" }, selectionDSL
-				.Commits().OnBranchBack("1", 80).Select(x => x.Revision));
+				.Commits().OnBranchBack(("1", 80)).Select(x => x.Revision));
 		}
 		[Fact]
 		public void Should_select_commits_on_branch_forward_when_masks_are_far_from_each_other()
 		{
 			mappingDSL
 				.AddCommit("100").OnBranch("1")
-				.AddCommit("200").OnBranch("1", 40)
-				.AddCommit("300").OnBranch("1", 80)
+				.AddCommit("200").OnBranch(("1", 40))
+				.AddCommit("300").OnBranch(("1", 80))
 			.Submit();
 
 			Assert.Equal(new string[] { "100", "200", "300" }, selectionDSL
 				.Commits().OnBranchForward("1").Select(x => x.Revision));
 			Assert.Equal(new string[] { "200", "300" }, selectionDSL
-				.Commits().OnBranchForward("1", 40).Select(x => x.Revision));
+				.Commits().OnBranchForward(("1", 40)).Select(x => x.Revision));
 			Assert.Equal(new string[] { "300" }, selectionDSL
-				.Commits().OnBranchForward("1", 80).Select(x => x.Revision));
+				.Commits().OnBranchForward(("1", 80)).Select(x => x.Revision));
 		}
 		[Fact]
 		public void Should_select_commits_on_branch_back_when_masks_are_partially_intersected()
 		{
 			mappingDSL
 				.AddCommit("100").OnBranch("00000001")
-				.AddCommit("110").OnBranch("1", 7)
-				.AddCommit("200").OnBranch("10001", 7)
-				.AddCommit("300").OnBranch("1000001", 7)
-				.AddCommit("210").OnBranch("100011", 11)
-				.AddCommit("310").OnBranch("00100011", 11)
+				.AddCommit("110").OnBranch(("1", 7))
+				.AddCommit("200").OnBranch(("10001", 7))
+				.AddCommit("300").OnBranch(("1000001", 7))
+				.AddCommit("210").OnBranch(("100011", 11))
+				.AddCommit("310").OnBranch(("00100011", 11))
 			.Submit();
 
 			Assert.Equal(new string[] { "100", "110" }, selectionDSL
 				.Commits().OnBranchBack("00000001").Select(x => x.Revision));
 			Assert.Equal(new string[] { "100", "110" }, selectionDSL
-				.Commits().OnBranchBack("1", 7).Select(x => x.Revision));
+				.Commits().OnBranchBack(("1", 7)).Select(x => x.Revision));
 			Assert.Equal(new string[] { "100", "110", "200" }, selectionDSL
-				.Commits().OnBranchBack("10001", 7).Select(x => x.Revision));
+				.Commits().OnBranchBack(("10001", 7)).Select(x => x.Revision));
 			Assert.Equal(new string[] { "100", "110", "300" }, selectionDSL
-				.Commits().OnBranchBack("1000001", 7).Select(x => x.Revision));
+				.Commits().OnBranchBack(("1000001", 7)).Select(x => x.Revision));
 			Assert.Equal(new string[] { "100", "110", "200", "210" }, selectionDSL
-				.Commits().OnBranchBack("100011", 11).Select(x => x.Revision));
+				.Commits().OnBranchBack(("100011", 11)).Select(x => x.Revision));
 			Assert.Equal(new string[] { "100", "110", "300", "310" }, selectionDSL
-				.Commits().OnBranchBack("00100011", 11).Select(x => x.Revision));
+				.Commits().OnBranchBack(("00100011", 11)).Select(x => x.Revision));
 		}
 		[Fact]
 		public void Should_select_commits_on_branch_forward_when_masks_are_partially_intersected()
 		{
 			mappingDSL
 				.AddCommit("100").OnBranch("00000001")
-				.AddCommit("110").OnBranch("1", 7)
-				.AddCommit("200").OnBranch("10001", 7)
-				.AddCommit("300").OnBranch("1000001", 7)
-				.AddCommit("210").OnBranch("100011", 11)
-				.AddCommit("310").OnBranch("00100011", 11)
+				.AddCommit("110").OnBranch(("1", 7))
+				.AddCommit("200").OnBranch(("10001", 7))
+				.AddCommit("300").OnBranch(("1000001", 7))
+				.AddCommit("210").OnBranch(("100011", 11))
+				.AddCommit("310").OnBranch(("00100011", 11))
 			.Submit();
 
 			Assert.Equal(new string[] { "100", "110", "200", "300", "210", "310" }, selectionDSL
 				.Commits().OnBranchForward("00000001").Select(x => x.Revision));
 			Assert.Equal(new string[] { "100", "110", "200", "300", "210", "310" }, selectionDSL
-				.Commits().OnBranchForward("1", 7).Select(x => x.Revision));
+				.Commits().OnBranchForward(("1", 7)).Select(x => x.Revision));
 			Assert.Equal(new string[] { "200", "210" }, selectionDSL
-				.Commits().OnBranchForward("10001", 7).Select(x => x.Revision));
+				.Commits().OnBranchForward(("10001", 7)).Select(x => x.Revision));
 			Assert.Equal(new string[] { "300", "310" }, selectionDSL
-				.Commits().OnBranchForward("1000001", 7).Select(x => x.Revision));
+				.Commits().OnBranchForward(("1000001", 7)).Select(x => x.Revision));
 			Assert.Equal(new string[] { "210" }, selectionDSL
-				.Commits().OnBranchForward("100011", 11).Select(x => x.Revision));
+				.Commits().OnBranchForward(("100011", 11)).Select(x => x.Revision));
 			Assert.Equal(new string[] { "310" }, selectionDSL
-				.Commits().OnBranchForward("00100011", 11).Select(x => x.Revision));
+				.Commits().OnBranchForward(("00100011", 11)).Select(x => x.Revision));
 		}
 		[Fact]
 		public void Should_select_commits_relatively_specified()
@@ -133,17 +133,17 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			mappingDSL
 				.AddCommit("100").OnBranch("00000001")
 			.Submit()
-				.AddCommit("110").OnBranch("1", 7)
+				.AddCommit("110").OnBranch(("1", 7))
 			.Submit()
-				.AddCommit("200").OnBranch("10001", 7)
+				.AddCommit("200").OnBranch(("10001", 7))
 			.Submit()
-				.AddCommit("300").OnBranch("1000001", 7)
+				.AddCommit("300").OnBranch(("1000001", 7))
 			.Submit()
-				.AddCommit("210").OnBranch("100011", 11)
+				.AddCommit("210").OnBranch(("100011", 11))
 			.Submit()
-				.AddCommit("310").OnBranch("00100011", 11)
+				.AddCommit("310").OnBranch(("00100011", 11))
 			.Submit()
-				.AddCommit("999").OnBranch("10101111", 11)
+				.AddCommit("999").OnBranch(("10101111", 11))
 			.Submit();
 			
 			Assert.Equal(new string[] { }, selectionDSL
@@ -212,17 +212,17 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			mappingDSL
 				.AddCommit("100").OnBranch("00000001")
 			.Submit()
-				.AddCommit("110").OnBranch("1", 7)
+				.AddCommit("110").OnBranch(("1", 7))
 			.Submit()
-				.AddCommit("200").OnBranch("10001", 7)
+				.AddCommit("200").OnBranch(("10001", 7))
 			.Submit()
-				.AddCommit("300").OnBranch("1000001", 7)
+				.AddCommit("300").OnBranch(("1000001", 7))
 			.Submit()
-				.AddCommit("210").OnBranch("100011", 11)
+				.AddCommit("210").OnBranch(("100011", 11))
 			.Submit()
-				.AddCommit("310").OnBranch("00100011", 11)
+				.AddCommit("310").OnBranch(("00100011", 11))
 			.Submit()
-				.AddCommit("999").OnBranch("10101111", 11)
+				.AddCommit("999").OnBranch(("10101111", 11))
 			.Submit();
 
 			Assert.Equal(new string[] { "200", "210", "999" }, selectionDSL

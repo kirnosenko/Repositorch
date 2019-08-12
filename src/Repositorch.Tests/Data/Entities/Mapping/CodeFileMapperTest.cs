@@ -3,7 +3,6 @@ using System.Linq;
 using Xunit;
 using NSubstitute;
 using Repositorch.Data.Entities.DSL.Mapping;
-using Repositorch.Data.Entities.DSL.Selection;
 
 namespace Repositorch.Data.Entities.Mapping
 {
@@ -143,6 +142,41 @@ namespace Repositorch.Data.Entities.Mapping
 			);
 
 			Assert.Equal(new string[] { "file1", "file2" }, expressions
+				.Select(x => x.CurrentEntity<CodeFile>().Path));
+		}
+		[Fact]
+		public void Should_map_modified_in_merge_file_only_if_it_was_touched_on_different_parent_branches()
+		{
+			mappingDSL
+				.AddCommit("1").OnBranch("1")
+					.File("file1").Added()
+					.File("file2").Added()
+					.File("file3").Added()
+					.File("file4").Added()
+			.Submit()
+				.AddCommit("2").OnBranch("11")
+					.File("file1").Modified()
+					.File("file2").Modified()   // ---------
+			.Submit()                           //         |
+				.AddCommit("3").OnBranch("101") //         |
+					.File("file2").Modified()   // <-------- cherry pick changes, so no diff in log
+					.File("file3").Modified()
+					.File("file4").Modified()   // ---------
+			.Submit()                           //         |
+				.AddCommit("4").OnBranch("101") //         |
+					.File("file4").Modified()   // <-------- reverse changes, so no diff in log
+			.Submit();
+
+			vcsData.GetRevisionParents("10")
+				.Returns(new string[] { "2", "4" });
+			log.FileModified("file1");
+			log.FileModified("file3");
+			
+			var expressions = mapper.Map(
+				mappingDSL.AddCommit("10").OnBranch("111")
+			);
+
+			Assert.Equal(new string[] { "file2" }, expressions
 				.Select(x => x.CurrentEntity<CodeFile>().Path));
 		}
 	}

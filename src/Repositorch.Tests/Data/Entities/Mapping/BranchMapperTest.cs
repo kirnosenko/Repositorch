@@ -24,8 +24,8 @@ namespace Repositorch.Data.Entities.Mapping
 
 			Assert.Equal(1, Get<Branch>().Count());
 			var branch = Get<Branch>().Single();
-			Assert.Equal("1", branch.Mask);
-			Assert.Equal(0, branch.MaskOffset);
+			Assert.Equal("1", branch.Mask.Data);
+			Assert.Equal(0, branch.Mask.Offset);
 		}
 		[Fact]
 		public void Should_use_the_same_branch_for_sequential_commits()
@@ -74,9 +74,9 @@ namespace Repositorch.Data.Entities.Mapping
 
 			Assert.Equal(3, Get<Branch>().Count());
 			Assert.Equal(new string[] { "1", "1", "101" }, Get<Branch>()
-				.Select(b => b.Mask));
+				.Select(b => b.Mask.Data));
 			Assert.Equal(new int[] { 0, 1, 0 }, Get<Branch>()
-				.Select(b => b.MaskOffset));
+				.Select(b => b.Mask.Offset));
 		}
 		[Fact]
 		public void Should_create_a_new_branch_for_nonfirst_commit_without_parents()
@@ -97,9 +97,9 @@ namespace Repositorch.Data.Entities.Mapping
 			
 			Assert.Equal(2, Get<Branch>().Count());
 			Assert.Equal(new string[] { "1", "01" }, Get<Branch>()
-				.Select(b => b.Mask));
+				.Select(b => b.Mask.Data));
 			Assert.Equal(new int[] { 0, 0 }, Get<Branch>()
-				.Select(b => b.MaskOffset));
+				.Select(b => b.Mask.Offset));
 		}
 		[Fact]
 		public void Should_combine_branch_mask_from_parents_branch_masks()
@@ -124,9 +124,9 @@ namespace Repositorch.Data.Entities.Mapping
 
 			Assert.Equal(3, Get<Branch>().Count());
 			Assert.Equal(new string[] { "1", "01", "1" }, Get<Branch>()
-				.Select(b => b.Mask));
+				.Select(b => b.Mask.Data));
 			Assert.Equal(new int[] { 0, 0, 1 }, Get<Branch>()
-				.Select(b => b.MaskOffset));
+				.Select(b => b.Mask.Offset));
 		}
 		[Fact]
 		public void Should_change_combined_mask_when_parents_have_another_child()
@@ -151,10 +151,9 @@ namespace Repositorch.Data.Entities.Mapping
 
 			Assert.Equal(3, Get<Branch>().Count());
 			Assert.Equal(new string[] { "1", "01", "1" }, Get<Branch>()
-				.Select(b => b.Mask));
+				.Select(b => b.Mask.Data));
 			Assert.Equal(new int[] { 0, 0, 2 }, Get<Branch>()
-				.Select(b => b.MaskOffset));
-
+				.Select(b => b.Mask.Offset));
 		}
 	}
 }
