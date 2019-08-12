@@ -118,12 +118,13 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		}
 		public ICodeBlockMappingExpression ForCodeAddedInitiallyInRevision(string revision)
 		{
+			var file = CurrentEntity<Modification>().File;
 			entity.AddedInitiallyInCommit = null;
 			entity.TargetCodeBlock = this.SelectionDSL()
-					.Commits().RevisionIs(revision)
-					.Files().IdIs(CurrentEntity<Modification>().File.Id)
-					.Modifications().InFiles()
-					.CodeBlocks().InModifications().AddedInitiallyInCommits().Single();
+				.Commits().RevisionIs(revision)
+				.Files().IdIs(file.Id)
+				.Modifications().InFiles()
+				.CodeBlocks().InModifications().AddedInitiallyInCommits().Last();
 
 			return this;
 		}

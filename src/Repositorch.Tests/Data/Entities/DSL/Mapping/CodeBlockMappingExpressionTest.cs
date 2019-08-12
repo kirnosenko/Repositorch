@@ -22,7 +22,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			Assert.Equal("1", cb.AddedInitiallyInCommit.Revision);
 		}
 		[Fact]
-		public void Can_set_target_codeblock_for_new_one()
+		public void Should_set_target_codeblock_for_new_one()
 		{
 			mappingDSL
 				.AddCommit("1")
@@ -61,6 +61,35 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 				from m in targetModification
 				join c in Get<Commit>() on m.CommitId equals c.Id
 				select c.Revision);
+		}
+		[Fact]
+		public void Should_use_the_last_target_codeblock_when_there_are_several_of_them()
+		{
+			mappingDSL
+				.AddCommit("1").OnBranch("1")
+					.File("file1").Added()
+						.Code(100)
+			.Submit()
+				.AddCommit("2").OnBranch("1")
+					.File("file1").Removed()
+						.DeleteCode()
+					.File("file2").CopiedFrom("file1", "1")
+						.Code(100).CopiedFrom("1")
+			.Submit()
+				.AddCommit("3").OnBranch("1")
+					.File("file1").CopiedFrom("file2", "2")
+						.Code(100).CopiedFrom("1")
+					.File("file2").Removed()
+						.DeleteCode()
+			.Submit()
+				.AddCommit("4").OnBranch("1")
+					.File("file1").Modified()
+						.Code(-10).ForCodeAddedInitiallyInRevision("1")
+			.Submit();
+
+			var codeBlock = Get<CodeBlock>().Last();
+			Assert.Equal("1", codeBlock.TargetCodeBlock.AddedInitiallyInCommit.Revision);
+			Assert.Equal("3", codeBlock.TargetCodeBlock.Modification.Commit.Revision);
 		}
 		[Fact]
 		public void Should_clear_added_initially_in_commit_field_for_targeted_code_block()
