@@ -164,52 +164,59 @@ namespace Repositorch.Data.Entities.Mapping
 		{
 			using (var s = data.OpenSession())
 			{
-				var commitsToRemove = s.Get<Commit>()
+				var commitsToRemove = s.GetReadOnly<Commit>()
 					.Skip(revisionsToKeep)
 					.OrderByDescending(x => x.OrderedNumber)
 					.ToArray();
-				
+
 				foreach (var commit in commitsToRemove)
 				{
 					OnTruncateRevision?.Invoke(GetRevisionName(commit.Revision, commit.OrderedNumber));
 
-					var modificationsToRemove = s.Get<Modification>()
-						.Where(m => m.CommitId == commit.Id);
+					var modificationsToRemove = s.GetReadOnly<Modification>()
+						.Where(m => m.CommitId == commit.Id)
+						.ToArray();
 					var codeToRemove =
-						from m in modificationsToRemove
-						join cb in s.Get<CodeBlock>() on m.Id equals cb.ModificationId
-						select cb;
-					s.RemoveRange(codeToRemove);
-					s.RemoveRange(modificationsToRemove);
+						(from m in modificationsToRemove
+						join cb in s.GetReadOnly<CodeBlock>() on m.Id equals cb.ModificationId
+						select cb).ToArray();
 					var filesToRemove =
-						from f in s.Get<CodeFile>()
-						join m in s.Get<Modification>() on f.Id equals m.FileId
-						join c in s.Get<Commit>() on m.CommitId equals c.Id
+						(from f in s.GetReadOnly<CodeFile>()
+						join m in s.GetReadOnly<Modification>() on f.Id equals m.FileId
+						join c in s.GetReadOnly<Commit>() on m.CommitId equals c.Id
 						group c.Id by f into fileCommits
 						where fileCommits.Count() == 1 && fileCommits.Max() == commit.Id
-						select fileCommits.Key;
-					s.RemoveRange(filesToRemove);
+						select fileCommits.Key).ToArray();
 					var authorsToRemove =
-						from a in s.Get<Author>()
-						join c in s.Get<Commit>() on a.Id equals c.AuthorId
+						(from a in s.GetReadOnly<Author>()
+						join c in s.GetReadOnly<Commit>() on a.Id equals c.AuthorId
 						group c.Id by a into authorCommits
 						where authorCommits.Count() == 1 && authorCommits.Max() == commit.Id
-						select authorCommits.Key;
-					s.RemoveRange(authorsToRemove);
-					var branchesToRemove =
-						from b in s.Get<Branch>()
-						join c in s.Get<Commit>() on b.Id equals c.BranchId
+						select authorCommits.Key).ToArray();
+					var fixesToRemove = s.GetReadOnly<BugFix>()
+						.Where(x => x.CommitId == commit.Id)
+						.ToArray();
+					var branchesToRemoveId =
+						(from b in s.GetReadOnly<Branch>()
+						join c in s.GetReadOnly<Commit>() on b.Id equals c.BranchId
 						group c.Id by b into branchCommits
 						where branchCommits.Count() == 1 && branchCommits.Max() == commit.Id
-						select branchCommits.Key;
-					s.RemoveRange(branchesToRemove);
-					var fixToRemove = s.Get<BugFix>().SingleOrDefault(x => x.CommitId == commit.Id);
-					if (fixToRemove != null)
-					{
-						s.Remove(fixToRemove);
-					}
-					s.Remove(commit);
+						select branchCommits.Key.Id).ToArray();
+					// Separate branch loading to include mask and prevent error:
+					// The entity of type 'Branch' is sharing the table 'Branch' with entities 
+					// of type 'BranchMask', but there is no entity of this type with the same 
+					// key value '{Id: }' that has been marked as 'Deleted'.
+					var branchesToRemove = s.GetReadOnly<Branch>()
+						.Where(x => branchesToRemoveId.Contains(x.Id))
+						.ToArray();
 					
+					s.RemoveRange(codeToRemove);
+					s.RemoveRange(modificationsToRemove);
+					s.RemoveRange(filesToRemove);
+					s.RemoveRange(fixesToRemove);
+					s.Remove(commit);
+					s.RemoveRange(authorsToRemove);
+					s.RemoveRange(branchesToRemove);
 					s.SubmitChanges();
 				}
 			}
