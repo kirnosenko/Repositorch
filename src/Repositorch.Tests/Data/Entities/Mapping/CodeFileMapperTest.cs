@@ -10,6 +10,7 @@ namespace Repositorch.Data.Entities.Mapping
 	{
 		private CodeFileMapper mapper;
 		private TestLog log;
+		private TestDiff diff;
 
 		public CodeFileMapperTest()
 		{
@@ -17,6 +18,10 @@ namespace Repositorch.Data.Entities.Mapping
 			vcsData
 				.Log(Arg.Is<string>("10"))
 				.Returns(log);
+			diff = new TestDiff();
+			vcsData
+				.Diff(Arg.Is<string>("10"))
+				.Returns(diff);
 			mapper = new CodeFileMapper(vcsData);
 		}
 		[Fact]
@@ -172,6 +177,32 @@ namespace Repositorch.Data.Entities.Mapping
 			log.FileModified("file1");
 			log.FileModified("file3");
 			
+			var expressions = mapper.Map(
+				mappingDSL.AddCommit("10").OnBranch("111")
+			);
+
+			Assert.Equal(new string[] { "file2" }, expressions
+				.Select(x => x.CurrentEntity<CodeFile>().Path));
+		}
+		[Fact]
+		public void Should_use_diff_as_source_of_modified_files_in_merge()
+		{
+			mappingDSL
+				.AddCommit("1").OnBranch("1")
+					.File("file1").Added()
+					.File("file2").Added()
+			.Submit()
+				.AddCommit("2").OnBranch("11")
+					.File("file1").Modified()
+			.Submit()
+				.AddCommit("3").OnBranch("101")
+					.File("file2").Modified()
+			.Submit();
+
+			vcsData.GetRevisionParents("10")
+				.Returns(new string[] { "2", "3" });
+			diff.FileTouched("file2");
+
 			var expressions = mapper.Map(
 				mappingDSL.AddCommit("10").OnBranch("111")
 			);

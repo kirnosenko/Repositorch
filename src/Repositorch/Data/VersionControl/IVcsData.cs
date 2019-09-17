@@ -23,6 +23,7 @@ namespace Repositorch.Data.VersionControl
 		IEnumerable<string> GetRevisionChildren(string revision);
 		
 		Log Log(string revision);
+		IDiff Diff(string revision);
 		IBlame Blame(string revision, string filePath);
 	}
 }

@@ -15,11 +15,11 @@ namespace Repositorch.Data.Entities.Mapping
 		}
 		public override IEnumerable<ICodeFileMappingExpression> Map(ICommitMappingExpression expression)
 		{
-			List<CodeFileMappingExpression> fileExpressions = new List<CodeFileMappingExpression>();
+			List<string> allTouchedFiles = new List<string>();
 
 			string revision = expression.CurrentEntity<Commit>().Revision;
 			Log log = vcsData.Log(revision);
-			var touchedFiles = FilterTouchedFiles(log.TouchedFiles);
+			var logTouchedFiles = log.TouchedFiles;
 			if (vcsData.IsMerge(revision))
 			{
 				var currentBranch = expression.CurrentEntity<Branch>();
@@ -50,34 +50,37 @@ namespace Repositorch.Data.Entities.Mapping
 
 				foreach (var touchedFile in filesTouchedOnDifferentBranches)
 				{
-					fileExpressions.Add(expression.File(touchedFile));
+					allTouchedFiles.Add(touchedFile);
 				}
 
-				touchedFiles = touchedFiles.Where(tf =>
+				foreach (var touchedFile in vcsData.Diff(revision).TouchedFiles)
+				{
+					allTouchedFiles.Add(touchedFile);
+				}
+
+				logTouchedFiles = logTouchedFiles.Where(tf =>
 					(tf.Action == TouchedFile.TouchedFileAction.ADDED && existentFiles.All(ef => ef != tf.Path))
 					||
 					(tf.Action == TouchedFile.TouchedFileAction.REMOVED && existentFiles.Any(ef => ef == tf.Path)));
 			}
 
-			foreach (var touchedFile in touchedFiles)
+			foreach (var touchedFile in logTouchedFiles)
 			{
-				fileExpressions.Add(expression.File(touchedFile.Path));
+				allTouchedFiles.Add(touchedFile.Path);
 			}
 
-			return fileExpressions;
+			IEnumerable<string> filteredFiles = allTouchedFiles;
+			if (PathSelectors != null)
+			{
+				filteredFiles = filteredFiles
+					.Where(x => PathSelectors.All(ps => ps.IsSelected(x)));
+			}
+
+			return filteredFiles.Distinct().Select(x => expression.File(x)).ToArray();
 		}
 		public IPathSelector[] PathSelectors
 		{
 			get; set;
-		}
-		private IEnumerable<TouchedFile> FilterTouchedFiles(IEnumerable<TouchedFile> touchedFiles)
-		{
-			if (PathSelectors != null)
-			{
-				touchedFiles = touchedFiles
-					.Where(tf => PathSelectors.All(ps => ps.IsSelected(tf.Path)));
-			}
-			return touchedFiles;
 		}
 	}
 }

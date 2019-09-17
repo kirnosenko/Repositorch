@@ -34,6 +34,13 @@ namespace Repositorch.Data.VersionControl.Git
 				return new GitLog(log);
 			}
 		}
+		public IDiff Diff(string revision)
+		{
+			using (var diff = git.Diff(revision))
+			{
+				return new GitDiff(diff);
+			}
+		}
 		public IBlame Blame(string revision, string filePath)
 		{
 			using (var blame = git.Blame(revision, filePath))

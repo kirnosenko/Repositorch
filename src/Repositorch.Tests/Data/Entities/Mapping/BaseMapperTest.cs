@@ -54,6 +54,16 @@ namespace Repositorch.Data.Entities.Mapping
 			}
 		}
 
+		protected class TestDiff : List<string>, IDiff
+		{
+			public IEnumerable<string> TouchedFiles => this;
+
+			public void FileTouched(string path)
+			{
+				Add(path);
+			}
+		}
+
 		protected class TestBlame : Dictionary<int, string>, IBlame
 		{
 			public TestBlame AddLinesFromRevision(string revision, int lines)
