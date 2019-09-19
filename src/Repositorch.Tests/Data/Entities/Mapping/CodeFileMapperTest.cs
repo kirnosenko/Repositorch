@@ -210,5 +210,33 @@ namespace Repositorch.Data.Entities.Mapping
 			Assert.Equal(new string[] { "file2" }, expressions
 				.Select(x => x.CurrentEntity<CodeFile>().Path));
 		}
+		[Fact]
+		public void Should_not_duplicate_the_same_file_from_different_sources()
+		{
+			mappingDSL
+				.AddCommit("1").OnBranch("1")
+					.File("file1").Added()
+			.Submit()
+				.AddCommit("2").OnBranch("11")
+					.File("file1").Modified()
+			.Submit()
+				.AddCommit("3").OnBranch("101")
+					.File("file1").Modified()
+			.Submit();
+
+			vcsData.GetRevisionParents("10")
+				.Returns(new string[] { "2", "3" });
+			log.FileModified("file1");
+			diff.FileTouched("file1");
+
+			var expressions = mapper.Map(
+				mappingDSL.AddCommit("10").OnBranch("111")
+			);
+
+			var count = expressions
+				.Where(x => x.CurrentEntity<CodeFile>().Path == "file1")
+				.Count();
+			Assert.Equal(1, count);
+		}
 	}
 }
