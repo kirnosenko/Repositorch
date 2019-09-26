@@ -185,6 +185,48 @@ namespace Repositorch.Data.Entities.Mapping
 				.Select(x => x.CurrentEntity<CodeFile>().Path));
 		}
 		[Fact]
+		public void Should_indentify_files_untouched_on_different_parent_branches_in_case_of_many_parent_branches()
+		{
+			mappingDSL
+				.AddCommit("1").OnBranch("1")
+					.File("file1").Added()
+					.File("file2").Added()
+					.File("file3").Added()
+					.File("file4").Added()
+					.File("file5").Added()
+					.File("file6").Added()
+			.Submit()
+				.AddCommit("2").OnBranch("11")
+					.File("file2").Modified()
+					.File("file6").Modified()
+			.Submit()
+				.AddCommit("3").OnBranch("101")
+					.File("file3").Modified()
+					.File("file6").Modified()
+			.Submit()
+				.AddCommit("4").OnBranch("11")
+					.File("file2").Modified()
+					.File("file6").Modified()
+			.Submit()
+				.AddCommit("5").OnBranch("1011")
+					.File("file4").Modified()
+					.File("file6").Modified()
+			.Submit()
+				.AddCommit("6").OnBranch("10101")
+					.File("file5").Modified()
+					.File("file6").Modified()
+			.Submit();
+
+			vcsData.GetRevisionParents("10")
+				.Returns(new string[] { "4", "5", "6" });
+			var expressions = mapper.Map(
+				mappingDSL.AddCommit("10").OnBranch("11111")
+			);
+
+			Assert.Equal(new string[] { "file6" }, expressions
+				.Select(x => x.CurrentEntity<CodeFile>().Path));
+		}
+		[Fact]
 		public void Should_use_diff_as_source_of_modified_files_in_merge()
 		{
 			mappingDSL

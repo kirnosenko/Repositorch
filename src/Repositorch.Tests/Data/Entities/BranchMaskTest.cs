@@ -157,6 +157,17 @@ namespace Repositorch.Data.Entities
 			Assert.Equal(13, result.Offset);
 		}
 		[Fact]
+		public void Should_keep_at_least_one_bit_in_mask()
+		{
+			var m1 = new BranchMask() { Data = "11" };
+			var m2 = new BranchMask() { Data = "1011" };
+
+			var result = BranchMask.And(m1, m2);
+
+			Assert.Equal("1", result.Data);
+			Assert.Equal(0, result.Offset);
+		}
+		[Fact]
 		public void Should_truncate_leading_zeros()
 		{
 			var m1 = new BranchMask() { Data = "0010000", Offset = 0 };

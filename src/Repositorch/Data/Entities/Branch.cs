@@ -81,24 +81,18 @@ namespace Repositorch.Data.Entities
 		}
 		private static BranchMask Shift(string mask)
 		{
+			mask = mask.TrimEnd('0');
+			
 			int offset = 0;
 			int ones = 0;
 			while (ones < mask.Length && mask[ones] == '1')
 			{
 				ones++;
 			}
-			int zeros = 0;
-			while (zeros < mask.Length && mask[mask.Length-1-zeros] == '0')
+			if (ones > 1)
 			{
-				zeros++;
-			}
-			if (ones > 1 || zeros > 0)
-			{
-				if (ones > 1)
-				{
-					ones--;
-				}
-				mask = mask.Substring(ones, mask.Length-ones-zeros);
+				ones--;
+				mask = mask.Substring(ones, mask.Length-ones);
 				offset += ones;
 			}
 

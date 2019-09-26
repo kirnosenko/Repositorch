@@ -28,26 +28,8 @@ namespace Repositorch.Data.Entities.Mapping
 					.Files().TouchedInAndStillExistAfterCommits().Select(x => x.Path)
 					.ToArray();
 
-				var parentRevisions = vcsData.GetRevisionParents(revision).ToArray();
-				var parentBranchMasks = expression.SelectionDSL()
-					.Commits().RevisionIsIn(parentRevisions)
-					.Branches().OfCommits()
-					.Select(b => b.Mask).ToArray();
-				var commonParentMask = BranchMask.And(parentBranchMasks);
-
-				List<IQueryable<string>> filesTouchedOnBranches = new List<IQueryable<string>>(parentBranchMasks.Length);
-				foreach (var parentBranchMask in parentBranchMasks)
-				{
-					filesTouchedOnBranches.Add(expression.SelectionDSL()
-						.Commits().OnBranchBack(BranchMask.Xor(parentBranchMask, commonParentMask))
-						.Files().TouchedInAndStillExistAfterCommits().Select(x => x.Path));
-				}
-				var filesTouchedOnDifferentBranches =
-					from f in filesTouchedOnBranches.SelectMany(x => x)
-					group f by f into fileCount
-					where fileCount.Count() > 1
-					select fileCount.Key;
-
+				var filesTouchedOnDifferentBranches = GetFilesTouchedOnDifferentBranches(expression, revision);
+				
 				foreach (var touchedFile in filesTouchedOnDifferentBranches)
 				{
 					allTouchedFiles.Add(touchedFile);
@@ -81,6 +63,59 @@ namespace Repositorch.Data.Entities.Mapping
 		public IPathSelector[] PathSelectors
 		{
 			get; set;
+		}
+
+		private IEnumerable<string> GetFilesTouchedOnDifferentBranches(ICommitMappingExpression expression, string revision)
+		{
+			List<string> filesTouchedOnDifferentBranches = new List<string>();
+
+			var parentRevisions = vcsData.GetRevisionParents(revision).ToArray();
+			var parentBranchMasks = expression.SelectionDSL()
+				.Commits().RevisionIsIn(parentRevisions)
+				.Branches().OfCommits()
+				.Select(b => b.Mask).ToArray();
+			var commonParentMask = BranchMask.And(parentBranchMasks);
+
+			if (parentRevisions.Length == 2) // merge of two branches -> simple case
+			{
+				var firstBranchMask = BranchMask.Xor(parentBranchMasks[0], commonParentMask);
+				var secondBranchMask = BranchMask.Xor(parentBranchMasks[1], commonParentMask);
+
+				filesTouchedOnDifferentBranches.AddRange(
+					GetFilesTouchedOnDifferentBranches(expression, firstBranchMask, secondBranchMask));
+			}
+			else
+			{
+				var fullParentMask = BranchMask.Or(parentBranchMasks);
+				foreach (var parentBranchMask in parentBranchMasks)
+				{
+					var currentBranchMask = BranchMask.Xor(parentBranchMask, commonParentMask);
+					var otherBranchesMask = BranchMask.Xor(currentBranchMask, BranchMask.Xor(commonParentMask, fullParentMask));
+
+					filesTouchedOnDifferentBranches.AddRange(
+						GetFilesTouchedOnDifferentBranches(expression, currentBranchMask, otherBranchesMask));
+				}
+			}
+
+			return filesTouchedOnDifferentBranches;
+		}
+
+		private IEnumerable<string> GetFilesTouchedOnDifferentBranches(
+			ICommitMappingExpression expression,
+			BranchMask singleBranchMask,
+			BranchMask otherBranchesMask)
+		{
+			var filesTouchedOnBranch = expression.SelectionDSL()
+				.Commits().OnBranchBack(singleBranchMask)
+				.Files().TouchedInAndStillExistAfterCommits().Select(x => x.Path);
+			var filesTouchedOnOtherBranches = expression.SelectionDSL()
+				.Commits().OnBranchBack(otherBranchesMask)
+				.Files().TouchedInAndStillExistAfterCommits().Select(x => x.Path);
+
+			foreach (var file in filesTouchedOnBranch.Intersect(filesTouchedOnOtherBranches))
+			{
+				yield return file;
+			}
 		}
 	}
 }

@@ -41,7 +41,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			{
 				Commit = CurrentEntity<Commit>(),
 				File = CurrentEntity<CodeFile>(),
-				Action = action
+				Action = action,
 			};
 			Add(entity);
 		}
@@ -53,8 +53,15 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		{
 			entity.SourceCommit = Get<Commit>()
 				.Single(x => x.Revision == sourceRevision);
-			entity.SourceFile = this.SelectionDSL()
-				.Files().PathIs(sourseFilePath).ExistInRevision(sourceRevision).Single();
+			var possibleSourceFiles = Get<CodeFile>()
+				.Where(x => x.Path == sourseFilePath)
+				.ToArray();
+			entity.SourceFile = possibleSourceFiles.Length == 1
+				? possibleSourceFiles[0]
+				: this.SelectionDSL()
+					.Files().PathIs(sourseFilePath)
+					.ExistInRevision(sourceRevision)
+					.Single();
 		}
 	}
 }
