@@ -45,7 +45,7 @@ namespace Repositorch.Data.VersionControl.Git
 		{
 			using (var blame = git.Blame(revision, filePath))
 			{
-				return new GitBlame(blame);
+				return GitBlame.Parse(blame);
 			}
 		}
 	}

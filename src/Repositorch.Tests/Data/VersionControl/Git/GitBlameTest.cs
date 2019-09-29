@@ -40,10 +40,12 @@ a59b276e18f3d4a548caf549e05188cb1bd3a709 17 17 2
 filename decorate.h
 ";
 
+private string blame1 = @"fatal: no such path";
+
 		[Fact]
 		public void Should_keep_revisions_for_each_line()
 		{
-			blame = new GitBlame(blame0.ToStream());
+			blame = GitBlame.Parse(blame0.ToStream());
 
 			Assert.Equal(15,
 				blame.Where(x => x.Value == "a59b276e18f3d4a548caf549e05188cb1bd3a709").Count());
@@ -52,6 +54,13 @@ filename decorate.h
 			Assert.Equal(new int[] { 5, 15, 16 },
 				blame.Where(x => x.Value == "54988bdad7dc3f09e40752221c144bf470d73aa7")
 				.Select(x => x.Key));
+		}
+		[Fact]
+		public void Should_return_null_for_invalid_path()
+		{
+			blame = GitBlame.Parse(blame1.ToStream());
+
+			Assert.Null(blame);
 		}
 	}
 }

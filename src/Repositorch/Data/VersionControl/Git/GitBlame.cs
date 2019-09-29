@@ -9,12 +9,22 @@ namespace Repositorch.Data.VersionControl.Git
 	/// </summary>
 	public class GitBlame : Dictionary<int,string>, IBlame
 	{
-		public GitBlame(Stream blameData)
+		private GitBlame()
 		{
+		}
+
+		public static GitBlame Parse(Stream blameData)
+		{
+			var result = new GitBlame();
 			TextReader reader = new StreamReader(blameData);
-			
-			string line;
-			while ((line = reader.ReadLine()) != null)
+
+			string line = reader.ReadLine();
+			if (line != null && line.StartsWith("fatal: no such path"))
+			{
+				return null;
+			}
+
+			do
 			{
 				if ((line.Length >= 46) && (line.Length < 100))
 				{
@@ -25,11 +35,13 @@ namespace Repositorch.Data.VersionControl.Git
 						int startLine = Convert.ToInt32(parts[2]);
 						for (int i = 0; i < lines; i++)
 						{
-							Add(startLine + i, parts[0]);
+							result.Add(startLine + i, parts[0]);
 						}
 					}
 				}
-			}
+			} while ((line = reader.ReadLine()) != null);
+
+			return result;
 		}
 	}
 }

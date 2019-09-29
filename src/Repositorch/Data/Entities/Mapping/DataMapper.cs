@@ -261,16 +261,41 @@ namespace Repositorch.Data.Entities.Mapping
 				return result;
 			}
 		}
+		public void CheckAndTruncate(string path)
+		{
+			var revisions = data.UsingSession(s => s.Get<Commit>().Count());
+
+			while (true)
+			{
+				using (var s = data.OpenSession())
+				{
+					var revision = s.Get<Commit>()
+						.OrderByDescending(x => x.OrderedNumber)
+						.Select(x => x.Revision)
+						.FirstOrDefault();
+					var file = s.Get<CodeFile>()
+						.Where(x => x.Path == path)
+						.OrderByDescending(x => x.Id)
+						.FirstOrDefault();
+					if (revision == null || file == null)
+					{
+						return;
+					}
+					var checkSuccess = CheckLinesContent(s, revision, file);
+					if (checkSuccess)
+					{
+						return;
+					}
+				}
+
+				revisions--;
+				Truncate(revisions);
+			}
+		}
+
 		private bool CheckLinesContent(ISession s, string revision, CodeFile file)
 		{
-			IBlame fileBlame = null;
-			try
-			{
-				fileBlame = vcsData.Blame(revision, file.Path);
-			}
-			catch
-			{
-			}
+			var fileBlame = vcsData.Blame(revision, file.Path);
 			if (fileBlame == null)
 			{
 				OnError?.Invoke(string.Format("Could not get blame for file {0} in revision {1}.",

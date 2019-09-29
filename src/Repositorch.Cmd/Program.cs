@@ -25,15 +25,16 @@ namespace Repositorch
 			{
 				Func<DataMapper.MappingSettings> settings = () => new DataMapper.MappingSettings()
 				{
-					StopRevision = vcsData.GetRevisionByNumber(3000),
-					Check = DataMapper.CheckMode.TOUCHED,
+					StopRevision = vcsData.GetRevisionByNumber(2850),
+					Check = DataMapper.CheckMode.ALL,
 				};
-				mapper.MapRevisions(settings());
-				//mapper.Truncate(2175);
+				//mapper.MapRevisions(settings());
+				//mapper.Truncate(3415);
 				//mapper.Check(2309, DataMapper.CheckMode.ALL);
+				//mapper.CheckAndTruncate("/test-delta.c");
 
-				//BlameDiff(vcsData);
-				//FileHistory(data, vcsData, "/git-svnimport.perl");
+				BlameDiff(vcsData);
+				//FileHistory(data, vcsData, "/test-delta.c");
 				//Select(data);
 			}
 
@@ -77,16 +78,16 @@ namespace Repositorch
 
 		static void BlameDiff(IVcsData vcsData)
 		{
-			var r0 = "40dad96e41fcb96e31bdf11deec3c7bf6261adbe";
-			var r1 = "29504118f8528f658fd0bfc02d8d78d4c01dc2cc";
+			var r0 = "41f93a2c903a45167b26c2dc93d45ffa9a9bbd49";
+			var r1 = "c2f3bf071ee90b01f2d629921bb04c4f798f02fa";
 			
-			var file = "/git-svnimport.perl";
+			var file = "/test-delta.c";
 
 			var blame0 = vcsData.Blame(r0, file);
 			var blame1 = vcsData.Blame(r1, file);
 			var diff01 = blame0.Diff(blame1);
 			
-			Console.WriteLine();	
+			Console.WriteLine();
 		}
 		static void Select(IDataStore data)
 		{
