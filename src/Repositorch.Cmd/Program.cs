@@ -122,6 +122,7 @@ namespace Repositorch
 					{
 						revision = codeBlocksForFile.Key.c.Revision,
 						revisionNumber = codeBlocksForFile.Key.c.OrderedNumber,
+						revisionDate = codeBlocksForFile.Key.c.Date,
 						action = codeBlocksForFile.Key.m.Action,
 						codePlus = codeBlocksForFile
 							.Where(x => x.TargetCodeBlockId == null)
@@ -138,9 +139,10 @@ namespace Repositorch
 				foreach (var m in modifications)
 				{
 					var lines = vcsData.Blame(m.revision, path);
-					Console.WriteLine(string.Format("{0} ({1}) {2} +{3} -{4} +{5} loc: {6}",
+					Console.WriteLine(string.Format("{0} ({1}) {2} {3} +{4} -{5} +{6} loc: {7}",
 						m.revision,
 						m.revisionNumber,
+						m.revisionDate.Date,
 						m.action,
 						m.codePlus,
 						-m.codeMinus,

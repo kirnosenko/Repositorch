@@ -369,9 +369,12 @@ namespace Repositorch.Data.Entities.Mapping
 			}
 			foreach (var error in errorCode)
 			{
+				var sourceCommit = s.Get<Commit>()
+					.Where(x => x.Revision == error.SourceRevision)
+					.Single();
 				OnError?.Invoke(string.Format("Incorrect number of lines in file {0} from revision {1}. {2} should be {3}",
 					file.Path,
-					error.SourceRevision,
+					GetRevisionName(sourceCommit.Revision, sourceCommit.OrderedNumber),
 					error.CodeSize,
 					error.RealCodeSize));
 			}
