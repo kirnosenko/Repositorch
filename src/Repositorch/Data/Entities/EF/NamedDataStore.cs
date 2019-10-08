@@ -9,6 +9,7 @@ namespace Repositorch.Data.Entities.EF
 	{
 		private static readonly ILoggerFactory loggerFactory = new LoggerFactory(
 			new[] { new DebugLoggerProvider() });
+		private ISession session;
 		protected readonly string name;
 
 		public NamedDataStore(string name)
@@ -16,6 +17,21 @@ namespace Repositorch.Data.Entities.EF
 			this.name = name;
 		}
 		public ISession OpenSession()
+		{
+			return SingletonSession ? GetSession() : GetNewSession();
+		}
+		public bool SingletonSession
+		{
+			get; set;
+		}
+		public bool Logging
+		{
+			get; set;
+		}
+
+		protected abstract void Configure(DbContextOptionsBuilder options);
+
+		private ISession GetNewSession()
 		{
 			return new EfSession(c =>
 			{
@@ -27,11 +43,13 @@ namespace Repositorch.Data.Entities.EF
 				}
 			});
 		}
-		public bool Logging
+		private ISession GetSession()
 		{
-			get; set;
+			if (session == null)
+			{
+				session = GetNewSession();
+			}
+			return new SessionWrapper(session);
 		}
-
-		protected abstract void Configure(DbContextOptionsBuilder options);
 	}
 }

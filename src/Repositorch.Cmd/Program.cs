@@ -17,6 +17,7 @@ namespace Repositorch
 		static void Main(string[] args)
 		{
 			var data = new SqliteDataStore("d:/123.db");// { Logging = true };
+			//var data = new PostgreSqlDataStore("git", "postgres", "123") { SingletonSession = true };
 			var gitClient = new CommandLineGitClient("D:/src/git/.git");
 			var vcsData = new VcsDataCached(new GitData(gitClient), 10, 1000);
 			var mapper = CreateDataMapper(data, vcsData);
