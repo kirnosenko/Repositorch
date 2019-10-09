@@ -16,7 +16,7 @@ namespace Repositorch
 	{
 		static void Main(string[] args)
 		{
-			var data = new SqliteDataStore("d:/123.db");// { Logging = true };
+			var data = new SqliteDataStore("d:/555.db");// { Logging = true };
 			//var data = new PostgreSqlDataStore("git", "postgres", "123") { SingletonSession = true };
 			var gitClient = new CommandLineGitClient("D:/src/git/.git");
 			var vcsData = new VcsDataCached(new GitData(gitClient), 10, 1000);
@@ -26,15 +26,15 @@ namespace Repositorch
 			{
 				Func<DataMapper.MappingSettings> settings = () => new DataMapper.MappingSettings()
 				{
-					StopRevision = vcsData.GetRevisionByNumber(2850),
-					Check = DataMapper.CheckMode.ALL,
+					StopRevision = vcsData.GetRevisionByNumber(2000),
+					Check = DataMapper.CheckMode.TOUCHED,
 				};
-				//mapper.MapRevisions(settings());
+				mapper.MapRevisions(settings());
 				//mapper.Truncate(3415);
 				//mapper.Check(2309, DataMapper.CheckMode.ALL);
 				//mapper.CheckAndTruncate("/test-delta.c");
 
-				BlameDiff(vcsData);
+				//BlameDiff(vcsData);
 				//FileHistory(data, vcsData, "/test-delta.c");
 				//Select(data);
 			}
@@ -53,7 +53,14 @@ namespace Repositorch
 			dataMapper.RegisterMapper(
 				new BugFixMapper(vcsData, new BugFixDetectorBasedOnLogMessage()));
 			dataMapper.RegisterMapper(
-				new CodeFileMapper(vcsData));
+				new CodeFileMapper(vcsData)
+				{
+					SimpleMapping = true,
+					RevisionsForSimpleMapping = new string[]
+					{
+						"1ed91937e5cd59fdbdfa5f15f6fac132d2b21ce0",
+					}
+				});
 			dataMapper.RegisterMapper(
 				new ModificationMapper(vcsData));
 			dataMapper.RegisterMapper(

@@ -116,8 +116,10 @@ namespace Repositorch.Data.Entities.Mapping
 			Assert.Equal(1, Get<CodeFile>()
 				.Where(x => x.Path == "file1.cpp").Count());
 		}
-		[Fact]
-		public void Should_map_added_or_removed_in_merge_file_only_if_it_has_different_history_state()
+		[Theory]
+		[InlineData(false)]
+		[InlineData(true)]
+		public void Should_map_added_or_removed_in_merge_file_only_if_it_has_different_history_state(bool simpleMapping)
 		{
 			mappingDSL
 				.AddCommit("1").OnBranch("1")
@@ -142,6 +144,7 @@ namespace Repositorch.Data.Entities.Mapping
 			log.FileAdded("file3");
 			log.FileAdded("file4");
 
+			mapper.SimpleMapping = simpleMapping;
 			var expressions = mapper.Map(
 				mappingDSL.AddCommit("10").OnBranch("111")
 			);
@@ -279,6 +282,36 @@ namespace Repositorch.Data.Entities.Mapping
 				.Where(x => x.CurrentEntity<CodeFile>().Path == "file1")
 				.Count();
 			Assert.Equal(1, count);
+		}
+		[Fact]
+		public void Should_map_all_files_touched_on_merged_branches_in_case_of_simplified_mapping()
+		{
+			mappingDSL
+				.AddCommit("1").OnBranch("1")
+					.File("file1").Added()
+					.File("file2").Added()
+					.File("file3").Added()
+			.Submit()
+				.AddCommit("2").OnBranch("1")
+					.File("file1").Modified()
+			.Submit()
+				.AddCommit("3").OnBranch("11")
+					.File("file2").Modified()
+			.Submit()
+				.AddCommit("4").OnBranch("101")
+					.File("file3").Modified()
+			.Submit();
+
+			vcsData.GetRevisionParents("10")
+				.Returns(new string[] { "3", "4" });
+
+			mapper.SimpleMapping = true;
+			var expressions = mapper.Map(
+				mappingDSL.AddCommit("10").OnBranch("111")
+			);
+
+			Assert.Equal(new string[] { "file2", "file3" },
+				expressions.Select(x => x.CurrentEntity<CodeFile>().Path));
 		}
 	}
 }
