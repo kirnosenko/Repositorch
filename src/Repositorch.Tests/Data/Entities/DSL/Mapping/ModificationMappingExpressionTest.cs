@@ -109,8 +109,27 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			Assert.Equal(Modification.FileAction.REMOVED, m.Action);
 			Assert.Equal("2", m.Commit.Revision);
 			Assert.Equal("file1", m.File.Path);
+			Assert.Null(m.CheckSum);
 			Assert.Null(m.SourceCommit);
 			Assert.Null(m.SourceFile);
+		}
+		[Fact]
+		public void Should_allow_to_attach_checksum_for_each_modification()
+		{
+			mappingDSL
+				.AddCommit("1").OnBranch("1")
+					.File("file1").Added().HasCheckSum("sum1")
+			.Submit()
+				.AddCommit("2").OnBranch("1")
+					.File("file1").Modified().HasCheckSum("sum2")
+			.Submit()
+				.AddCommit("3").OnBranch("1")
+					.File("file2").CopiedFrom("file1", "1").HasCheckSum("sum3")
+			.Submit();
+
+			Assert.Equal(3, Get<Modification>().Count());
+			Assert.Equal(new string[] { "sum1", "sum2", "sum3" },
+				Get<Modification>().Select(x => x.CheckSum));
 		}
 	}
 }

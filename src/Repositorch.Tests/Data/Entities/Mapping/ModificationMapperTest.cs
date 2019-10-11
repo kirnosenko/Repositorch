@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 using NSubstitute;
@@ -10,6 +11,7 @@ namespace Repositorch.Data.Entities.Mapping
 	{
 		private ModificationMapper mapper;
 		private TestLog log;
+		private Dictionary<string,TestBlame> blames;
 		
 		public ModificationMapperTest()
 		{
@@ -17,6 +19,10 @@ namespace Repositorch.Data.Entities.Mapping
 			vcsData
 				.Log(Arg.Is<string>("10"))
 				.Returns(log);
+			blames = new Dictionary<string, TestBlame>();
+			vcsData
+				.Blame(Arg.Is<string>("10"), Arg.Any<string>())
+				.Returns(x => blames[(string)x[1]]);
 			mapper = new ModificationMapper(vcsData);
 		}
 		[Fact]
@@ -28,19 +34,19 @@ namespace Repositorch.Data.Entities.Mapping
 			.Submit();
 
 			log.FileAdded("file2");
+			blames.Add("file2", new TestBlame() { CheckSum = "sha2" });
 
-			CommitMappingExpression commitExp = mappingDSL.AddCommit("10");
 			mapper.Map(
-				commitExp.File("file2")
+				mappingDSL.AddCommit("10").File("file2")
 			);
 			SubmitChanges();
 
 			Assert.Equal(2, Get<Modification>().Count());
-			
 			var modification = Get<Modification>().Last();
 			Assert.Equal("10", modification.Commit.Revision);
 			Assert.Equal("file2", modification.File.Path);
 			Assert.Equal(Modification.FileAction.ADDED, modification.Action);
+			Assert.Equal("sha2", modification.CheckSum);
 			Assert.Null(modification.SourceCommit);
 			Assert.Null(modification.SourceFile);
 		}
@@ -53,19 +59,19 @@ namespace Repositorch.Data.Entities.Mapping
 			.Submit();
 
 			log.FileModified("file1");
+			blames.Add("file1", new TestBlame() { CheckSum = "sha1" });
 
-			CommitMappingExpression commitExp = mappingDSL.AddCommit("10");
 			mapper.Map(
-				commitExp.File("file1")
+				mappingDSL.AddCommit("10").File("file1")
 			);
 			SubmitChanges();
 
 			Assert.Equal(2, Get<Modification>().Count());
-
 			var modification = Get<Modification>().Last();
 			Assert.Equal("10", modification.Commit.Revision);
 			Assert.Equal("file1", modification.File.Path);
 			Assert.Equal(Modification.FileAction.MODIFIED, modification.Action);
+			Assert.Equal("sha1", modification.CheckSum);
 			Assert.Null(modification.SourceCommit);
 			Assert.Null(modification.SourceFile);
 		}
@@ -73,48 +79,55 @@ namespace Repositorch.Data.Entities.Mapping
 		public void Should_map_copied_file_with_source()
 		{
 			mappingDSL
-				.AddCommit("9").OnBranch("1")
+				.AddCommit("5").OnBranch("1")
 					.File("file1").Added()
-			.Submit();
+			.Submit()
+				.AddCommit("6").OnBranch("1")
+					.File("file1").Modified();
 
-			log.FileCopied("file2", "file1", "9");
+			log.FileCopied("file2", "file1", "5");
+			blames.Add("file2", new TestBlame() { CheckSum = "sha2" });
 
 			mapper.Map(
 				mappingDSL.AddCommit("10").OnBranch("1").File("file2")
 			);
 			SubmitChanges();
 
-			Assert.Equal(2, Get<Modification>().Count());
-
+			Assert.Equal(3, Get<Modification>().Count());
 			var modification = Get<Modification>().Last();
 			Assert.Equal("10", modification.Commit.Revision);
 			Assert.Equal("file2", modification.File.Path);
 			Assert.Equal(Modification.FileAction.ADDED, modification.Action);
-			Assert.Equal("9", modification.SourceCommit.Revision);
+			Assert.Equal("sha2", modification.CheckSum);
+			Assert.Equal("5", modification.SourceCommit.Revision);
 			Assert.Equal("file1", modification.SourceFile.Path);
 		}
 		[Fact]
 		public void Should_set_previous_revision_as_source_for_file_copied_without_source_revision()
 		{
 			mappingDSL
-				.AddCommit("9").OnBranch("1")
+				.AddCommit("5").OnBranch("1")
 					.File("file1").Added()
+			.Submit()
+				.AddCommit("6").OnBranch("1")
+					.File("file1").Modified()
 			.Submit();
-
+					
 			log.FileRenamed("file2", "file1");
+			blames.Add("file2", new TestBlame() { CheckSum = "sha2" });
 
 			mapper.Map(
 				mappingDSL.AddCommit("10").OnBranch("1").File("file2")
 			);
 			SubmitChanges();
 
-			Assert.Equal(2, Get<Modification>().Count());
-
+			Assert.Equal(3, Get<Modification>().Count());
 			var modification = Get<Modification>().Last();
 			Assert.Equal("10", modification.Commit.Revision);
 			Assert.Equal("file2", modification.File.Path);
 			Assert.Equal(Modification.FileAction.ADDED, modification.Action);
-			Assert.Equal("9", modification.SourceCommit.Revision);
+			Assert.Equal("sha2", modification.CheckSum);
+			Assert.Equal("6", modification.SourceCommit.Revision);
 			Assert.Equal("file1", modification.SourceFile.Path);
 		}
 		[Fact]
@@ -126,6 +139,7 @@ namespace Repositorch.Data.Entities.Mapping
 			.Submit();
 
 			log.FileRemoved("file1");
+			blames.Add("file1", new TestBlame() { CheckSum = "sha1" });
 
 			mapper.Map(
 				mappingDSL.AddCommit("10").File("file1")
@@ -133,35 +147,37 @@ namespace Repositorch.Data.Entities.Mapping
 			SubmitChanges();
 
 			Assert.Equal(2, Get<Modification>().Count());
-
 			var modification = Get<Modification>().Last();
 			Assert.Equal("10", modification.Commit.Revision);
 			Assert.Equal("file1", modification.File.Path);
 			Assert.Equal(Modification.FileAction.REMOVED, modification.Action);
+			Assert.Null(modification.CheckSum);
 			Assert.Null(modification.SourceCommit);
 			Assert.Null(modification.SourceFile);
+			vcsData.DidNotReceiveWithAnyArgs()
+				.Blame(null, null);
 		}
 		[Fact]
-		public void Should_map_file_as_modified_if_log_does_not_keep_it()
+		public void Should_map_file_as_modified_in_merge_when_checksum_is_different()
 		{
 			mappingDSL
-				.AddCommit("9")
-					.File("file1").Added()
+				.AddCommit("1").OnBranch("1")
+					.File("file1").Added().HasCheckSum("sha1")
+					.File("file2").Added().HasCheckSum("sha2")
+			.Submit()
+				.AddCommit("2").OnBranch("11")
+					.File("file1").Modified().HasCheckSum("sha11")
+			.Submit()
+				.AddCommit("3").OnBranch("101")
+					.File("file2").Modified().HasCheckSum("sha22")
 			.Submit();
-			
-			mapper.Map(
-				mappingDSL.AddCommit("10").File("file1")
-			);
-			SubmitChanges();
 
-			Assert.Equal(2, Get<Modification>().Count());
+			blames.Add("file1", new TestBlame() { CheckSum = "sha11" });
+			blames.Add("file2", new TestBlame() { CheckSum = "sha222" });
 
-			var modification = Get<Modification>().Last();
-			Assert.Equal("10", modification.Commit.Revision);
-			Assert.Equal("file1", modification.File.Path);
-			Assert.Equal(Modification.FileAction.MODIFIED, modification.Action);
-			Assert.Null(modification.SourceCommit);
-			Assert.Null(modification.SourceFile);
+			var commitMappingExpression = mappingDSL.AddCommit("10").OnBranch("111");
+			Assert.Equal(0, (int)mapper.Map(commitMappingExpression.File("file1")).Count());
+			Assert.Equal(1, (int)mapper.Map(commitMappingExpression.File("file2")).Count());
 		}
 	}
 }

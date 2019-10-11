@@ -16,7 +16,7 @@ namespace Repositorch
 	{
 		static void Main(string[] args)
 		{
-			var data = new SqliteDataStore("d:/555.db");// { Logging = true };
+			var data = new SqliteDataStore("d:/123.db");// { Logging = true };
 			//var data = new PostgreSqlDataStore("git", "postgres", "123") { SingletonSession = true };
 			var gitClient = new CommandLineGitClient("D:/src/git/.git");
 			var vcsData = new VcsDataCached(new GitData(gitClient), 10, 1000);
@@ -26,7 +26,7 @@ namespace Repositorch
 			{
 				Func<DataMapper.MappingSettings> settings = () => new DataMapper.MappingSettings()
 				{
-					StopRevision = vcsData.GetRevisionByNumber(2000),
+					StopRevision = vcsData.GetRevisionByNumber(100),
 					Check = DataMapper.CheckMode.TOUCHED,
 				};
 				mapper.MapRevisions(settings());

@@ -25,6 +25,16 @@ namespace Repositorch.Data.Entities
 
 		public int Id { get; set; }
 		/// <summary>
+		/// Type of the modification.
+		/// </summary>
+		public FileAction Action { get; set; }
+		/// <summary>
+		/// File check sum for fast change detection.
+		/// We keep blame hash here to detect code ownership
+		/// changes even when there are no content changes.
+		/// </summary>
+		public string CheckSum { get; set; }
+		/// <summary>
 		/// Commit that contains modification.
 		/// </summary>
 		public int CommitId { get; set; }
@@ -34,10 +44,6 @@ namespace Repositorch.Data.Entities
 		/// </summary>
 		public int FileId { get; set; }
 		public CodeFile File { get; set; }
-		/// <summary>
-		/// Type of the modification.
-		/// </summary>
-		public FileAction Action { get; set; }
 		/// <summary>
 		/// The source file of a new file.
 		/// Null if the file was created from scratch.

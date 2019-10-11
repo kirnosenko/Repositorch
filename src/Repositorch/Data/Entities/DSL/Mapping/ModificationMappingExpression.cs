@@ -39,9 +39,10 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		{
 			entity = new Modification()
 			{
+				Action = action,
+				CheckSum = null,
 				Commit = CurrentEntity<Commit>(),
 				File = CurrentEntity<CodeFile>(),
-				Action = action,
 			};
 			Add(entity);
 		}
@@ -53,15 +54,15 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		{
 			entity.SourceCommit = Get<Commit>()
 				.Single(x => x.Revision == sourceRevision);
-			var possibleSourceFiles = Get<CodeFile>()
-				.Where(x => x.Path == sourseFilePath)
-				.ToArray();
-			entity.SourceFile = possibleSourceFiles.Length == 1
-				? possibleSourceFiles[0]
-				: this.SelectionDSL()
-					.Files().PathIs(sourseFilePath)
-					.ExistInRevision(sourceRevision)
-					.Single();
+			// use DSL to make additional check that file exists in the revision
+			entity.SourceFile = this.SelectionDSL()
+				.Files().PathIs(sourseFilePath).ExistInRevision(sourceRevision).Single();
+		}
+
+		public ModificationMappingExpression HasCheckSum(string checkSum)
+		{
+			entity.CheckSum = checkSum;
+			return this;
 		}
 	}
 }

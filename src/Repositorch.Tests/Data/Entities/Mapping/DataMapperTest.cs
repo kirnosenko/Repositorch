@@ -37,8 +37,7 @@ namespace Repositorch.Data.Entities.Mapping
 			mapper.RegisterMapper(commitMapper);
 			mapper.MapRevision("1");
 
-			commitMapper
-				.Received(1)
+			commitMapper.Received(1)
 				.Map(Arg.Is<RepositoryMappingExpression>(e => e != null));
 		}
 		[Fact]
@@ -51,8 +50,7 @@ namespace Repositorch.Data.Entities.Mapping
 			mapper.RegisterMapper(commitMapper);
 			mapper.MapRevision("10");
 
-			commitMapper
-				.Received(1)
+			commitMapper.Received(1)
 				.Map(Arg.Is<RepositoryMappingExpression>(e => e.Revision == "10"));
 		}
 		[Fact]
@@ -71,8 +69,7 @@ namespace Repositorch.Data.Entities.Mapping
 			mapper.RegisterMapper(bugFixMapper);
 			mapper.MapRevision("1");
 
-			bugFixMapper
-				.Received(1)
+			bugFixMapper.Received(1)
 				.Map(Arg.Is(commitExp));
 		}
 		[Fact]
@@ -110,17 +107,13 @@ namespace Repositorch.Data.Entities.Mapping
 
 			mapper.MapRevision("1");
 
-			commitMapper
-				.Received(1)
+			commitMapper.Received(1)
 				.Map(Arg.Any<IRepositoryMappingExpression>());
-			bugFixMapper
-				.Received(1)
+			bugFixMapper.Received(1)
 				.Map(commitExp);
-			fileMapper
-				.Received(1)
+			fileMapper.Received(1)
 				.Map(bugfixExp);
-			fileMapper
-				.Received(1)
+			fileMapper.Received(1)
 				.Map(Arg.Any<ICommitMappingExpression>());
 		}
 
@@ -157,8 +150,7 @@ namespace Repositorch.Data.Entities.Mapping
 
 			mapper.MapRevision("1");
 
-			fileMapper
-				.Received(1)
+			fileMapper.Received(1)
 				.Map(commitExp);
 		}
 
@@ -175,8 +167,7 @@ namespace Repositorch.Data.Entities.Mapping
 			mapper.MapRevision("1");
 			mapper.MapRevision("1");
 
-			commitMapper
-				.Received(2)
+			commitMapper.Received(2)
 				.Map(Arg.Any<RepositoryMappingExpression>());
 		}
 		[Fact]
