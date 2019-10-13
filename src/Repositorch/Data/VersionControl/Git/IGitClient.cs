@@ -12,7 +12,6 @@ namespace Repositorch.Data.VersionControl.Git
 		/// <returns>Resulting stream.</returns>
 		Stream RevList();
 		Stream Log(string revision);
-		Stream Diff(string revision);
 		Stream Blame(string revision, string filePath);
 	}
 }

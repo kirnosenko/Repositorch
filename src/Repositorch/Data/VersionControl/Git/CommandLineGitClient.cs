@@ -25,13 +25,6 @@ namespace Repositorch.Data.VersionControl.Git
 				revision
 			);
 		}
-		public Stream Diff(string revision)
-		{
-			return RunCommand(
-				"diff-tree --cc {0}",
-				revision
-			);
-		}
 		public Stream Blame(string revision, string filePath)
 		{
 			return RunCommand(

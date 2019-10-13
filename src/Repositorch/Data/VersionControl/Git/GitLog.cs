@@ -39,20 +39,20 @@ namespace Repositorch.Data.VersionControl.Git
 				switch (action)
 				{
 					case TouchedFileGitAction.MODIFIED:
-						TouchFile(TouchedFile.TouchedFileAction.MODIFIED, blocks[1]);
+						TouchFile(TouchedFileAction.MODIFIED, blocks[1]);
 						break;
 					case TouchedFileGitAction.ADDED:
-						TouchFile(TouchedFile.TouchedFileAction.ADDED, blocks[1]);
+						TouchFile(TouchedFileAction.ADDED, blocks[1]);
 						break;
 					case TouchedFileGitAction.DELETED:
-						TouchFile(TouchedFile.TouchedFileAction.REMOVED, blocks[1]);
+						TouchFile(TouchedFileAction.REMOVED, blocks[1]);
 						break;
 					case TouchedFileGitAction.RENAMED:
-						TouchFile(TouchedFile.TouchedFileAction.REMOVED, blocks[1]);
-						TouchFile(TouchedFile.TouchedFileAction.ADDED, blocks[2], blocks[1]);
+						TouchFile(TouchedFileAction.REMOVED, blocks[1]);
+						TouchFile(TouchedFileAction.ADDED, blocks[2], blocks[1]);
 						break;
 					case TouchedFileGitAction.COPIED:
-						TouchFile(TouchedFile.TouchedFileAction.ADDED, blocks[2], blocks[1]);
+						TouchFile(TouchedFileAction.ADDED, blocks[2], blocks[1]);
 						break;
 					default:
 						break;
@@ -60,11 +60,11 @@ namespace Repositorch.Data.VersionControl.Git
 			}
 			touchedFiles.Sort((x, y) => string.CompareOrdinal(x.Path.ToLower(), y.Path.ToLower()));
 		}
-		private void TouchFile(TouchedFile.TouchedFileAction action, string path)
+		private void TouchFile(TouchedFileAction action, string path)
 		{
 			TouchFile(action, path, null);
 		}
-		private void TouchFile(TouchedFile.TouchedFileAction action, string path, string sourcePath)
+		private void TouchFile(TouchedFileAction action, string path, string sourcePath)
 		{
 			path = path.Replace("\"", "");
 			if (sourcePath != null)
@@ -89,8 +89,8 @@ namespace Repositorch.Data.VersionControl.Git
 			}
 			else
 			{
-				if (touchedFile.Action == TouchedFile.TouchedFileAction.MODIFIED
-					&& action != TouchedFile.TouchedFileAction.MODIFIED)
+				if (touchedFile.Action == TouchedFileAction.MODIFIED
+					&& action != TouchedFileAction.MODIFIED)
 				{
 					touchedFile.Action = action;
 				}

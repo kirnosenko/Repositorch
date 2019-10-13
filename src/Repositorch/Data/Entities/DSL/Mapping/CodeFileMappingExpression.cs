@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using Repositorch.Data.Entities.DSL.Selection;
 
 namespace Repositorch.Data.Entities.DSL.Mapping
 {
@@ -30,6 +29,15 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 				};
 				Add(entity);
 			}
+		}
+		public bool IgnoreCheckSum
+		{
+			get; private set;
+		}
+		public CodeFileMappingExpression EnsureContentCheck()
+		{
+			IgnoreCheckSum = true;
+			return this;
 		}
 	}
 }

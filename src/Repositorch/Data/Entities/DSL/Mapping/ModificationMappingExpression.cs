@@ -8,11 +8,11 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 	{
 		public static ModificationMappingExpression Modified(this ICodeFileMappingExpression exp)
 		{
-			return new ModificationMappingExpression(exp, Modification.FileAction.MODIFIED);
+			return new ModificationMappingExpression(exp, TouchedFileAction.MODIFIED);
 		}
 		public static ModificationMappingExpression Added(this ICodeFileMappingExpression exp)
 		{
-			return new ModificationMappingExpression(exp, Modification.FileAction.ADDED);
+			return new ModificationMappingExpression(exp, TouchedFileAction.ADDED);
 		}
 		public static ModificationMappingExpression CopiedFrom(
 			this ICodeFileMappingExpression exp,
@@ -21,9 +21,9 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		{
 			return new ModificationMappingExpression(exp, sourseFilePath, sourceRevision);
 		}
-		public static ModificationMappingExpression Removed(this ICodeFileMappingExpression exp)
+		public static IModificationMappingExpression Removed(this ICodeFileMappingExpression exp)
 		{
-			return new ModificationMappingExpression(exp, Modification.FileAction.REMOVED);
+			return new ModificationMappingExpression(exp, TouchedFileAction.REMOVED);
 		}
 	}
 
@@ -34,7 +34,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 	{
 		public ModificationMappingExpression(
 			IRepositoryMappingExpression parentExp,
-			Modification.FileAction action)
+			TouchedFileAction action)
 			: base(parentExp)
 		{
 			entity = new Modification()
@@ -50,7 +50,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			IRepositoryMappingExpression parentExp,
 			string sourseFilePath,
 			string sourceRevision)
-			: this(parentExp, Modification.FileAction.ADDED)
+			: this(parentExp, TouchedFileAction.ADDED)
 		{
 			entity.SourceCommit = Get<Commit>()
 				.Single(x => x.Revision == sourceRevision);
@@ -58,7 +58,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			entity.SourceFile = this.SelectionDSL()
 				.Files().PathIs(sourseFilePath).ExistInRevision(sourceRevision).Single();
 		}
-
+		
 		public ModificationMappingExpression HasCheckSum(string checkSum)
 		{
 			entity.CheckSum = checkSum;

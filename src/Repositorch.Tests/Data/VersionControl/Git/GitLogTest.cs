@@ -149,7 +149,7 @@ D	file3";
 					"/show-diff.c"
 				},
 				log.TouchedFiles
-					.Where(x => x.Action == TouchedFile.TouchedFileAction.REMOVED)
+					.Where(x => x.Action == TouchedFileAction.REMOVED)
 					.Select(x => x.Path));
 
 			Assert.Equal(
@@ -160,7 +160,7 @@ D	file3";
 					"/mktag.c"
 				},
 				log.TouchedFiles
-					.Where(x => x.Action == TouchedFile.TouchedFileAction.ADDED)
+					.Where(x => x.Action == TouchedFileAction.ADDED)
 					.Select(x => x.Path));
 		}
 		[Fact]
@@ -185,7 +185,7 @@ D	file3";
 			Assert.Equal(
 				2,
 				log.TouchedFiles
-					.Where(x => x.Action == TouchedFile.TouchedFileAction.ADDED)
+					.Where(x => x.Action == TouchedFileAction.ADDED)
 					.Count());
 		}
 		[Fact]
@@ -205,11 +205,11 @@ D	file3";
 			Assert.Equal(20, log.TouchedFiles.Count());
 			Assert.Equal(20, log.TouchedFiles.Select(x => x.Path).Distinct().Count());
 			var makefile = log.TouchedFiles.Where(x => x.Path == "/Makefile").Single();
-			Assert.Equal(TouchedFile.TouchedFileAction.MODIFIED, makefile.Action);
+			Assert.Equal(TouchedFileAction.MODIFIED, makefile.Action);
 			var blob = log.TouchedFiles.Where(x => x.Path == "/blob.c").Single();
-			Assert.Equal(TouchedFile.TouchedFileAction.ADDED, blob.Action);
+			Assert.Equal(TouchedFileAction.ADDED, blob.Action);
 			var revtree = log.TouchedFiles.Where(x => x.Path == "/rev-tree.c").Single();
-			Assert.Equal(TouchedFile.TouchedFileAction.MODIFIED, revtree.Action);
+			Assert.Equal(TouchedFileAction.MODIFIED, revtree.Action);
 		}
 		[Fact]
 		public void Should_prefer_file_addition_or_removing_over_modification_in_merge_log()
@@ -219,11 +219,11 @@ D	file3";
 			Assert.Equal(3, log.TouchedFiles.Count());
 			Assert.Equal(new string[] { "/file1", "/file2", "/file3" },
 				log.TouchedFiles.Select(x => x.Path));
-			Assert.Equal(new TouchedFile.TouchedFileAction[]
+			Assert.Equal(new TouchedFileAction[]
 				{
-					TouchedFile.TouchedFileAction.MODIFIED,
-					TouchedFile.TouchedFileAction.ADDED,
-					TouchedFile.TouchedFileAction.REMOVED
+					TouchedFileAction.MODIFIED,
+					TouchedFileAction.ADDED,
+					TouchedFileAction.REMOVED
 				},
 				log.TouchedFiles.Select(x => x.Action));
 		}

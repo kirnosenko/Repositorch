@@ -49,6 +49,14 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			}
 			return parentExp.CurrentEntity<T>();
 		}
+		public virtual T CurrentExpression<T>() where T : class, IRepositoryMappingExpression
+		{
+			if (typeof(T) == this.GetType())
+			{
+				return this as T;
+			}
+			return parentExp.CurrentExpression<T>();
+		}
 		public string Revision
 		{
 			get { return parentExp.Revision; }

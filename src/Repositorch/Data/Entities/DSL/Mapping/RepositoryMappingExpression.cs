@@ -8,6 +8,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 	{
 		IRepositoryMappingExpression Submit();
 		T CurrentEntity<T>() where T : class;
+		T CurrentExpression<T>() where T : class, IRepositoryMappingExpression;
 		string Revision { get; }
 	}
 
@@ -49,6 +50,10 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			return session.MappingDSL();
 		}
 		public T CurrentEntity<T>() where T : class
+		{
+			return default(T);
+		}
+		public T CurrentExpression<T>() where T : class, IRepositoryMappingExpression
 		{
 			return default(T);
 		}

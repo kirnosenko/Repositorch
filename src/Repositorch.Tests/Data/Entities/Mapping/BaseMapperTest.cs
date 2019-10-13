@@ -22,19 +22,19 @@ namespace Repositorch.Data.Entities.Mapping
 
 			public void FileAdded(string path)
 			{
-				TouchPath(path, TouchedFile.TouchedFileAction.ADDED, null, null);
+				TouchPath(path, TouchedFileAction.ADDED, null, null);
 			}
 			public void FileModified(string path)
 			{
-				TouchPath(path, TouchedFile.TouchedFileAction.MODIFIED, null, null);
+				TouchPath(path, TouchedFileAction.MODIFIED, null, null);
 			}
 			public void FileCopied(string path, string sourcePath, string sourceRevision)
 			{
-				TouchPath(path, TouchedFile.TouchedFileAction.ADDED, sourcePath, sourceRevision);
+				TouchPath(path, TouchedFileAction.ADDED, sourcePath, sourceRevision);
 			}
 			public void FileRemoved(string path)
 			{
-				TouchPath(path, TouchedFile.TouchedFileAction.REMOVED, null, null);
+				TouchPath(path, TouchedFileAction.REMOVED, null, null);
 			}
 			public void FileRenamed(string path, string sourcePath)
 			{
@@ -42,7 +42,7 @@ namespace Repositorch.Data.Entities.Mapping
 				FileCopied(path, sourcePath, null);
 			}
 
-			private void TouchPath(string path, TouchedFile.TouchedFileAction action, string sourcePath, string sourceRevision)
+			private void TouchPath(string path, TouchedFileAction action, string sourcePath, string sourceRevision)
 			{
 				touchedFiles.Add(new TouchedFile()
 				{
@@ -51,16 +51,6 @@ namespace Repositorch.Data.Entities.Mapping
 					SourcePath = sourcePath,
 					SourceRevision = sourceRevision
 				});
-			}
-		}
-
-		protected class TestDiff : List<string>, IDiff
-		{
-			public IEnumerable<string> TouchedFiles => this;
-
-			public void FileTouched(string path)
-			{
-				Add(path);
 			}
 		}
 

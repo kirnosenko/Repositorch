@@ -16,7 +16,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 
 			Assert.Equal(1, Get<Modification>().Count());
 			var m = Get<Modification>().Single();
-			Assert.Equal(Modification.FileAction.ADDED, m.Action);
+			Assert.Equal(TouchedFileAction.ADDED, m.Action);
 			Assert.Equal("1", m.Commit.Revision);
 			Assert.Equal("file1", m.File.Path);
 			Assert.Null(m.SourceCommit);
@@ -52,7 +52,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 
 			Assert.Equal(3, Get<Modification>().Count());
 			var m = Get<Modification>().Last();
-			Assert.Equal(Modification.FileAction.MODIFIED, m.Action);
+			Assert.Equal(TouchedFileAction.MODIFIED, m.Action);
 			Assert.Equal("3", m.Commit.Revision);
 			Assert.Equal("file1", m.File.Path);
 			Assert.Null(m.SourceCommit);
@@ -79,14 +79,14 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			Assert.Equal(5, Get<Modification>().Count());
 
 			var m2 = Get<Modification>().Single(x => x.File.Path == "file2");
-			Assert.Equal(Modification.FileAction.ADDED, m2.Action);
+			Assert.Equal(TouchedFileAction.ADDED, m2.Action);
 			Assert.Equal("10", m2.Commit.Revision);
 			Assert.Equal("file2", m2.File.Path);
 			Assert.Equal("1", m2.SourceCommit.Revision);
 			Assert.Equal("file1", m2.SourceFile.Path);
 
 			var m3 = Get<Modification>().Single(x => x.File.Path == "file3");
-			Assert.Equal(Modification.FileAction.ADDED, m3.Action);
+			Assert.Equal(TouchedFileAction.ADDED, m3.Action);
 			Assert.Equal("10", m3.Commit.Revision);
 			Assert.Equal("file3", m3.File.Path);
 			Assert.Equal("3", m3.SourceCommit.Revision);
@@ -106,7 +106,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			Assert.Equal(2, Get<Modification>().Count());
 			
 			var m = Get<Modification>().Last();
-			Assert.Equal(Modification.FileAction.REMOVED, m.Action);
+			Assert.Equal(TouchedFileAction.REMOVED, m.Action);
 			Assert.Equal("2", m.Commit.Revision);
 			Assert.Equal("file1", m.File.Path);
 			Assert.Null(m.CheckSum);

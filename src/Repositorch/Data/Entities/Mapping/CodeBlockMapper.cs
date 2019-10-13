@@ -20,7 +20,7 @@ namespace Repositorch.Data.Entities.Mapping
 			CodeFile file = expression.CurrentEntity<CodeFile>();
 			Modification modification = expression.CurrentEntity<Modification>();
 			
-			if (modification.Action == Modification.FileAction.REMOVED)
+			if (modification.Action == TouchedFileAction.REMOVED)
 			{
 				codeBlockExpressions.Add(
 					expression.DeleteCode()
@@ -30,7 +30,7 @@ namespace Repositorch.Data.Entities.Mapping
 			{
 				IBlame blame = vcsData.Blame(revision, file.Path);
 				var linesByRevision = from l in blame group l.Key by l.Value;
-				bool fileCopied = (modification.Action == Modification.FileAction.ADDED) &&
+				bool fileCopied = (modification.Action == TouchedFileAction.ADDED) &&
 					(modification.SourceFile != null);
 
 				if (fileCopied)

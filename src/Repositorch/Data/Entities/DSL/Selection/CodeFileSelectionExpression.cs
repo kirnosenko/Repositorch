@@ -40,7 +40,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				(from c in Selection<Commit>()
 				join m in Queryable<Modification>() on c.Id equals m.CommitId
 				join f in s on m.FileId equals f.Id
-				where m.Action == Modification.FileAction.ADDED
+				where m.Action == TouchedFileAction.ADDED
 				select f).Distinct()
 			);
 		}
@@ -50,7 +50,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				(from c in Selection<Commit>()
 				join m in Queryable<Modification>() on c.Id equals m.CommitId
 				join f in s on m.FileId equals f.Id
-				where m.Action == Modification.FileAction.REMOVED
+				where m.Action == TouchedFileAction.REMOVED
 				select f).Distinct()
 			);
 		}
@@ -137,7 +137,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 					from f in s
 					join fa in filesWithLastAction on f.Id equals fa.File.Id
 					select fa
-				).Where(x => x.LastAction != Modification.FileAction.REMOVED)
+				).Where(x => x.LastAction != TouchedFileAction.REMOVED)
 				.Select(x => x.File));
 		}
 

@@ -7,27 +7,11 @@ namespace Repositorch.Data.Entities
 	/// </summary>
 	public class Modification
 	{
-		public enum FileAction
-		{
-			/// <summary>
-			/// Modification of an existent file.
-			/// </summary>
-			MODIFIED,
-			/// <summary>
-			/// Addition of a new file.
-			/// </summary>
-			ADDED,
-			/// <summary>
-			/// Removing of an existent file.
-			/// </summary>
-			REMOVED
-		}
-
 		public int Id { get; set; }
 		/// <summary>
 		/// Type of the modification.
 		/// </summary>
-		public FileAction Action { get; set; }
+		public TouchedFileAction Action { get; set; }
 		/// <summary>
 		/// File check sum for fast change detection.
 		/// We keep blame hash here to detect code ownership
