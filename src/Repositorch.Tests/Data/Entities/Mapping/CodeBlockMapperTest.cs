@@ -234,5 +234,56 @@ namespace Repositorch.Data.Entities.Mapping
 				.Select(x => x.AddedInitiallyInCommit)
 				.All(x => x == null));
 		}
+		[Fact]
+		public void Should_revert_parent_modification_if_no_blocks_were_added()
+		{
+			mappingDSL
+				.AddCommit("1").OnBranch("1")
+					.File("file1").Added()
+						.Code(100)
+			.Submit()
+				.AddCommit("2").OnBranch("1")
+					.File("file1").Modified()
+						.Code(-20).ForCodeAddedInitiallyInRevision("1")
+						.Code(30)
+			.Submit();
+
+			var blame = new TestBlame()
+				.AddLinesFromRevision("1", 80)
+				.AddLinesFromRevision("2", 30);
+			vcsData.Blame("3", "file1")
+				.Returns(blame);
+
+			mapper.Map(
+				mappingDSL.AddCommit("3").OnBranch("1")
+					.File("file1").Modified()
+			);
+			SubmitChanges();
+
+			Assert.Equal(new double[] { 100, -20, 30 }, Get<CodeBlock>()
+				.Select(cb => cb.Size));
+			Assert.Equal(2, Get<Modification>().Count());		
+		}
+		[Fact]
+		public void Should_not_revert_addition_or_removing_of_empty_file()
+		{
+			var blame = new TestBlame();
+			vcsData.Blame("1", "file1")
+				.Returns(blame);
+
+			mapper.Map(
+				mappingDSL.AddCommit("1").OnBranch("1")
+					.File("file1").Added()
+			);
+			SubmitChanges();
+			mapper.Map(
+				mappingDSL.AddCommit("2").OnBranch("1")
+					.File("file1").Removed()
+			);
+			SubmitChanges();
+
+			Assert.Equal(0, Get<CodeBlock>().Count());
+			Assert.Equal(2, Get<Modification>().Count());
+		}
 	}
 }

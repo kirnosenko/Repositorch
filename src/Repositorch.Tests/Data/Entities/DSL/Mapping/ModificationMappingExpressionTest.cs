@@ -131,5 +131,18 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			Assert.Equal(new string[] { "sum1", "sum2", "sum3" },
 				Get<Modification>().Select(x => x.CheckSum));
 		}
+		[Fact]
+		public void Should_allow_to_revert_modification()
+		{
+			mappingDSL
+				.AddCommit("1")
+					.File("file1").Added()
+			.Submit()
+				.AddCommit("2")
+					.File("file1").Modified().Revert()
+			.Submit();
+
+			Assert.Equal(1, Get<Modification>().Count());
+		}
 	}
 }

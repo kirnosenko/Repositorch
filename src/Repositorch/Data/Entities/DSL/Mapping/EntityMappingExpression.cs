@@ -41,6 +41,10 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		{
 			return parentExp.Submit();
 		}
+		public virtual IRepositoryMappingExpression Revert()
+		{
+			return parentExp.Revert();
+		}
 		public virtual T CurrentEntity<T>() where T : class
 		{
 			if (typeof(T) == typeof(E))

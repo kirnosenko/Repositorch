@@ -87,7 +87,11 @@ namespace Repositorch.Data.Entities.Mapping
 					}
 				}
 			}
-			
+
+			if (codeBlockExpressions.Count == 0 && modification.Action == TouchedFileAction.MODIFIED)
+			{
+				expression.Revert();
+			}
 			return codeBlockExpressions;
 		}
 	}

@@ -58,7 +58,12 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			entity.SourceFile = this.SelectionDSL()
 				.Files().PathIs(sourseFilePath).ExistInRevision(sourceRevision).Single();
 		}
-		
+
+		public override IRepositoryMappingExpression Revert()
+		{
+			Remove(entity);
+			return this;
+		}
 		public ModificationMappingExpression HasCheckSum(string checkSum)
 		{
 			entity.CheckSum = checkSum;
