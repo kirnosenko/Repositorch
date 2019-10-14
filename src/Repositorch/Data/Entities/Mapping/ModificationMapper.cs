@@ -18,13 +18,16 @@ namespace Repositorch.Data.Entities.Mapping
 			var commit = expression.CurrentEntity<Commit>();
 			var filePath = expression.CurrentEntity<CodeFile>().Path;
 
-			Lazy<string> fileCheckSum = new Lazy<string>(
-				() => vcsData.Blame(commit.Revision, filePath).CheckSum);
 			Log log = vcsData.Log(commit.Revision);
 			var touchedFile = log.TouchedFiles.SingleOrDefault(x => x.Path == filePath);
 
 			if (vcsData.IsMerge(commit.Revision))
 			{
+				if (touchedFile == null || touchedFile.Action == TouchedFileAction.MODIFIED)
+				{
+					return Enumerable.Repeat(expression.Modified(), 1);
+				}
+
 				var branchMask = expression.CurrentEntity<Branch>().Mask;
 				var commitsToLookAt = expression.SelectionDSL()
 					.Commits().OnBranchBack(branchMask);
@@ -34,23 +37,15 @@ namespace Repositorch.Data.Entities.Mapping
 					 join c in commitsToLookAt on m.CommitId equals c.Id
 					 orderby c.OrderedNumber descending
 					 select m).First();
-				if (touchedFile != null
-					&& (touchedFile.Action != TouchedFileAction.MODIFIED)
-					&& touchedFile.Action != lastFileModification.Action)
+				if (touchedFile != null && touchedFile.Action != lastFileModification.Action)
 				{
 					if (touchedFile.Action == TouchedFileAction.ADDED)
 					{
 						return Enumerable.Repeat(
-							expression.Added().HasCheckSum(fileCheckSum.Value), 1);
+							expression.Added(), 1);
 					}
 
 					return Enumerable.Repeat(expression.Removed(), 1);
-				}
-
-				if (expression.CurrentExpression<CodeFileMappingExpression>().IgnoreCheckSum
-					|| lastFileModification.CheckSum != fileCheckSum.Value)
-				{
-					return Enumerable.Repeat(expression.Modified().HasCheckSum(fileCheckSum.Value), 1);
 				}
 
 				return Enumerable.Empty<IModificationMappingExpression>();
@@ -61,8 +56,7 @@ namespace Repositorch.Data.Entities.Mapping
 				case TouchedFileAction.ADDED:
 					if (touchedFile.SourcePath == null)
 					{
-						return Enumerable.Repeat(expression
-							.Added().HasCheckSum(fileCheckSum.Value), 1);
+						return Enumerable.Repeat(expression.Added(), 1);
 					}
 					if (touchedFile.SourceRevision == null)
 					{
@@ -71,11 +65,9 @@ namespace Repositorch.Data.Entities.Mapping
 							.Revision;
 					}
 					return Enumerable.Repeat(expression
-						.CopiedFrom(touchedFile.SourcePath, touchedFile.SourceRevision)
-						.HasCheckSum(fileCheckSum.Value), 1);
+						.CopiedFrom(touchedFile.SourcePath, touchedFile.SourceRevision), 1);
 				case TouchedFileAction.MODIFIED:
-					return Enumerable.Repeat(expression
-						.Modified().HasCheckSum(fileCheckSum.Value), 1);
+					return Enumerable.Repeat(expression.Modified(), 1);
 				case TouchedFileAction.REMOVED:
 					return Enumerable.Repeat(expression.Removed(), 1);
 				default:

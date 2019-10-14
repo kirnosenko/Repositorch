@@ -30,14 +30,5 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 				Add(entity);
 			}
 		}
-		public bool IgnoreCheckSum
-		{
-			get; private set;
-		}
-		public CodeFileMappingExpression EnsureContentCheck()
-		{
-			IgnoreCheckSum = true;
-			return this;
-		}
 	}
 }

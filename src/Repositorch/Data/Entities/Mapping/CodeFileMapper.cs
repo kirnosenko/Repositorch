@@ -13,25 +13,14 @@ namespace Repositorch.Data.Entities.Mapping
 			: base(vcsData)
 		{
 		}
+
 		public override IEnumerable<ICodeFileMappingExpression> Map(ICommitMappingExpression expression)
 		{
 			string revision = expression.CurrentEntity<Commit>().Revision;
 
-			return vcsData.IsMerge(revision)
-				? GetExpressionsForMerge(expression, revision)
-				: GetExpressions(expression, revision);
-		}
-		public IPathSelector[] PathSelectors
-		{
-			get; set;
-		}
-
-		private IEnumerable<CodeFileMappingExpression> GetExpressions(
-			ICommitMappingExpression expression,
-			string revision)
-		{
-			Log log = vcsData.Log(revision);
-			var filesTouched = log.TouchedFiles.Select(x => x.Path);
+			var filesTouched = vcsData.IsMerge(revision)
+				? GetFilesTouchedOnParentBranches(expression, revision)
+				: vcsData.Log(revision).TouchedFiles.Select(x => x.Path);
 
 			if (PathSelectors != null)
 			{
@@ -41,31 +30,11 @@ namespace Repositorch.Data.Entities.Mapping
 
 			return filesTouched.Select(x => expression.File(x)).ToArray();
 		}
-
-		private IEnumerable<CodeFileMappingExpression> GetExpressionsForMerge(
-			ICommitMappingExpression expression,
-			string revision)
+		public IPathSelector[] PathSelectors
 		{
-			var filesTouched = GetFilesTouchedOnParentBranches(expression, revision);
-			var filesTouchedOnDifferentBranches = GetFilesTouchedOnDifferentParentBranches(expression, revision);
-
-			if (PathSelectors != null)
-			{
-				filesTouched = filesTouched
-					.Where(x => PathSelectors.All(ps => ps.IsSelected(x)));
-			}
-
-			return filesTouched.Select(x =>
-			{
-				var fileExpr = expression.File(x);
-				if (filesTouchedOnDifferentBranches.Contains(x))
-				{
-					fileExpr.EnsureContentCheck();
-				}
-				return fileExpr;
-			}).ToArray();
+			get; set;
 		}
-
+		
 		private IEnumerable<string> GetFilesTouchedOnParentBranches(ICommitMappingExpression expression, string revision)
 		{
 			var parentRevisions = vcsData.GetRevisionParents(revision).ToArray();

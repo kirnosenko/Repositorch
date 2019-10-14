@@ -36,6 +36,5 @@ namespace Repositorch.Data.VersionControl
 
 	public interface IBlame : IDictionary<int, string>
 	{
-		string CheckSum { get; }
 	}
 }

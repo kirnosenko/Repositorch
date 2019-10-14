@@ -67,7 +67,6 @@ namespace Repositorch.Data.Entities.Mapping
 
 				return this;
 			}
-			public string CheckSum { get; set; }
 		}
 
 		protected IVcsData vcsData;

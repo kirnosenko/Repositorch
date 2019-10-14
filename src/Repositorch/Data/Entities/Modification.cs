@@ -13,12 +13,6 @@ namespace Repositorch.Data.Entities
 		/// </summary>
 		public TouchedFileAction Action { get; set; }
 		/// <summary>
-		/// File check sum for fast change detection.
-		/// We keep blame hash here to detect code ownership
-		/// changes even when there are no content changes.
-		/// </summary>
-		public string CheckSum { get; set; }
-		/// <summary>
 		/// Commit that contains modification.
 		/// </summary>
 		public int CommitId { get; set; }

@@ -62,12 +62,5 @@ private string blame1 = @"fatal: no such path";
 
 			Assert.Null(blame);
 		}
-		[Fact]
-		public void Should_keep_checksum_for_content()
-		{
-			blame = GitBlame.Parse(blame0.ToStream());
-
-			Assert.Equal("d134d747b47e2e8d98e35b340dac7a228a63c187", blame.CheckSum);
-		}
 	}
 }

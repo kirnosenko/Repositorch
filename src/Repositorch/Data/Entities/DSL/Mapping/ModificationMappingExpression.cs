@@ -40,7 +40,6 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			entity = new Modification()
 			{
 				Action = action,
-				CheckSum = null,
 				Commit = CurrentEntity<Commit>(),
 				File = CurrentEntity<CodeFile>(),
 			};
@@ -62,11 +61,6 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		public override IRepositoryMappingExpression Revert()
 		{
 			Remove(entity);
-			return this;
-		}
-		public ModificationMappingExpression HasCheckSum(string checkSum)
-		{
-			entity.CheckSum = checkSum;
 			return this;
 		}
 	}
