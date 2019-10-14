@@ -15,16 +15,16 @@ namespace Repositorch.Data.VersionControl.Git
 
 		public static GitBlame Parse(Stream blameData)
 		{
-			var result = new GitBlame();
-
-			TextReader reader = new StreamReader(blameData);
-			string line = reader.ReadLine();
-			if (line != null && line.StartsWith("fatal: no such path"))
+			if (blameData.Length == 0)
 			{
 				return null;
 			}
+			
+			TextReader reader = new StreamReader(blameData);
+			var result = new GitBlame();
+			string line;
 
-			do
+			while ((line = reader.ReadLine()) != null)
 			{
 				if ((line.Length >= 46) && (line.Length < 100))
 				{
@@ -39,7 +39,7 @@ namespace Repositorch.Data.VersionControl.Git
 						}
 					}
 				}
-			} while ((line = reader.ReadLine()) != null);
+			}
 
 			return result;
 		}

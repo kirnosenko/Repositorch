@@ -40,7 +40,7 @@ a59b276e18f3d4a548caf549e05188cb1bd3a709 17 17 2
 filename decorate.h
 ";
 
-private string blame1 = @"fatal: no such path";
+private string blame1 = @"";
 
 		[Fact]
 		public void Should_keep_revisions_for_each_line()
