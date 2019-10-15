@@ -26,16 +26,16 @@ namespace Repositorch
 			{
 				Func<DataMapper.MappingSettings> settings = () => new DataMapper.MappingSettings()
 				{
-					StopRevision = vcsData.GetRevisionByNumber(2000),
+					StopRevision = vcsData.GetRevisionByNumber(3000),
 					Check = DataMapper.CheckMode.TOUCHED,
 				};
 				mapper.MapRevisions(settings());
-				//mapper.Truncate(125);
+				//mapper.Truncate(1170);
 				//mapper.Check(2309, DataMapper.CheckMode.ALL);
 				//mapper.CheckAndTruncate("/test-delta.c");
 
 				//BlameDiff(vcsData);
-				//FileHistory(data, vcsData, "/test-delta.c");
+				//FileHistory(data, vcsData, "/Makefile");
 				//Select(data);
 			}
 
@@ -139,16 +139,18 @@ namespace Repositorch
 				Console.WriteLine(path);
 				foreach (var m in modifications)
 				{
-					var lines = vcsData.Blame(m.revision, path);
+					var linesCount = (m.action == TouchedFileAction.REMOVED)
+						? 0
+						: vcsData.Blame(m.revision, path).Count();
 					Console.WriteLine(string.Format("{0} ({1}) {2} {3} +{4} -{5} +{6} loc: {7}",
 						m.revision,
 						m.revisionNumber,
-						m.revisionDate.Date,
+						m.revisionDate.ToShortDateString(),
 						m.action,
 						m.codePlus,
 						-m.codeMinus,
 						m.cancelPlus,
-						lines.Count));
+						linesCount));
 				}
 			}
 		}

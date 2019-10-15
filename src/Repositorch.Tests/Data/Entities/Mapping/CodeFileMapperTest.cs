@@ -141,6 +141,33 @@ namespace Repositorch.Data.Entities.Mapping
 				expressions.Select(x => x.CurrentEntity<CodeFile>().Path));
 		}
 		[Fact]
+		public void Should_map_removed_on_branch_file_when_it_still_exists_on_another_branch()
+		{
+			mappingDSL
+				.AddCommit("1").OnBranch("1")
+					.File("file1").Added()
+					.File("file2").Added()
+			.Submit()
+				.AddCommit("2").OnBranch("11")
+					.File("file1").Modified()
+			.Submit()
+				.AddCommit("3").OnBranch("101")
+					.File("file1").Removed()
+					.File("file2").Removed()
+			.Submit();
+
+			vcsData.GetRevisionParents("10")
+				.Returns(new string[] { "2", "3" });
+			log.FileAdded("file1");
+
+			var expressions = mapper.Map(
+				mappingDSL.AddCommit("10").OnBranch("111")
+			);
+
+			Assert.Equal(new string[] { "file1" },
+				expressions.Select(x => x.CurrentEntity<CodeFile>().Path));
+		}
+		[Fact]
 		public void Should_not_duplicate_the_same_file_touched_multiple_times()
 		{
 			mappingDSL

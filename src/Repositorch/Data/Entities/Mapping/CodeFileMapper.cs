@@ -17,10 +17,13 @@ namespace Repositorch.Data.Entities.Mapping
 		public override IEnumerable<ICodeFileMappingExpression> Map(ICommitMappingExpression expression)
 		{
 			string revision = expression.CurrentEntity<Commit>().Revision;
+			var log = vcsData.Log(revision);
 
 			var filesTouched = vcsData.IsMerge(revision)
-				? GetFilesTouchedOnParentBranches(expression, revision)
-				: vcsData.Log(revision).TouchedFiles.Select(x => x.Path);
+				? log.TouchedFiles
+					.Where(x => x.Action == TouchedFileAction.ADDED).Select(x => x.Path)
+					.Union(GetFilesTouchedOnParentBranches(expression, revision))
+				: log.TouchedFiles.Select(x => x.Path);
 
 			if (PathSelectors != null)
 			{
