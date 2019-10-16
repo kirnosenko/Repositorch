@@ -55,8 +55,10 @@ namespace Repositorch.Data.Entities.DSL.Selection
 
 	public class ModificationSelectionExpression : EntitySelectionExpression<Modification,ModificationSelectionExpression>
 	{
-		public ModificationSelectionExpression(IRepositorySelectionExpression parentExp)
-			: base(parentExp)
+		public ModificationSelectionExpression(
+			IRepositorySelectionExpression parentExp,
+			IQueryable<Modification> selection = null)
+			: base(parentExp, selection)
 		{
 		}
 		public ModificationSelectionExpression InCommits()
@@ -75,9 +77,10 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				select m
 			);
 		}
-		protected override ModificationSelectionExpression Recreate()
+
+		protected override ModificationSelectionExpression Recreate(IQueryable<Modification> selection)
 		{
-			return new ModificationSelectionExpression(this);
+			return new ModificationSelectionExpression(this, selection);
 		}
 	}
 }

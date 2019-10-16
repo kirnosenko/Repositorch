@@ -13,12 +13,13 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		private IQueryable<E> selection;
 		private bool isFixed;
 
-		public EntitySelectionExpression(IRepositorySelectionExpression parentExp)
+		public EntitySelectionExpression(IRepositorySelectionExpression parentExp, IQueryable<E> selection)
 		{
 			this.parentExp = parentExp;
-			selection = Queryable<E>();
+			this.selection = selection ?? Queryable<E>();
 			isFixed = false;
 		}
+		
 		public IQueryable<T> Queryable<T>() where T : class
 		{
 			return parentExp.Queryable<T>();
@@ -41,11 +42,16 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		}
 		public Exp Reselect(Func<IQueryable<E>, IQueryable<E>> selector)
 		{
-			return Reselect(selector(selection));
+			if (isFixed)
+			{
+				return Recreate(selector(selection));
+			}
+			selection = selector(selection);
+			return this as Exp;
 		}
 		public Exp Again()
 		{
-			return Reselect(parentExp.Selection<E>());
+			return Recreate(parentExp.Selection<E>());
 		}
 		public Exp Fixed()
 		{
@@ -57,7 +63,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			action(this as Exp);
 			return this as Exp;
 		}
-		protected abstract Exp Recreate();
+		protected abstract Exp Recreate(IQueryable<E> selection);
 
 		#region IQueryable Members
 
@@ -95,16 +101,5 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		}
 
 		#endregion
-
-		private Exp Reselect(IQueryable<E> newSelection)
-		{
-			if (isFixed)
-			{
-				return (Recreate() as EntitySelectionExpression<E, Exp>)
-					.Reselect(s => newSelection);
-			}
-			selection = newSelection;
-			return this as Exp;
-		}
 	}
 }

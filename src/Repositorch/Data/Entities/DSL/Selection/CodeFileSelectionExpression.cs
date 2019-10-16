@@ -30,8 +30,10 @@ namespace Repositorch.Data.Entities.DSL.Selection
 
 	public class CodeFileSelectionExpression : EntitySelectionExpression<CodeFile,CodeFileSelectionExpression>
 	{
-		public CodeFileSelectionExpression(IRepositorySelectionExpression parentExp)
-			: base(parentExp)
+		public CodeFileSelectionExpression(
+			IRepositorySelectionExpression parentExp,
+			IQueryable<CodeFile> selection = null)
+			: base(parentExp, selection)
 		{
 		}
 		public CodeFileSelectionExpression AddedInCommits()
@@ -111,12 +113,17 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			return TouchedInAndStillExistAfterCommits(Selection<Commit>());
 		}
+
+		protected override CodeFileSelectionExpression Recreate(IQueryable<CodeFile> selection)
+		{
+			return new CodeFileSelectionExpression(this, selection);
+		}
 		private CodeFileSelectionExpression TouchedInAndStillExistAfterCommits(IQueryable<Commit> commits)
 		{
 			// This code is the result of exorcism to evict EF 'must be reducible node' error.
 			// Reproduced on real DB not in-memory.
 
-			IQueryable<IGrouping<CodeFile,Modification>> modificationsByFile = commits == null ?
+			IQueryable<IGrouping<CodeFile, Modification>> modificationsByFile = commits == null ?
 				from f in Queryable<CodeFile>()
 				join m in Queryable<Modification>() on f.Id equals m.FileId
 				group m by f
@@ -131,7 +138,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 					File = fileModifications.Key,
 					LastAction = fileModifications.OrderByDescending(x => x.Id).First().Action
 				});
-				
+
 			return Reselect(s =>
 				(
 					from f in s
@@ -139,11 +146,6 @@ namespace Repositorch.Data.Entities.DSL.Selection
 					select fa
 				).Where(x => x.LastAction != TouchedFileAction.REMOVED)
 				.Select(x => x.File));
-		}
-
-		protected override CodeFileSelectionExpression Recreate()
-		{
-			return new CodeFileSelectionExpression(this);
 		}
 	}
 }

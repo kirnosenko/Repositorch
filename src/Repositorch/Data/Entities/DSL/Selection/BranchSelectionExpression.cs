@@ -98,8 +98,10 @@ namespace Repositorch.Data.Entities.DSL.Selection
 
 	public class BranchSelectionExpression : EntitySelectionExpression<Branch, BranchSelectionExpression>
 	{
-		public BranchSelectionExpression(IRepositorySelectionExpression parentExp)
-			: base(parentExp)
+		public BranchSelectionExpression(
+			IRepositorySelectionExpression parentExp,
+			IQueryable<Branch> selection = null)
+			: base(parentExp, selection)
 		{
 		}
 		public BranchSelectionExpression OfCommits()
@@ -110,9 +112,10 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				 select b).Distinct()
 			);
 		}
-		protected override BranchSelectionExpression Recreate()
+
+		protected override BranchSelectionExpression Recreate(IQueryable<Branch> selection)
 		{
-			return new BranchSelectionExpression(this);
+			return new BranchSelectionExpression(this, selection);
 		}
 	}
 }

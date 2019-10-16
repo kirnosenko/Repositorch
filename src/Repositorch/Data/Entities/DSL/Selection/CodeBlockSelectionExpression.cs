@@ -40,8 +40,10 @@ namespace Repositorch.Data.Entities.DSL.Selection
 
 	public class CodeBlockSelectionExpression : EntitySelectionExpression<CodeBlock,CodeBlockSelectionExpression>
 	{
-		public CodeBlockSelectionExpression(IRepositorySelectionExpression parentExp)
-			: base(parentExp)
+		public CodeBlockSelectionExpression(
+			IRepositorySelectionExpression parentExp,
+			IQueryable<CodeBlock> selection = null)
+			: base(parentExp, selection)
 		{
 		}
 		public CodeBlockSelectionExpression InModifications()
@@ -98,9 +100,10 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				select cb
 			);
 		}
-		protected override CodeBlockSelectionExpression Recreate()
+
+		protected override CodeBlockSelectionExpression Recreate(IQueryable<CodeBlock> selection)
 		{
-			return new CodeBlockSelectionExpression(this);
+			return new CodeBlockSelectionExpression(this, selection);
 		}
 	}
 }

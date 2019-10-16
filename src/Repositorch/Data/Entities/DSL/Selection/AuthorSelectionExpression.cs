@@ -33,8 +33,10 @@ namespace Repositorch.Data.Entities.DSL.Selection
 
 	public class AuthorSelectionExpression : EntitySelectionExpression<Author, AuthorSelectionExpression>
 	{
-		public AuthorSelectionExpression(IRepositorySelectionExpression parentExp)
-			: base(parentExp)
+		public AuthorSelectionExpression(
+			IRepositorySelectionExpression parentExp,
+			IQueryable<Author> selection = null)
+			: base(parentExp, selection)
 		{
 		}
 		public AuthorSelectionExpression OfCommits()
@@ -69,9 +71,10 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				select a
 			);
 		}
-		protected override AuthorSelectionExpression Recreate()
+
+		protected override AuthorSelectionExpression Recreate(IQueryable<Author> selection)
 		{
-			return new AuthorSelectionExpression(this);
+			return new AuthorSelectionExpression(this, selection);
 		}
 	}
 }

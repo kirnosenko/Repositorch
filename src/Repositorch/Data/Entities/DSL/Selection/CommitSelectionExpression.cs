@@ -13,8 +13,10 @@ namespace Repositorch.Data.Entities.DSL.Selection
 
 	public class CommitSelectionExpression : EntitySelectionExpression<Commit, CommitSelectionExpression>
 	{
-		public CommitSelectionExpression(IRepositorySelectionExpression parentExp)
-			: base(parentExp)
+		public CommitSelectionExpression(
+			IRepositorySelectionExpression parentExp,
+			IQueryable<Commit> selection = null)
+			: base(parentExp, selection)
 		{
 		}
 		public CommitSelectionExpression RevisionIs(string revision)
@@ -81,10 +83,10 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				select c
 			);
 		}
-		
-		protected override CommitSelectionExpression Recreate()
+
+		protected override CommitSelectionExpression Recreate(IQueryable<Commit> selection)
 		{
-			return new CommitSelectionExpression(this);
+			return new CommitSelectionExpression(this, selection);
 		}
 	}
 }

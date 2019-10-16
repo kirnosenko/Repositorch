@@ -32,8 +32,10 @@ namespace Repositorch.Data.Entities.DSL.Selection
 
 	public class BugFixSelectionExpression : EntitySelectionExpression<BugFix, BugFixSelectionExpression>
 	{
-		public BugFixSelectionExpression(IRepositorySelectionExpression parentExp)
-			: base(parentExp)
+		public BugFixSelectionExpression(
+			IRepositorySelectionExpression parentExp,
+			IQueryable<BugFix> selection = null)
+			: base(parentExp, selection)
 		{
 		}
 		public BugFixSelectionExpression InCommits()
@@ -44,9 +46,10 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				select bf
 			);
 		}
-		protected override BugFixSelectionExpression Recreate()
+
+		protected override BugFixSelectionExpression Recreate(IQueryable<BugFix> selection)
 		{
-			return new BugFixSelectionExpression(this);
+			return new BugFixSelectionExpression(this, selection);
 		}
 	}
 }
