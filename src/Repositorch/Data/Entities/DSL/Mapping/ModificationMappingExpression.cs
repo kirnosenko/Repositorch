@@ -54,7 +54,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			entity.SourceCommit = Get<Commit>()
 				.Single(x => x.Revision == sourceRevision);
 			// use DSL to make additional check that file exists in the revision
-			entity.SourceFile = this.SelectionDSL()
+			entity.SourceFile = this.SelectionDSL(true)
 				.Files().PathIs(sourseFilePath).ExistInRevision(sourceRevision).Single();
 		}
 

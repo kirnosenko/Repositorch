@@ -120,7 +120,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		{
 			var file = CurrentEntity<Modification>().File;
 			entity.AddedInitiallyInCommit = null;
-			entity.TargetCodeBlock = this.SelectionDSL()
+			entity.TargetCodeBlock = this.SelectionDSL(true)
 				.Commits().RevisionIs(revision)
 				.Files().IdIs(file.Id)
 				.Modifications().InFiles()
