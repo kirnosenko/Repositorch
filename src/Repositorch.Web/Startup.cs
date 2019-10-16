@@ -32,15 +32,17 @@ namespace Repositorch.Web
 				options.MinimumSameSitePolicy = SameSiteMode.None;
 			});
 
-			services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+			services
+				.AddMvc(o => o.EnableEndpointRouting = false)
+				.SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
 			services.AddTransient<IDataStore>(sp => new SqliteDataStore("d:/123.db"));
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-		public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
-			if (env.IsDevelopment())
+			if (env.EnvironmentName == "DEBUG")
 			{
 				app.UseDeveloperExceptionPage();
 			}

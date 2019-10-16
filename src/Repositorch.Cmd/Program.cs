@@ -26,7 +26,7 @@ namespace Repositorch
 			{
 				Func<DataMapper.MappingSettings> settings = () => new DataMapper.MappingSettings()
 				{
-					StopRevision = vcsData.GetRevisionByNumber(3000),
+					StopRevision = vcsData.GetRevisionByNumber(100),
 					Check = DataMapper.CheckMode.TOUCHED,
 				};
 				mapper.MapRevisions(settings());
