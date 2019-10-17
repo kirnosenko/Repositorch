@@ -120,32 +120,28 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		}
 		private CodeFileSelectionExpression TouchedInAndStillExistAfterCommits(IQueryable<Commit> commits)
 		{
-			// This code is the result of exorcism to evict EF 'must be reducible node' error.
-			// Reproduced on real DB not in-memory.
-
-			IQueryable<IGrouping<CodeFile, Modification>> modificationsByFile = commits == null ?
-				from f in Queryable<CodeFile>()
-				join m in Queryable<Modification>() on f.Id equals m.FileId
-				group m by f
-				:
-				from c in commits
-				join m in Queryable<Modification>() on c.Id equals m.CommitId
-				join f in Queryable<CodeFile>() on m.FileId equals f.Id
-				group m by f;
-			var filesWithLastAction = modificationsByFile
-				.Select(fileModifications => new
-				{
-					File = fileModifications.Key,
-					LastAction = fileModifications.OrderByDescending(x => x.Id).First().Action
-				});
-
+			if (commits == null)
+			{
+				return Reselect(s =>
+					from c in Queryable<Commit>().ToList().AsQueryable()
+					join m in Queryable<Modification>() on c.Id equals m.CommitId
+					join f in s on m.FileId equals f.Id
+					orderby f.Id
+					group m by f into fileModifications
+					where fileModifications.OrderByDescending(x => x.Id).First().Action != TouchedFileAction.REMOVED
+					select fileModifications.Key
+				);
+			}
+			
 			return Reselect(s =>
-				(
-					from f in s
-					join fa in filesWithLastAction on f.Id equals fa.File.Id
-					select fa
-				).Where(x => x.LastAction != TouchedFileAction.REMOVED)
-				.Select(x => x.File));
+				from c in commits.ToList().AsQueryable()
+				join m in Queryable<Modification>() on c.Id equals m.CommitId
+				join f in s on m.FileId equals f.Id
+				orderby f.Id
+				group m by f into fileModifications
+				where fileModifications.OrderByDescending(x => x.Id).First().Action != TouchedFileAction.REMOVED
+				select fileModifications.Key
+			);
 		}
 	}
 }

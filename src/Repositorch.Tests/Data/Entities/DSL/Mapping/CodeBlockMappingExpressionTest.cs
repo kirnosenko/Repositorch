@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Xunit;
+using FluentAssertions;
 
 namespace Repositorch.Data.Entities.DSL.Mapping
 {
@@ -57,10 +58,10 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 				from m in targetModification
 				join f in Get<CodeFile>() on m.FileId equals f.Id
 				select f.Path);
-			Assert.Equal(new string[] { "1", "2", "3" },
-				from m in targetModification
-				join c in Get<Commit>() on m.CommitId equals c.Id
-				select c.Revision);
+			(from m in targetModification
+			join c in Get<Commit>() on m.CommitId equals c.Id
+			select c.Revision)
+				.Should().BeEquivalentTo(new string[] { "1", "2", "3" });
 		}
 		[Fact]
 		public void Should_use_the_last_target_codeblock_when_there_are_several_of_them()
@@ -165,12 +166,14 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			Assert.Null(Get<CodeBlock>()
 				.Single(cb => cb.Modification.Commit.Revision == "2" && cb.Size < 0)
 				.AddedInitiallyInCommit);
-			Assert.Equal(new string[] { "1", "2" }, Get<CodeBlock>()
+			Get<CodeBlock>()
 				.Where(cb => cb.Modification.Commit.Revision == "3")
-				.Select(cb => cb.AddedInitiallyInCommit.Revision));
-			Assert.Equal(new string[] { "1", "2" }, Get<CodeBlock>()
+				.Select(cb => cb.AddedInitiallyInCommit.Revision)
+					.Should().BeEquivalentTo(new string[] { "1", "2" });
+			Get<CodeBlock>()
 				.Where(cb => cb.Modification.Commit.Revision == "4")
-				.Select(cb => cb.AddedInitiallyInCommit.Revision));
+				.Select(cb => cb.AddedInitiallyInCommit.Revision)
+					.Should().BeEquivalentTo(new string[] { "1", "2" });
 		}
 		[Fact]
 		public void Should_copy_code_for_copied_file()
@@ -195,9 +198,10 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 						.CopyCode()
 			.Submit();
 
-			Assert.Equal(new double[] { 95, 20 }, Get<CodeBlock>()
+			Get<CodeBlock>()
 				.Where(cb => cb.Modification.Commit.Revision == "4")
-				.Select(cb => cb.Size));
+				.Select(cb => cb.Size)
+					.Should().BeEquivalentTo(new double[] { 95, 20 });
 		}
 		[Fact]
 		public void Should_not_add_empty_code_blocks_for_copied_file()
@@ -222,9 +226,10 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 						.CopyCode()
 			.Submit();
 
-			Assert.Equal(new double[] { 20, 5 }, Get<CodeBlock>()
+			Get<CodeBlock>()
 				.Where(cb => cb.Modification.Commit.Revision == "4")
-				.Select(x => x.Size));
+				.Select(x => x.Size)
+					.Should().BeEquivalentTo(new double[] { 20, 5 });
 		}
 		[Fact]
 		public void Should_find_target_codeblock_for_copied_file()
@@ -312,14 +317,14 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			var codeBlocks = Get<CodeBlock>()
 				.Where(cb => cb.Modification.Commit.Revision == "3");
 
-			Assert.Equal(2, codeBlocks.Count());
-			Assert.Equal(new double[] { -95, -10 }, codeBlocks
-				.Select(cb => cb.Size));
-			Assert.False(codeBlocks
-				.Select(cb => cb.TargetCodeBlock)
-				.Contains(null));
-			Assert.Equal(new double[] { 100, 10 }, codeBlocks
-				.Select(cb => cb.TargetCodeBlock.Size));
+			codeBlocks.Count()
+				.Should().Be(2);
+			codeBlocks.Select(cb => cb.Size)
+				.Should().BeEquivalentTo(new double[] { -95, -10 });
+			codeBlocks.Select(cb => cb.TargetCodeBlock)
+				.Should().NotContainNulls();
+			codeBlocks.Select(cb => cb.TargetCodeBlock.Size)
+				.Should().BeEquivalentTo(new double[] { 100, 10 });
 		}
 		[Fact]
 		public void Should_not_add_empty_code_blocks_for_deleted_file()
@@ -344,9 +349,10 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 						.DeleteCode()
 			.Submit();
 
-			Assert.Equal(new double[] { -20, -5 }, Get<CodeBlock>()
+			Get<CodeBlock>()
 				.Where(cb => cb.Modification.Commit.Revision == "4")
-				.Select(x => x.Size));
+				.Select(x => x.Size)
+					.Should().BeEquivalentTo(new double[] { -20, -5 });
 		}
 		[Fact]
 		public void Can_delete_code_for_copied_file()

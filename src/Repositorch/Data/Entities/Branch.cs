@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace Repositorch.Data.Entities
@@ -16,17 +17,7 @@ namespace Repositorch.Data.Entities
 		/// Offset of the mask in bits.
 		/// </summary>
 		public int Offset { get; set; }
-		/// <summary>
-		/// Total size of the mask in bits.
-		/// </summary>
-		public int Size
-		{
-			get
-			{
-				return Data.Length + Offset;
-			}
-		}
-
+		
 		public static implicit operator BranchMask(string mask)
 		{
 			return Create(mask);
@@ -57,14 +48,18 @@ namespace Repositorch.Data.Entities
 		}
 		private static BranchMask Logic(Func<char,char,char> op, params BranchMask[] masks)
 		{
-			masks = masks.OrderByDescending(m => m.Size).ToArray();
+			masks = masks.OrderByDescending(m => m.Data.Length + m.Offset).ToArray();
 			StringBuilder result = new StringBuilder(Unshift(masks[0]));
 
 			foreach (var m in masks.Skip(1))
 			{
 				for (int i = 0; i < result.Length; i++)
 				{
-					var maskBit = (i < m.Offset) ? '1' : (i >= m.Size) ? '0' : m.Data[i-m.Offset];
+					var maskBit = (i < m.Offset)
+						? '1'
+						: (i >= m.Data.Length + m.Offset)
+							? '0'
+							: m.Data[i-m.Offset];
 					result[i] = op(result[i], maskBit);
 				}
 			}

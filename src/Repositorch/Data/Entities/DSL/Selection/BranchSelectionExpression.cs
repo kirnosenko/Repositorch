@@ -15,7 +15,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			return parentExp.Reselect(s =>
 				from c in s
 				join br in parentExp.Queryable<Branch>() on c.BranchId equals br.Id
-				let branch_bit_pos = br.Mask.Size - 1 - mask.Offset
+				let branch_bit_pos = br.Mask.Data.Length + br.Mask.Offset - 1 - mask.Offset
 				where
 					(branch_bit_pos < 0)
 					||
@@ -28,7 +28,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			return parentExp.Reselect(s =>
 				from c in s
 				join br in parentExp.Queryable<Branch>() on c.BranchId equals br.Id
-				let branch_bit_pos = mask.Size - 1 - br.Mask.Offset
+				let branch_bit_pos = mask.Data.Length + mask.Offset - 1 - br.Mask.Offset
 				where
 					(branch_bit_pos < 0)
 					||
@@ -88,11 +88,11 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				select new
 				{
 					Number = c.OrderedNumber,
-					Mask = b.Mask,
+					Branch = b,
 				}).Single();
 			return parentExp
 				.Reselect(s => numberFilter(s, revisionData.Number))
-				.Reselect(s => branchFilter(s, revisionData.Mask));
+				.Reselect(s => branchFilter(s, revisionData.Branch.Mask));
 		}
 	}
 

@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Xunit;
+using FluentAssertions;
 using NSubstitute;
 using Repositorch.Data.Entities.DSL.Mapping;
 
@@ -48,8 +49,8 @@ namespace Repositorch.Data.Entities.Mapping
 			);
 			SubmitChanges();
 
-			Assert.Equal(new double[] { 100, -100 }, Get<CodeBlock>()
-				.Select(cb => cb.Size));
+			Get<CodeBlock>().Select(cb => cb.Size)
+				.Should().BeEquivalentTo(new double[] { 100, -100 });
 			vcsData.DidNotReceive().Blame(Arg.Any<string>(), Arg.Any<string>());
 		}
 		[Fact]
@@ -80,11 +81,10 @@ namespace Repositorch.Data.Entities.Mapping
 			var code = Get<CodeBlock>()
 				.Where(cb => cb.Modification.Commit.Revision == "abc");
 
-			Assert.Equal(new double[] { 10, -10, -5 }, code
-				.Select(cb => cb.Size));
-			Assert.Equal(new double[] { 10, 20 }, code
-				.Where(cb => cb.Size < 0)
-				.Select(cb => cb.TargetCodeBlock.Size));
+			code.Select(cb => cb.Size)
+				.Should().BeEquivalentTo(new double[] { 10, -10, -5 });
+			code.Where(cb => cb.Size < 0).Select(cb => cb.TargetCodeBlock.Size)
+				.Should().BeEquivalentTo(new double[] { 10, 20 });
 		}
 		[Fact]
 		public void Should_not_take_into_account_code_on_another_branch()
@@ -121,11 +121,10 @@ namespace Repositorch.Data.Entities.Mapping
 			var code = Get<CodeBlock>()
 				.Where(cb => cb.Modification.Commit.Revision == "4");
 
-			Assert.Equal(new double[] { 5, -5 }, code
-				.Select(cb => cb.Size));
-			Assert.Equal(new double[] { 10 }, code
-				.Where(cb => cb.Size < 0)
-				.Select(cb => cb.TargetCodeBlock.Size));
+			code.Select(cb => cb.Size)
+				.Should().BeEquivalentTo(new double[] { 5, -5 });
+			code.Where(cb => cb.Size < 0).Select(cb => cb.TargetCodeBlock.Size)
+				.Should().BeEquivalentTo(new double[] { 10 });
 		}
 		[Fact]
 		public void Should_map_all_code_as_is_for_copied_file()
@@ -155,10 +154,10 @@ namespace Repositorch.Data.Entities.Mapping
 			var code = Get<CodeBlock>()
 				.Where(cb => cb.Modification.Commit.Revision == "abc");
 
-			Assert.Equal(new double[] { 10, 5 }, code
-				.Select(cb => cb.Size));
-			Assert.Equal(new string[] { "a", "ab" }, code
-				.Select(cb => cb.AddedInitiallyInCommit.Revision));
+			code.Select(cb => cb.Size)
+				.Should().BeEquivalentTo(new double[] { 10, 5 });
+			code.Select(cb => cb.AddedInitiallyInCommit.Revision)
+				.Should().BeEquivalentTo(new string[] { "a", "ab" });
 		}
 		[Fact]
 		public void Should_map_new_code_in_copied_file_as_new()
@@ -226,10 +225,10 @@ namespace Repositorch.Data.Entities.Mapping
 				where c.Revision == "4"
 				select cb).ToArray();
 
-			Assert.Equal(new double[] { 10, -5, -10 }, mergeCodeBlocks
-				.Select(x => x.Size));
-			Assert.Equal(new double[] { 100, 10, 20 }, mergeCodeBlocks
-				.Select(x => x.TargetCodeBlock.Size));
+			mergeCodeBlocks.Select(x => x.Size)
+				.Should().BeEquivalentTo(new double[] { 10, -5, -10 });
+			mergeCodeBlocks.Select(x => x.TargetCodeBlock.Size)
+				.Should().BeEquivalentTo(new double[] { 100, 10, 20 });
 			Assert.True(mergeCodeBlocks
 				.Select(x => x.AddedInitiallyInCommit)
 				.All(x => x == null));
@@ -260,9 +259,10 @@ namespace Repositorch.Data.Entities.Mapping
 			);
 			SubmitChanges();
 
-			Assert.Equal(new double[] { 100, -20, 30 }, Get<CodeBlock>()
-				.Select(cb => cb.Size));
-			Assert.Equal(2, Get<Modification>().Count());		
+			Get<CodeBlock>().Select(cb => cb.Size)
+				.Should().BeEquivalentTo(new double[] { 100, -20, 30 });
+			Get<Modification>().Count()
+				.Should().Be(2);
 		}
 		[Fact]
 		public void Should_not_revert_addition_or_removing_of_empty_file()
@@ -282,8 +282,10 @@ namespace Repositorch.Data.Entities.Mapping
 			);
 			SubmitChanges();
 
-			Assert.Equal(0, Get<CodeBlock>().Count());
-			Assert.Equal(2, Get<Modification>().Count());
+			Get<CodeBlock>().Count()
+				.Should().Be(0);
+			Get<Modification>().Count()
+				.Should().Be(2);
 		}
 	}
 }

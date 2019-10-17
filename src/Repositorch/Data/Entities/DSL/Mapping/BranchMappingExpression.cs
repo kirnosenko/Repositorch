@@ -79,13 +79,13 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			if (createMask)
 			{
 				var branchWithMaxMask = GetReadOnly<Branch>()
-					.OrderByDescending(x => x.Mask.Size)
+					.OrderByDescending(x => x.Mask.Data.Length + x.Mask.Offset)
 					.FirstOrDefault();
 				var newMask = new BranchMask()
 				{
 					Data = string.Format("{0}1",
 						branchWithMaxMask == null ? string.Empty
-						: new String('0', branchWithMaxMask.Mask.Size)),
+						: new String('0', branchWithMaxMask.Mask.Data.Length + branchWithMaxMask.Mask.Offset)),
 					Offset = 0
 				};
 

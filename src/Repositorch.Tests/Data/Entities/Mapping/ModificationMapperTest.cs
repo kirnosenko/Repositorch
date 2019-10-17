@@ -74,7 +74,8 @@ namespace Repositorch.Data.Entities.Mapping
 					.File("file1").Added()
 			.Submit()
 				.AddCommit("6").OnBranch("1")
-					.File("file1").Modified();
+					.File("file1").Modified()
+			.Submit();
 
 			log.FileCopied("file2", "file1", "5");
 			

@@ -182,33 +182,31 @@ namespace Repositorch.Data.Entities.Mapping
 						select cb).ToArray();
 					var filesToRemove =
 						(from f in s.GetReadOnly<CodeFile>()
-						join m in s.GetReadOnly<Modification>() on f.Id equals m.FileId
-						join c in s.GetReadOnly<Commit>() on m.CommitId equals c.Id
-						group c.Id by f into fileCommits
-						where fileCommits.Count() == 1 && fileCommits.Max() == commit.Id
-						select fileCommits.Key).ToArray();
+						join m in s.GetReadOnly<Modification>()
+							.Where(x => x.CommitId != commit.Id) 
+							on f.Id equals m.FileId into nullm
+						from nm in nullm.DefaultIfEmpty()
+						where nm == null
+						select f).ToArray();
 					var authorsToRemove =
 						(from a in s.GetReadOnly<Author>()
-						join c in s.GetReadOnly<Commit>() on a.Id equals c.AuthorId
-						group c.Id by a into authorCommits
-						where authorCommits.Count() == 1 && authorCommits.Max() == commit.Id
-						select authorCommits.Key).ToArray();
+						join c in s.GetReadOnly<Commit>()
+							.Where(x => x.Id != commit.Id)
+							on a.Id equals c.AuthorId into nullc
+						from nc in nullc.DefaultIfEmpty()
+						where nc == null
+						select a).ToArray();
 					var fixesToRemove = s.GetReadOnly<BugFix>()
 						.Where(x => x.CommitId == commit.Id)
 						.ToArray();
-					var branchesToRemoveId =
+					var branchesToRemove =
 						(from b in s.GetReadOnly<Branch>()
-						join c in s.GetReadOnly<Commit>() on b.Id equals c.BranchId
-						group c.Id by b into branchCommits
-						where branchCommits.Count() == 1 && branchCommits.Max() == commit.Id
-						select branchCommits.Key.Id).ToArray();
-					// Separate branch loading to include mask and prevent error:
-					// The entity of type 'Branch' is sharing the table 'Branch' with entities 
-					// of type 'BranchMask', but there is no entity of this type with the same 
-					// key value '{Id: }' that has been marked as 'Deleted'.
-					var branchesToRemove = s.GetReadOnly<Branch>()
-						.Where(x => branchesToRemoveId.Contains(x.Id))
-						.ToArray();
+						join c in s.GetReadOnly<Commit>()
+							.Where(x => x.Id != commit.Id)
+							on b.Id equals c.BranchId into nullc
+						from nc in nullc.DefaultIfEmpty()
+						where nc == null
+						select b).ToArray();
 					
 					s.RemoveRange(codeToRemove);
 					s.RemoveRange(modificationsToRemove);

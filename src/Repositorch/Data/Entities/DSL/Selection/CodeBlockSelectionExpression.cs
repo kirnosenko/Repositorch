@@ -21,20 +21,13 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		}
 		public static CommitSelectionExpression AreRefactorings(this CommitSelectionExpression parentExp)
 		{
-			return parentExp.AreNotBugFixes().Reselect(s =>
-				(
-					from c in s
-					join m in parentExp.Queryable<Modification>() on c.Id equals m.CommitId
-					join cb in parentExp.Queryable<CodeBlock>() on m.Id equals cb.ModificationId
-					group cb by c into g
-					select new
-					{
-						Commit = g.Key,
-						Added = g.Where(x => x.TargetCodeBlockId == null).Sum(x => x.Size),
-						Removed = -g.Where(x => x.Size < 0).Sum(x => x.Size)
-					}
-				).Where(x => x.Removed / x.Added >= 1d / 2).Select(x => x.Commit)
-			);
+			return parentExp.Reselect(s => s.Where(commit =>
+				(from c in s
+				 join m in parentExp.Queryable<Modification>() on c.Id equals m.CommitId
+				 join cb in parentExp.Queryable<CodeBlock>() on m.Id equals cb.ModificationId
+				 where cb.TargetCodeBlock == null || cb.Size < 0
+				 group cb.Size by c.Id)
+				.Where(x => x.Sum() <= 0).Select(x => x.Key).Contains(commit.Id)));
 		}
 	}
 
