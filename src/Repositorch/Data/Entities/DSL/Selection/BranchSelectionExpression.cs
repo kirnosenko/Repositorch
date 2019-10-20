@@ -19,7 +19,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				where
 					(branch_bit_pos < 0)
 					||
-					(branch_bit_pos < mask.Data.Length && mask.Data[branch_bit_pos] == '1')
+					(branch_bit_pos < mask.Data.Length && mask.Data.Substring(branch_bit_pos, 1) == "1")
 				select c);
 		}
 		public static CommitSelectionExpression OnBranchForward(
@@ -32,7 +32,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				where
 					(branch_bit_pos < 0)
 					||
-					(branch_bit_pos < br.Mask.Data.Length && br.Mask.Data[branch_bit_pos] == '1')
+					(branch_bit_pos < br.Mask.Data.Length && br.Mask.Data.Substring(branch_bit_pos, 1) == "1")
 				select c);
 		}
 		public static CommitSelectionExpression BeforeRevision(

@@ -121,7 +121,8 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 				.Commits().RevisionIs(revision)
 				.Files().IdIs(file.Id)
 				.Modifications().InFiles()
-				.CodeBlocks().InModifications().AddedInitiallyInCommits().Last();
+				.CodeBlocks().InModifications().AddedInitiallyInCommits()
+				.OrderByDescending(x => x.Id).First();
 
 			return this;
 		}

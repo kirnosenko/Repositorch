@@ -11,7 +11,7 @@ namespace Repositorch.Data.Entities.Persistent
 		}
 		protected override void Configure(DbContextOptionsBuilder options)
 		{
-			var cs = $"Server=.\\SQLEXPRESS;Database={name};Trusted_Connection=True;";
+			var cs = $"Server=.\\SQLEXPRESS;Database={name};Trusted_Connection=True;MultipleActiveResultSets=true;";
 			
 			options.UseSqlServer(cs);
 		}
