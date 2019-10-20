@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Repositorch.Data.Entities.EF;
 using Repositorch.Data.Entities.DSL.Mapping;
 using Repositorch.Data.Entities.DSL.Selection;
+using Repositorch.Data.Entities.Persistent;
 
 namespace Repositorch.Data.Entities
 {

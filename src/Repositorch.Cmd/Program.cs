@@ -4,11 +4,11 @@ using System.Linq;
 using System.Diagnostics;
 using Repositorch.Data;
 using Repositorch.Data.Entities;
-using Repositorch.Data.Entities.EF;
 using Repositorch.Data.Entities.Mapping;
 using Repositorch.Data.VersionControl;
 using Repositorch.Data.VersionControl.Git;
 using Repositorch.Data.Entities.DSL.Selection;
+using Repositorch.Data.Entities.Persistent;
 
 namespace Repositorch
 {
@@ -16,8 +16,12 @@ namespace Repositorch
 	{
 		static void Main(string[] args)
 		{
-			var data = new SqliteDataStore("d:/123.db");// { Logging = true };
-			//var data = new PostgreSqlDataStore("git", "postgres", "123") { SingletonSession = true };
+			var data = new SqlServerDataStore("git")
+			//var data = new PostgreSqlDataStore("git", "postgres", "123")
+			{
+				//Logging = true,
+				//SingletonSession = true,
+			};
 			var gitClient = new CommandLineGitClient("D:/src/git/.git");
 			var vcsData = new VcsDataCached(new GitData(gitClient), 10, 1000);
 			var mapper = CreateDataMapper(data, vcsData);
@@ -26,7 +30,7 @@ namespace Repositorch
 			{
 				Func<DataMapper.MappingSettings> settings = () => new DataMapper.MappingSettings()
 				{
-					StopRevision = vcsData.GetRevisionByNumber(100),
+					StopRevision = vcsData.GetRevisionByNumber(200),
 					Check = DataMapper.CheckMode.TOUCHED,
 				};
 				mapper.MapRevisions(settings());

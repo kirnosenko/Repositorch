@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -9,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Repositorch.Data;
-using Repositorch.Web.Models;
+using Repositorch.Data.Entities.Persistent;
 
 namespace Repositorch.Web
 {
@@ -36,7 +33,7 @@ namespace Repositorch.Web
 				.AddMvc(o => o.EnableEndpointRouting = false)
 				.SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 
-			services.AddTransient<IDataStore>(sp => new SqliteDataStore("d:/123.db"));
+			services.AddTransient<IDataStore>(sp => new SqlServerDataStore("git"));
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

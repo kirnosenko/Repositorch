@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 
-namespace Repositorch.Data.Entities.EF
+namespace Repositorch.Data.Entities.Persistent
 {
 	public class InMemoryDataStore : NamedDataStore
 	{

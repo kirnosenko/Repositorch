@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 
-namespace Repositorch.Data.Entities.EF
+namespace Repositorch.Data.Entities.Persistent
 {
-	public class EfSession : DbContext, ISession
+	public class PersistentSession : DbContext, ISession
 	{
 		private Action<DbContextOptionsBuilder> config;
 		private Dictionary<Type, object> tables;
 
-		public EfSession(Action<DbContextOptionsBuilder> config)
+		public PersistentSession(Action<DbContextOptionsBuilder> config)
 			: base()
 		{
 			this.config = config;

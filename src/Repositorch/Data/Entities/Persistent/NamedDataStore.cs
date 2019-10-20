@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Debug;
 
-namespace Repositorch.Data.Entities.EF
+namespace Repositorch.Data.Entities.Persistent
 {
 	public abstract class NamedDataStore : IDataStore
 	{
@@ -33,7 +33,7 @@ namespace Repositorch.Data.Entities.EF
 
 		private ISession GetNewSession()
 		{
-			return new EfSession(c =>
+			return new PersistentSession(c =>
 			{
 				Configure(c);
 				if (Logging)

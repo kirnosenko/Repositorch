@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
-namespace Repositorch.Data.Entities.EF
+namespace Repositorch.Data.Entities.Persistent
 {
 	public class SessionWrapper : ISession
 	{

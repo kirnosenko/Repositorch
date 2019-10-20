@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿  <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -7,12 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.0.0" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.0.1" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <ProjectReference Include="..\Repositorch.Data.Entities.Persistent.PostgreSql\Repositorch.Data.Entities.Persistent.PostgreSql.csproj" />
+    <ProjectReference Include="..\Repositorch.Data.Entities.Persistent.SqlServer\Repositorch.Data.Entities.Persistent.SqlServer.csproj" />
     <ProjectReference Include="..\Repositorch\Repositorch.csproj" />
   </ItemGroup>
 
