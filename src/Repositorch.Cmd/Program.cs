@@ -30,16 +30,16 @@ namespace Repositorch
 			{
 				Func<DataMapper.MappingSettings> settings = () => new DataMapper.MappingSettings()
 				{
-					StopRevision = vcsData.GetRevisionByNumber(200),
+					StopRevision = vcsData.GetRevisionByNumber(3000),
 					Check = DataMapper.CheckMode.TOUCHED,
 				};
-				mapper.MapRevisions(settings());
+				//mapper.MapRevisions(settings());
 				//mapper.Truncate(1170);
 				//mapper.Check(2309, DataMapper.CheckMode.ALL);
 				//mapper.CheckAndTruncate("/test-delta.c");
 
 				//BlameDiff(vcsData);
-				//FileHistory(data, vcsData, "/Makefile");
+				FileHistory(data, vcsData, "/Documentation/merge-pull-opts.txt");
 				//Select(data);
 			}
 
@@ -117,43 +117,41 @@ namespace Repositorch
 			using (var s = data.OpenSession())
 			{
 				var modifications =
-					from f in s.Get<CodeFile>().Where(x => x.Path == path)
-					join m in s.Get<Modification>() on f.Id equals m.FileId
-					join c in s.Get<Commit>() on m.CommitId equals c.Id
-					join cb in s.Get<CodeBlock>() on m.Id equals cb.ModificationId
-					group cb by new { c, m } into codeBlocksForFile
-					orderby codeBlocksForFile.Key.c.OrderedNumber descending
+					(from f in s.GetReadOnly<CodeFile>()
+					join m in s.GetReadOnly<Modification>() on f.Id equals m.FileId
+					join c in s.GetReadOnly<Commit>() on m.CommitId equals c.Id
+					join cb in s.GetReadOnly<CodeBlock>() on m.Id equals cb.ModificationId
+					where f.Path == path
+					group cb by new { m.Action, c.Revision, c.OrderedNumber, c.Date } into modCode
 					select new
 					{
-						revision = codeBlocksForFile.Key.c.Revision,
-						revisionNumber = codeBlocksForFile.Key.c.OrderedNumber,
-						revisionDate = codeBlocksForFile.Key.c.Date,
-						action = codeBlocksForFile.Key.m.Action,
-						codePlus = codeBlocksForFile
-							.Where(x => x.TargetCodeBlockId == null)
-							.Sum(x => x.Size),
-						codeMinus = codeBlocksForFile
-							.Where(x => x.Size < 0)
-							.Sum(x => x.Size),
-						cancelPlus = codeBlocksForFile
-							.Where(x => x.TargetCodeBlockId != null && x.Size > 0)
-							.Sum(x => x.Size),
-					};
+						Action = modCode.Key.Action,
+						Revision = modCode.Key.Revision,
+						Number = modCode.Key.OrderedNumber,
+						Date = modCode.Key.Date,
+						Added = modCode.Sum(
+							x => x.TargetCodeBlockId == null ? x.Size : 0),
+						Removed = modCode.Sum(
+							x => x.Size < 0 ? x.Size : 0),
+						Compensated = modCode.Sum(
+							x => (x.TargetCodeBlockId != null && x.Size > 0) ? x.Size : 0),
+					}).ToArray();
 
 				Console.WriteLine(path);
-				foreach (var m in modifications)
+				
+				foreach (var m in modifications.OrderByDescending(x => x.Number))
 				{
-					var linesCount = (m.action == TouchedFileAction.REMOVED)
+					var linesCount = (m.Action == TouchedFileAction.REMOVED)
 						? 0
-						: vcsData.Blame(m.revision, path).Count();
+						: vcsData.Blame(m.Revision, path).Count();
 					Console.WriteLine(string.Format("{0} ({1}) {2} {3} +{4} -{5} +{6} loc: {7}",
-						m.revision,
-						m.revisionNumber,
-						m.revisionDate.ToShortDateString(),
-						m.action,
-						m.codePlus,
-						-m.codeMinus,
-						m.cancelPlus,
+						m.Revision,
+						m.Number,
+						m.Date.ToShortDateString(),
+						m.Action,
+						m.Added,
+						Math.Abs(m.Removed),
+						m.Compensated,
 						linesCount));
 				}
 			}
