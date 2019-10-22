@@ -9,17 +9,21 @@ namespace System.IO
 			MemoryStream buf = new MemoryStream();
 			TextWriter writer = new StreamWriter(buf);
 
-			RunAndWaitForExit(cmd, arguments, line => writer.WriteLine(line));
+			if (RunAndWaitForExit(cmd, arguments, line => writer.WriteLine(line)))
+			{
+				writer.Flush();
+				buf.Seek(0, SeekOrigin.Begin);
+				return buf;
+			}
 
-			writer.Flush();
-			buf.Seek(0, SeekOrigin.Begin);
-			return buf;
+			return null;
 		}
-		protected void RunAndWaitForExit(string command, string arguments, Action<string> lineOutput)
+		protected bool RunAndWaitForExit(string command, string arguments, Action<string> lineOutput)
 		{
 			ProcessStartInfo psi = new ProcessStartInfo(command, arguments);
 			psi.UseShellExecute = false;
 			psi.RedirectStandardOutput = true;
+			psi.RedirectStandardError = true;
 
 			Process process = new Process();
 			process.StartInfo = psi;
@@ -33,12 +37,7 @@ namespace System.IO
 			process.Start();
 			process.BeginOutputReadLine();
 			process.WaitForExit();
-			if (process.ExitCode != 0)
-			{
-				Console.WriteLine(string.Format(
-					"Process {0} with arguments {1} exit code is {2}",
-					command, arguments, process.ExitCode));
-			}
+			return process.ExitCode == 0;
 		}
 	}
 }

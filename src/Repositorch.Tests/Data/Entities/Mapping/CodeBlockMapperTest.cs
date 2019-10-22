@@ -234,6 +234,54 @@ namespace Repositorch.Data.Entities.Mapping
 				.All(x => x == null));
 		}
 		[Fact]
+		public void Should_not_map_removed_file_when_remove_modification_is_not_on_merged_branches()
+		{
+			mappingDSL
+				.AddCommit("1").OnBranch("1")
+					.File("file1").Added()
+						.Code(100)
+			.Submit()
+				.AddCommit("2").OnBranch("11")
+					.File("file1").Modified()
+						.Code(10)
+			.Submit()
+				.AddCommit("3").OnBranch("11")
+					.File("file1").Modified()
+						.Code(10)
+			.Submit()
+				.AddCommit("4").OnBranch("101")
+					.File("file1").Modified()
+						.Code(10)
+			.Submit()
+				.AddCommit("5").OnBranch("101")
+					.File("file1").Removed()
+			.Submit()
+				.AddCommit("6").OnBranch("111")
+			.Submit()
+				.AddCommit("7").OnBranch("1011")
+			.Submit();
+
+			vcsData.Blame("10", "file1")
+				.Returns((TestBlame)null);
+			vcsData.GetRevisionParents("10")
+				.Returns(new string[] { "6", "7" });
+
+			mapper.Map(
+				mappingDSL.AddCommit("10").OnBranch("1111")
+					.File("file1").Modified()
+			);
+			SubmitChanges();
+
+			var modifications =
+				(from m in Get<Modification>()
+				 join c in Get<Commit>() on m.CommitId equals c.Id
+				 where c.Revision == "10"
+				 select m).ToArray();
+
+			modifications.Count()
+				.Should().Be(0);
+		}
+		[Fact]
 		public void Should_revert_parent_modification_if_no_blocks_were_added()
 		{
 			mappingDSL

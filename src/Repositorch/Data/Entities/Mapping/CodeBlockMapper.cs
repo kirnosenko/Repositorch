@@ -13,22 +13,23 @@ namespace Repositorch.Data.Entities.Mapping
 			: base(vcsData)
 		{
 		}
+
 		public override IEnumerable<ICodeBlockMappingExpression> Map(IModificationMappingExpression expression)
 		{
+			Modification modification = expression.CurrentEntity<Modification>();
+
+			if (modification.Action == TouchedFileAction.REMOVED)
+			{
+				return Enumerable.Repeat(expression.DeleteCode(), 1);
+			}
+
 			List<CodeBlockMappingExpression> codeBlockExpressions = new List<CodeBlockMappingExpression>();
 			string revision = expression.CurrentEntity<Commit>().Revision;
 			CodeFile file = expression.CurrentEntity<CodeFile>();
-			Modification modification = expression.CurrentEntity<Modification>();
-			
-			if (modification.Action == TouchedFileAction.REMOVED)
+			var blame = vcsData.Blame(revision, file.Path);
+
+			if (blame != null)
 			{
-				codeBlockExpressions.Add(
-					expression.DeleteCode()
-				);
-			}
-			else
-			{
-				IBlame blame = vcsData.Blame(revision, file.Path);
 				var linesByRevision = from l in blame group l.Key by l.Value;
 				bool fileCopied = (modification.Action == TouchedFileAction.ADDED) &&
 					(modification.SourceFile != null);

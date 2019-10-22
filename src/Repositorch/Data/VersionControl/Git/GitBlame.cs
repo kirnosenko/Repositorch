@@ -15,10 +15,7 @@ namespace Repositorch.Data.VersionControl.Git
 
 		public static GitBlame Parse(Stream blameData)
 		{
-			if (blameData.Length == 0)
-			{
-				return null;
-			}
+			if (blameData == null) return null;
 			
 			TextReader reader = new StreamReader(blameData);
 			var result = new GitBlame();

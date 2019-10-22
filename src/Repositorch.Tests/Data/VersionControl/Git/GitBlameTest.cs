@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Xunit;
+using FluentAssertions;
 
 namespace Repositorch.Data.VersionControl.Git
 {
@@ -40,27 +41,33 @@ a59b276e18f3d4a548caf549e05188cb1bd3a709 17 17 2
 filename decorate.h
 ";
 
-private string blame1 = @"";
-
 		[Fact]
 		public void Should_keep_revisions_for_each_line()
 		{
 			blame = GitBlame.Parse(blame0.ToStream());
 
-			Assert.Equal(15,
-				blame.Where(x => x.Value == "a59b276e18f3d4a548caf549e05188cb1bd3a709").Count());
-			Assert.Equal(3,
-				blame.Where(x => x.Value == "54988bdad7dc3f09e40752221c144bf470d73aa7").Count());
-			Assert.Equal(new int[] { 5, 15, 16 },
-				blame.Where(x => x.Value == "54988bdad7dc3f09e40752221c144bf470d73aa7")
-				.Select(x => x.Key));
+			blame.Where(x => x.Value == "a59b276e18f3d4a548caf549e05188cb1bd3a709").Count()
+				.Should().Be(15);
+			blame.Where(x => x.Value == "54988bdad7dc3f09e40752221c144bf470d73aa7").Count()
+				.Should().Be(3);
+			blame.Where(x => x.Value == "54988bdad7dc3f09e40752221c144bf470d73aa7")
+				.Select(x => x.Key)
+					.Should().BeEquivalentTo(new int[] { 5, 15, 16 });
 		}
 		[Fact]
 		public void Should_return_null_for_invalid_path()
 		{
-			blame = GitBlame.Parse(blame1.ToStream());
+			blame = GitBlame.Parse(null);
 
-			Assert.Null(blame);
+			blame.Should().BeNull();
+		}
+		[Fact]
+		public void Should_return_empty_for_empty_file()
+		{
+			blame = GitBlame.Parse("".ToStream());
+
+			blame.Should().NotBeNull();
+			blame.Count.Should().Be(0);
 		}
 	}
 }
