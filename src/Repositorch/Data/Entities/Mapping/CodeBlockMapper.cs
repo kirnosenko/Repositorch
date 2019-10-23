@@ -61,7 +61,7 @@ namespace Repositorch.Data.Entities.Mapping
 						.OnBranchBack(currentBranch.Mask);
 					var isMerge = vcsData.IsMerge(revision);
 
-					foreach (var existentCode in (
+					var existent—odeByRevision = (
 						from f in expression.Get<CodeFile>().Where(x => x.Id == file.Id)
 						join m in expression.Get<Modification>() on f.Id equals m.FileId
 						join c in commitsOnBranch on m.CommitId equals c.Id
@@ -73,8 +73,9 @@ namespace Repositorch.Data.Entities.Mapping
 						{
 							Revision = g.Key,
 							CodeSize = g.Sum()
-						}
-					))
+						}).ToArray();
+
+					foreach (var existentCode in existent—odeByRevision)
 					{
 						var linesForRevision = linesByRevision.SingleOrDefault(x => x.Key == existentCode.Revision);
 						double realCodeSize = linesForRevision == null ? 0 : linesForRevision.Count();

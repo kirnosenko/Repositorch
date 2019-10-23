@@ -15,7 +15,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			CodeBlockMappingExpression lastCodeBlockExp = null;
 			var modification = exp.CurrentEntity<Modification>();
 
-			foreach (var codeByFirstBlock in (
+			var codeByFirstBlock = (
 				from cb in exp.GetReadOnly<CodeBlock>()
 				join m in exp.GetReadOnly<Modification>() on cb.ModificationId equals m.Id
 				join f in exp.Get<CodeFile>() on m.FileId equals f.Id
@@ -23,10 +23,16 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 				join tcb in exp.Get<CodeBlock>() on cb.TargetCodeBlockId ?? cb.Id equals tcb.Id
 				where f.Id == modification.SourceFile.Id
 					&& c.OrderedNumber <= modification.SourceCommit.OrderedNumber
-				group cb.Size by tcb.Id)
-				.Select(x => new { Id = x.Key, Size = x.Sum() }))
+				group cb.Size by tcb.Id into g
+				select new
+				{
+					Id = g.Key,
+					Size = g.Sum()
+				}).ToArray();
+
+			foreach (var codeForFirstBlock in codeByFirstBlock)
 			{
-				double currentCodeSize = codeByFirstBlock.Size;
+				double currentCodeSize = codeForFirstBlock.Size;
 				
 				if (currentCodeSize != 0)
 				{
@@ -39,7 +45,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 						lastCodeBlockExp = lastCodeBlockExp.Code(currentCodeSize);
 					}
 					lastCodeBlockExp.CopiedFrom(
-						RevisionCodeBlockWasInitiallyAddedIn(exp, codeByFirstBlock.Id)
+						RevisionCodeBlockWasInitiallyAddedIn(exp, codeForFirstBlock.Id)
 					);
 				}
 			}
@@ -50,16 +56,22 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		{
 			CodeBlockMappingExpression lastCodeBlockExp = null;
 
-			foreach (var codeByFirstBlock in (
+			var codeByFistBlock = (
 				from cb in exp.GetReadOnly<CodeBlock>()
 				join m in exp.GetReadOnly<Modification>() on cb.ModificationId equals m.Id
 				join f in exp.Get<CodeFile>() on m.FileId equals f.Id
 				join tcb in exp.Get<CodeBlock>() on cb.TargetCodeBlockId ?? cb.Id equals tcb.Id
 				where f.Id == exp.CurrentEntity<CodeFile>().Id
-				group cb.Size by tcb.Id)
-				.Select(x => new { Id = x.Key, Size = x.Sum() }))
+				group cb.Size by tcb.Id into g
+				select new
+				{
+					Id = g.Key,
+					Size = g.Sum()
+				}).ToArray();
+
+			foreach (var codeForFirstBlock in codeByFistBlock)
 			{
-				double currentCodeSize = codeByFirstBlock.Size;
+				double currentCodeSize = codeForFirstBlock.Size;
 				
 				if (currentCodeSize != 0)
 				{
@@ -72,7 +84,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 						lastCodeBlockExp = lastCodeBlockExp.Code(- currentCodeSize);
 					}
 					lastCodeBlockExp.ForCodeAddedInitiallyInRevision(
-						RevisionCodeBlockWasInitiallyAddedIn(exp, codeByFirstBlock.Id)
+						RevisionCodeBlockWasInitiallyAddedIn(exp, codeForFirstBlock.Id)
 					);
 				}
 			}
