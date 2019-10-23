@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
+using FluentAssertions;
 using NSubstitute;
 using Repositorch.Data.Entities.DSL.Mapping;
 
@@ -93,29 +94,36 @@ namespace Repositorch.Data.Entities.Mapping
 			Assert.Equal("file1", modification.SourceFile.Path);
 		}
 		[Fact]
-		public void Should_set_previous_revision_as_source_for_file_copied_without_source_revision()
+		public void Should_set_previous_revision_on_the_same_branch_as_source_for_file_copied_without_source_revision()
 		{
 			mappingDSL
-				.AddCommit("5").OnBranch("1")
+				.AddCommit("1").OnBranch("1")
 					.File("file1").Added()
 			.Submit()
-				.AddCommit("6").OnBranch("1")
+				.AddCommit("2").OnBranch("11")
 					.File("file1").Modified()
+			.Submit()
+				.AddCommit("3").OnBranch("101")
+					.File("file1").Modified()
+			.Submit()
+				.AddCommit("4").OnBranch("11")
+					.File("file1").Removed()
 			.Submit();
-					
+
 			log.FileRenamed("file2", "file1");
-			
-			mapper.Map(
-				mappingDSL.AddCommit("10").OnBranch("1").File("file2")
+
+			var modifications = mapper.Map(
+				mappingDSL.AddCommit("10").OnBranch("101").File("file2")
 			);
 			SubmitChanges();
 
-			Assert.Equal(3, Get<Modification>().Count());
-			var modification = Get<Modification>().Last();
+			modifications.Count()
+				.Should().Be(1);
+			var modification = modifications.First().CurrentEntity<Modification>();
 			Assert.Equal("10", modification.Commit.Revision);
 			Assert.Equal("file2", modification.File.Path);
 			Assert.Equal(TouchedFileAction.ADDED, modification.Action);
-			Assert.Equal("6", modification.SourceCommit.Revision);
+			Assert.Equal("3", modification.SourceCommit.Revision);
 			Assert.Equal("file1", modification.SourceFile.Path);
 		}
 		[Fact]

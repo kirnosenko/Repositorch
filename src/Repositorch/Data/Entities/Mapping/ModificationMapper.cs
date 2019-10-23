@@ -60,9 +60,10 @@ namespace Repositorch.Data.Entities.Mapping
 					}
 					if (touchedFile.SourceRevision == null)
 					{
-						touchedFile.SourceRevision = expression.Get<Commit>()
-							.Single(c => c.OrderedNumber == commit.OrderedNumber - 1)
-							.Revision;
+						var branchMask = expression.CurrentEntity<Branch>().Mask;
+						touchedFile.SourceRevision = expression.SelectionDSL()
+							.Commits().OnBranchBack(branchMask)
+							.OrderByDescending(x => x.OrderedNumber).First().Revision;
 					}
 					return Enumerable.Repeat(expression
 						.CopiedFrom(touchedFile.SourcePath, touchedFile.SourceRevision), 1);
