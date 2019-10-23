@@ -73,7 +73,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			.Submit()
 				.AddCommit("2").OnBranch("1")
 					.File("file1").Removed()
-						.DeleteCode()
+						.RemoveCode()
 					.File("file2").CopiedFrom("file1", "1")
 						.Code(100).CopiedFrom("1")
 			.Submit()
@@ -81,7 +81,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 					.File("file1").CopiedFrom("file2", "2")
 						.Code(100).CopiedFrom("1")
 					.File("file2").Removed()
-						.DeleteCode()
+						.RemoveCode()
 			.Submit()
 				.AddCommit("4").OnBranch("1")
 					.File("file1").Modified()
@@ -271,7 +271,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 				.Select(cb => cb.Size));
 		}
 		[Fact]
-		public void Should_copy_copied_code_with_correct_initial_commit()
+		public void Should_copy_code_with_correct_initial_commit()
 		{
 			mappingDSL
 				.AddCommit("1").OnBranch("1")
@@ -297,21 +297,51 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 				.Select(cb => cb.AddedInitiallyInCommit.Revision));
 		}
 		[Fact]
-		public void Should_delete_code_for_deleted_file()
+		public void Should_copy_code_from_the_same_branch_only()
 		{
 			mappingDSL
-				.AddCommit("1")
+				.AddCommit("1").OnBranch("1")
 					.File("file1").Added()
 						.Code(100)
 			.Submit()
-				.AddCommit("2")
+				.AddCommit("2").OnBranch("11")
+					.File("file1").Modified()
+						.Code(20)
+			.Submit()
+				.AddCommit("3").OnBranch("101")
+					.File("file1").Modified()
+						.Code(30)
+			.Submit()
+				.AddCommit("4").OnBranch("11")
+					.File("file1").Modified()
+						.Code(40)
+			.Submit()
+				.AddCommit("5").OnBranch("11")
+					.File("file2").CopiedFrom("file1", "4")
+						.CopyCode()
+			.Submit();
+
+			Get<CodeBlock>()
+				.Where(cb => cb.Modification.Commit.Revision == "5")
+				.Select(cb => cb.Size)
+					.Should().BeEquivalentTo(new double[] { 100, 20, 40 });
+		}
+		[Fact]
+		public void Should_remove_code_for_removed_file()
+		{
+			mappingDSL
+				.AddCommit("1").OnBranch("1")
+					.File("file1").Added()
+						.Code(100)
+			.Submit()
+				.AddCommit("2").OnBranch("1")
 					.File("file1").Modified()
 						.Code(-5).ForCodeAddedInitiallyInRevision("1")
 						.Code(10)
 			.Submit()
-				.AddCommit("3")
+				.AddCommit("3").OnBranch("1")
 					.File("file1").Removed()
-						.DeleteCode()
+						.RemoveCode()
 			.Submit();
 
 			var codeBlocks = Get<CodeBlock>()
@@ -327,26 +357,26 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 				.Should().BeEquivalentTo(new double[] { 100, 10 });
 		}
 		[Fact]
-		public void Should_not_add_empty_code_blocks_for_deleted_file()
+		public void Should_not_add_empty_code_blocks_for_removed_file()
 		{
 			mappingDSL
-				.AddCommit("1")
+				.AddCommit("1").OnBranch("1")
 					.File("file1").Added()
 						.Code(10)
 			.Submit()
-				.AddCommit("2")
+				.AddCommit("2").OnBranch("1")
 					.File("file1").Modified()
 						.Code(20)
 						.Code(-5).ForCodeAddedInitiallyInRevision("1")
 			.Submit()
-				.AddCommit("3")
+				.AddCommit("3").OnBranch("1")
 					.File("file1").Modified()
 						.Code(5)
 						.Code(-5).ForCodeAddedInitiallyInRevision("1")
 			.Submit()
-				.AddCommit("4")
+				.AddCommit("4").OnBranch("1")
 					.File("file1").Removed()
-						.DeleteCode()
+						.RemoveCode()
 			.Submit();
 
 			Get<CodeBlock>()
@@ -355,7 +385,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 					.Should().BeEquivalentTo(new double[] { -20, -5 });
 		}
 		[Fact]
-		public void Can_delete_code_for_copied_file()
+		public void Can_remove_code_for_copied_file()
 		{
 			mappingDSL
 				.AddCommit("1").OnBranch("1")
@@ -368,12 +398,38 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			.Submit()
 				.AddCommit("3").OnBranch("1")
 					.File("file2").Removed()
-						.DeleteCode()
+						.RemoveCode()
 			.Submit();
 
 			Assert.Equal(0, Get<CodeBlock>()
 				.Where(cb => cb.Modification.File.Path == "file2")
 				.Sum(x => x.Size));
+		}
+		[Fact]
+		public void Should_remove_code_from_the_same_branch_only()
+		{
+			mappingDSL
+				.AddCommit("1").OnBranch("1")
+					.File("file1").Added()
+						.Code(100)
+			.Submit()
+				.AddCommit("2").OnBranch("11")
+					.File("file1").Modified()
+						.Code(20)
+			.Submit()
+				.AddCommit("3").OnBranch("101")
+					.File("file1").Modified()
+						.Code(30)
+			.Submit()
+				.AddCommit("4").OnBranch("101")
+					.File("file1").Removed()
+						.RemoveCode()
+			.Submit();
+
+			Get<CodeBlock>()
+				.Where(cb => cb.Modification.Commit.Revision == "4")
+				.Select(cb => cb.Size)
+					.Should().BeEquivalentTo(new double[] { -100, -30 });
 		}
 	}
 }

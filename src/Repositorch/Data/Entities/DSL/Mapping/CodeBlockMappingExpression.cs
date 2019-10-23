@@ -12,91 +12,86 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		}
 		public static CodeBlockMappingExpression CopyCode(this IModificationMappingExpression exp)
 		{
-			CodeBlockMappingExpression lastCodeBlockExp = null;
 			var modification = exp.CurrentEntity<Modification>();
+			var sourceCommit = (
+				from c in exp.GetReadOnly<Commit>().Where(x => x.Id == modification.SourceCommit.Id)
+				join b in exp.GetReadOnly<Branch>() on c.BranchId equals b.Id
+				select new { c.OrderedNumber, b.Mask }).Single();
+			var commitsOnBranch = exp.SelectionDSL().Commits()
+				.OnBranchBack(sourceCommit.Mask)
+				.Where(x => x.OrderedNumber <= sourceCommit.OrderedNumber);
 
-			var codeByFirstBlock = (
-				from cb in exp.GetReadOnly<CodeBlock>()
-				join m in exp.GetReadOnly<Modification>() on cb.ModificationId equals m.Id
-				join f in exp.Get<CodeFile>() on m.FileId equals f.Id
-				join c in exp.Get<Commit>() on m.CommitId equals c.Id
-				join tcb in exp.Get<CodeBlock>() on cb.TargetCodeBlockId ?? cb.Id equals tcb.Id
-				where f.Id == modification.SourceFile.Id
-					&& c.OrderedNumber <= modification.SourceCommit.OrderedNumber
-				group cb.Size by tcb.Id into g
+			return DoWithRemainingCode(
+				exp, commitsOnBranch, modification.SourceFile.Id, CopyCodeBlock);
+		}
+		public static CodeBlockMappingExpression RemoveCode(this IModificationMappingExpression exp)
+		{
+			var file = exp.CurrentEntity<CodeFile>();
+			var currentCommitBranch = exp.CurrentEntity<Branch>();
+			var commitsOnBranch = exp.SelectionDSL().Commits()
+				.OnBranchBack(currentCommitBranch.Mask);
+
+			return DoWithRemainingCode(
+				exp, commitsOnBranch, file.Id, RemoveCodeBlock);
+		}
+
+		private static CodeBlockMappingExpression DoWithRemainingCode(
+			this IModificationMappingExpression expression,
+			IQueryable<Commit> commits,
+			int fileId,
+			Func<IModificationMappingExpression,string,double,CodeBlockMappingExpression> codeToExp)
+		{
+			var remaining—odeByRevision = (
+				from m in expression.Get<Modification>().Where(x => x.FileId == fileId)
+				join c in commits on m.CommitId equals c.Id
+				join cb in expression.Get<CodeBlock>() on m.Id equals cb.ModificationId
+				join tcb in expression.Get<CodeBlock>() on cb.TargetCodeBlockId ?? cb.Id equals tcb.Id
+				join tcbc in expression.Get<Commit>() on tcb.AddedInitiallyInCommitId equals tcbc.Id
+				group cb.Size by tcbc.Revision into g
 				select new
 				{
-					Id = g.Key,
+					Revision = g.Key,
 					Size = g.Sum()
 				}).ToArray();
 
-			foreach (var codeForFirstBlock in codeByFirstBlock)
+			CodeBlockMappingExpression codeExp = null;
+			foreach (var codeForRevision in remaining—odeByRevision)
 			{
-				double currentCodeSize = codeForFirstBlock.Size;
-				
-				if (currentCodeSize != 0)
-				{
-					if (lastCodeBlockExp == null)
-					{
-						lastCodeBlockExp = exp.Code(currentCodeSize);
-					}
-					else
-					{
-						lastCodeBlockExp = lastCodeBlockExp.Code(currentCodeSize);
-					}
-					lastCodeBlockExp.CopiedFrom(
-						RevisionCodeBlockWasInitiallyAddedIn(exp, codeForFirstBlock.Id)
-					);
-				}
+				codeExp = codeToExp(
+					codeExp ?? expression,
+					codeForRevision.Revision,
+					codeForRevision.Size) ?? codeExp;
 			}
-				
-			return lastCodeBlockExp;
+
+			return codeExp;
 		}
-		public static CodeBlockMappingExpression DeleteCode(this IModificationMappingExpression exp)
+		private static CodeBlockMappingExpression CopyCodeBlock(
+			IModificationMappingExpression expression,
+			string revision,
+			double codeSize)
 		{
-			CodeBlockMappingExpression lastCodeBlockExp = null;
-
-			var codeByFistBlock = (
-				from cb in exp.GetReadOnly<CodeBlock>()
-				join m in exp.GetReadOnly<Modification>() on cb.ModificationId equals m.Id
-				join f in exp.Get<CodeFile>() on m.FileId equals f.Id
-				join tcb in exp.Get<CodeBlock>() on cb.TargetCodeBlockId ?? cb.Id equals tcb.Id
-				where f.Id == exp.CurrentEntity<CodeFile>().Id
-				group cb.Size by tcb.Id into g
-				select new
-				{
-					Id = g.Key,
-					Size = g.Sum()
-				}).ToArray();
-
-			foreach (var codeForFirstBlock in codeByFistBlock)
+			if (codeSize != 0)
 			{
-				double currentCodeSize = codeForFirstBlock.Size;
-				
-				if (currentCodeSize != 0)
-				{
-					if (lastCodeBlockExp == null)
-					{
-						lastCodeBlockExp = exp.Code(- currentCodeSize);
-					}
-					else
-					{
-						lastCodeBlockExp = lastCodeBlockExp.Code(- currentCodeSize);
-					}
-					lastCodeBlockExp.ForCodeAddedInitiallyInRevision(
-						RevisionCodeBlockWasInitiallyAddedIn(exp, codeForFirstBlock.Id)
-					);
-				}
+				var newExp = expression.Code(codeSize);
+				newExp.CopiedFrom(revision);
+				return newExp;
 			}
-			
-			return lastCodeBlockExp;
+
+			return null;
 		}
-		private static string RevisionCodeBlockWasInitiallyAddedIn(IRepository repository, int codeBlockID)
+		private static CodeBlockMappingExpression RemoveCodeBlock(
+			IModificationMappingExpression expression,
+			string revision,
+			double codeSize)
 		{
-			return repository.Get<Commit>()
-				.Single(c => c.Id == repository.Get<CodeBlock>()
-					.Single(cb => cb.Id == codeBlockID).AddedInitiallyInCommitId
-				).Revision;
+			if (codeSize != 0)
+			{
+				var newExp = expression.Code(-codeSize);
+				newExp.ForCodeAddedInitiallyInRevision(revision);
+				return newExp;
+			}
+
+			return null;
 		}
 	}
 

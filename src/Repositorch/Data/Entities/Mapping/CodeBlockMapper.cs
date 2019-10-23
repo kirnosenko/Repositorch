@@ -20,7 +20,7 @@ namespace Repositorch.Data.Entities.Mapping
 
 			if (modification.Action == TouchedFileAction.REMOVED)
 			{
-				return Enumerable.Repeat(expression.DeleteCode(), 1);
+				return Enumerable.Repeat(expression.RemoveCode(), 1);
 			}
 
 			List<CodeBlockMappingExpression> codeBlockExpressions = new List<CodeBlockMappingExpression>();
