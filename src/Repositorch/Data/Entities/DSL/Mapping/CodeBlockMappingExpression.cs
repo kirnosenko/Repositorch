@@ -24,6 +24,18 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			return DoWithRemainingCode(
 				exp, commitsOnBranch, modification.SourceFile.Id, CopyCodeBlock);
 		}
+		public static CodeBlockMappingExpression UpdateCode(
+			this IModificationMappingExpression exp,
+			Func<IModificationMappingExpression, string, double, CodeBlockMappingExpression> codeToExp)
+		{
+			var file = exp.CurrentEntity<CodeFile>();
+			var currentCommitBranch = exp.CurrentEntity<Branch>();
+			var commitsOnBranch = exp.SelectionDSL().Commits()
+				.OnBranchBack(currentCommitBranch.Mask);
+
+			return DoWithRemainingCode(
+				exp, commitsOnBranch, file.Id, codeToExp);
+		}
 		public static CodeBlockMappingExpression RemoveCode(this IModificationMappingExpression exp)
 		{
 			var file = exp.CurrentEntity<CodeFile>();
