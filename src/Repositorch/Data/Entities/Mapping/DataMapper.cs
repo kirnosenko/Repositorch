@@ -249,7 +249,8 @@ namespace Repositorch.Data.Entities.Mapping
 					.Commits().RevisionIs(revision)
 					.Files().Reselect(
 						e => mode == CheckMode.TOUCHED ? e.TouchedInCommits() : e)
-					.ExistInRevision(revision);
+					.ExistInRevision(revision)
+					.ToArray();
 
 				var result = true;
 				foreach (var file in filesToCheck)

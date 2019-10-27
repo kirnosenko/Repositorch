@@ -25,12 +25,14 @@ namespace Repositorch.Web.Controllers
 			{
 				Dictionary<string, object> result = new Dictionary<string, object>();
 
+				string revision = s.GetReadOnly<Commit>()
+					.OrderByDescending(x => x.OrderedNumber).First().Revision;
 				int commits = s.Get<Commit>().Count();
 				var authors = s.Get<Author>().ToArray();
 				double totalLoc = s.SelectionDSL()
 					.CodeBlocks().CalculateLOC();
 				int totalFiles = s.SelectionDSL()
-					.Files().Exist()
+					.Files().ExistInRevision(revision)
 					.Count();
 
 				var codeByAuthor = (from author in authors
@@ -51,7 +53,7 @@ namespace Repositorch.Web.Controllers
 						TouchedFiles = s.SelectionDSL()
 							.Authors().NameIs(author.Name)
 							.Commits().ByAuthors()
-							.Files().Exist().TouchedInCommits()
+							.Files().ExistInRevision(revision).TouchedInCommits()
 					}).ToList();
 
 				ViewBag.Authors =

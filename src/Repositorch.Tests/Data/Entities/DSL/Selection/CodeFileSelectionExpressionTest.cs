@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Xunit;
+using FluentAssertions;
 using Repositorch.Data.Entities.DSL.Mapping;
 
 namespace Repositorch.Data.Entities.DSL.Selection
@@ -99,22 +100,6 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				.Files().PathIs("file3").Count());
 		}
 		[Fact]
-		public void Should_get_existent_files()
-		{
-			mappingDSL
-				.AddCommit("1")
-					.File("file1").Added()
-			.Submit()
-				.AddCommit("2")
-					.File("file1").Removed()
-					.File("file2").Added()
-			.Submit();
-
-			Assert.Equal(new string[] { "file2" }, selectionDSL
-				.Files().Exist()
-				.Select(f => f.Path));
-		}
-		[Fact]
 		public void Should_get_existent_files_for_revision()
 		{
 			mappingDSL
@@ -131,15 +116,18 @@ namespace Repositorch.Data.Entities.DSL.Selection
 					.File("file4").CopiedFrom("file2", "2")
 			.Submit();
 
-			Assert.Equal(new string[] { "file1" }, selectionDSL
+			selectionDSL
 				.Files().ExistInRevision("1")
-				.Select(f => f.Path));
-			Assert.Equal(new string[] { "file2", "file3" }, selectionDSL
+				.Select(f => f.Path)
+					.Should().BeEquivalentTo(new string[] { "file1" });
+			selectionDSL
 				.Files().ExistInRevision("2")
-				.Select(f => f.Path));
-			Assert.Equal(new string[] { "file3", "file4" }, selectionDSL
+				.Select(f => f.Path)
+					.Should().BeEquivalentTo(new string[] { "file2", "file3" });
+			selectionDSL
 				.Files().ExistInRevision("3")
-				.Select(f => f.Path));
+				.Select(f => f.Path)
+					.Should().BeEquivalentTo(new string[] { "file3", "file4" });
 		}
 		[Fact]
 		public void Should_get_existent_files_for_selected_commits()

@@ -89,14 +89,6 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			);
 		}
 		/// <summary>
-		/// Get files were added before the last mapped revision 
-		/// and still exist in it.
-		/// </summary>
-		public CodeFileSelectionExpression Exist()
-		{
-			return TouchedInAndStillExistAfterCommits(null);
-		}
-		/// <summary>
 		/// Get files were added before the revision and still exist in it.
 		/// </summary>
 		public CodeFileSelectionExpression ExistInRevision(string revision)
@@ -120,28 +112,22 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		}
 		private CodeFileSelectionExpression TouchedInAndStillExistAfterCommits(IQueryable<Commit> commits)
 		{
-			if (commits == null)
-			{
-				return Reselect(s =>
-					from c in Queryable<Commit>().ToList().AsQueryable()
-					join m in Queryable<Modification>() on c.Id equals m.CommitId
-					join f in s on m.FileId equals f.Id
-					orderby f.Id
-					group m by f into fileModifications
-					where fileModifications.OrderByDescending(x => x.Id).First().Action != TouchedFileAction.REMOVED
-					select fileModifications.Key
-				);
-			}
-			
-			return Reselect(s =>
-				from c in commits.ToList().AsQueryable()
+			var fileLastMod =
+				(from c in commits
 				join m in Queryable<Modification>() on c.Id equals m.CommitId
-				join f in s on m.FileId equals f.Id
-				orderby f.Id
-				group m by f into fileModifications
-				where fileModifications.OrderByDescending(x => x.Id).First().Action != TouchedFileAction.REMOVED
-				select fileModifications.Key
-			);
+				group m by m.FileId into fileModifications
+				select new
+				{
+					FileId = fileModifications.Key,
+					ModId = fileModifications.Max(x => x.Id),
+				});
+
+			return Reselect(s =>
+				from f in s
+				join a in fileLastMod on f.Id equals a.FileId
+				join m in Queryable<Modification>() on a.ModId equals m.Id
+				where m.Action != TouchedFileAction.REMOVED
+				select f);
 		}
 	}
 }

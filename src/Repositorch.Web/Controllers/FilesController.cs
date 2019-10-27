@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Repositorch.Data;
+using Repositorch.Data.Entities;
 using Repositorch.Data.Entities.DSL.Selection;
 using Repositorch.Data.Entities.DSL.Selection.Metrics;
 using Repositorch.Web.Models;
@@ -23,8 +24,10 @@ namespace Repositorch.Web.Controllers
 		{
 			using (var s = data.OpenSession())
 			{
+				var revision = s.GetReadOnly<Commit>()
+					.OrderByDescending(x => x.OrderedNumber).First().Revision;
 				var files = s.SelectionDSL()
-					.Files().Exist()
+					.Files().ExistInRevision(revision)
 					.Select(f => f.Path).ToArray();
 				var filesCount = files.Count();
 				var extensions = files
@@ -35,7 +38,7 @@ namespace Repositorch.Web.Controllers
 				ViewBag.Extensions =
 					(from ext in extensions
 					let code = s.SelectionDSL()
-							.Files().Exist().PathEndsWith(ext)
+							.Files().ExistInRevision(revision).PathEndsWith(ext)
 							.Modifications().InFiles()
 							.CodeBlocks().InModifications().Fixed()
 					let extFilesCount = code.Files().Again().Count()
@@ -56,7 +59,7 @@ namespace Repositorch.Web.Controllers
 				ViewBag.Directories =
 					(from dir in dirs
 					let code = s.SelectionDSL()
-						.Files().InDirectory(dir).Exist()
+						.Files().InDirectory(dir).ExistInRevision(revision)
 						.Modifications().InFiles()
 						.CodeBlocks().InModifications().Fixed()
 					let dirFilesCount = code.Files().Again().Count()

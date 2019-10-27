@@ -22,6 +22,8 @@ namespace Repositorch.Web.Controllers
 		{
 			using (var s = data.OpenSession())
 			{
+				var revision = s.GetReadOnly<Commit>()
+					.OrderByDescending(x => x.OrderedNumber).First().Revision;
 				int commitsCount = s.Get<Commit>().Count();
 				int commitsFixCount = s.SelectionDSL().Commits().AreBugFixes().Count();
 				string commitsFixPercent = ((double)commitsFixCount / commitsCount * 100).ToString("F02");
@@ -46,7 +48,7 @@ namespace Repositorch.Web.Controllers
 				var files = s.SelectionDSL()
 					.Files().Fixed();
 				var filesAll = files.Count();
-				var filesExist = files.Exist().Count();
+				var filesExist = files.ExistInRevision(revision).Count();
 				var filesRemoved = filesAll - filesExist;
 				ViewData["files"] = filesExist;
 				ViewData["filesAdded"] = filesAll;

@@ -51,7 +51,8 @@ namespace Repositorch.Data.Entities.Mapping
 
 			return expression.SelectionDSL()
 				.Commits().OnBranchBack(branchesMask)
-				.Files().TouchedInAndStillExistAfterCommits().Select(x => x.Path);
+				.Files().TouchedInAndStillExistAfterCommits()
+				.Select(x => x.Path).ToArray();
 		}
 		private IEnumerable<string> GetFilesTouchedOnDifferentParentBranches(ICommitMappingExpression expression, string revision)
 		{
