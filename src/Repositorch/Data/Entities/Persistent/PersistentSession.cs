@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Microsoft.EntityFrameworkCore;
+using Repositorch.Data.Entities.Persistent.Mapping;
 
 namespace Repositorch.Data.Entities.Persistent
 {
@@ -29,15 +31,15 @@ namespace Repositorch.Data.Entities.Persistent
 
 		IQueryable<T> IRepository.Get<T>()
 		{
-			return (DbSet<T>)tables[typeof(T)];
+			return GetTable<T>();
 		}
 		IQueryable<T> IRepository.GetReadOnly<T>()
 		{
-			return ((DbSet<T>)tables[typeof(T)]).AsNoTracking();
+			return GetTable<T>().AsNoTracking();
 		}
 		void IRepository.Add<T>(T entity)
 		{
-			((DbSet<T>)tables[typeof(T)]).Add(entity);
+			GetTable<T>().Add(entity);
 		}
 		void IRepository.AddRange<T>(IEnumerable<T> entities)
 		{
@@ -45,11 +47,11 @@ namespace Repositorch.Data.Entities.Persistent
 			{
 				return;
 			}
-			((DbSet<T>)tables[typeof(T)]).AddRange(entities);
+			GetTable<T>().AddRange(entities);
 		}
 		void IRepository.Remove<T>(T entity)
 		{
-			((DbSet<T>)tables[typeof(T)]).Remove(entity);
+			GetTable<T>().Remove(entity);
 		}
 		void IRepository.RemoveRange<T>(IEnumerable<T> entities)
 		{
@@ -57,7 +59,7 @@ namespace Repositorch.Data.Entities.Persistent
 			{
 				return;
 			}
-			((DbSet<T>)tables[typeof(T)]).RemoveRange(entities);
+			GetTable<T>().RemoveRange(entities);
 		}
 		void ISession.SubmitChanges()
 		{
@@ -70,48 +72,20 @@ namespace Repositorch.Data.Entities.Persistent
 		}
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
-			modelBuilder.Entity<Author>()
-				.HasMany(a => a.Commits)
-				.WithOne((string)null)
-				.HasForeignKey(c => c.AuthorId);
-			modelBuilder.Entity<Branch>()
-				.HasMany(b => b.Commits)
-				.WithOne((string)null)
-				.HasForeignKey(c => c.BranchId);
-			modelBuilder.Entity<Branch>()
-				.OwnsOne(b => b.Mask);
-			modelBuilder.Entity<BugFix>()
-				.HasOne(bf => bf.Commit)
-				.WithOne((string)null)
-				.HasForeignKey<BugFix>(bf => bf.CommitId);
-			modelBuilder.Entity<Modification>()
-				.HasOne(m => m.Commit)
-				.WithMany((string)null)
-				.HasForeignKey(m => m.CommitId);
-			modelBuilder.Entity<Modification>()
-				.HasOne(m => m.File)
-				.WithMany((string)null)
-				.HasForeignKey(m => m.FileId);
-			modelBuilder.Entity<Modification>()
-				.HasOne(m => m.SourceCommit)
-				.WithMany((string)null)
-				.HasForeignKey(m => m.SourceCommitId);
-			modelBuilder.Entity<Modification>()
-				.HasOne(m => m.SourceFile)
-				.WithMany((string)null)
-				.HasForeignKey(m => m.SourceFileId);
-			modelBuilder.Entity<CodeBlock>()
-				.HasOne(cb => cb.Modification)
-				.WithMany((string)null)
-				.HasForeignKey(cb => cb.ModificationId);
-			modelBuilder.Entity<CodeBlock>()
-				.HasOne(cb => cb.AddedInitiallyInCommit)
-				.WithMany((string)null)
-				.HasForeignKey(cb => cb.AddedInitiallyInCommitId);
-			modelBuilder.Entity<CodeBlock>()
-				.HasOne(cb => cb.TargetCodeBlock)
-				.WithMany((string)null)
-				.HasForeignKey(cb => cb.TargetCodeBlockId);
+			modelBuilder.ApplyConfiguration(new CommitMapping());
+			modelBuilder.ApplyConfiguration(new AuthorMapping());
+			modelBuilder.ApplyConfiguration(new BranchMapping());
+			modelBuilder.ApplyConfiguration(new BugFixMapping());
+			modelBuilder.ApplyConfiguration(new CodeFileMapping());
+			modelBuilder.ApplyConfiguration(new ModificationMapping());
+			modelBuilder.ApplyConfiguration(new CodeBlockMapping());
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		private DbSet<T> GetTable<T>() where T : class
+		{
+			var key = typeof(T);
+			return (DbSet<T>)tables[key];
 		}
 	}
 }

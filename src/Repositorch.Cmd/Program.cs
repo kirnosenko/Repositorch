@@ -30,16 +30,16 @@ namespace Repositorch
 			{
 				Func<DataMapper.MappingSettings> settings = () => new DataMapper.MappingSettings()
 				{
-					StopRevision = vcsData.GetRevisionByNumber(3000),
+					StopRevision = vcsData.GetRevisionByNumber(2000),
 					Check = DataMapper.CheckMode.TOUCHED,
 				};
-				//mapper.MapRevisions(settings());
+				mapper.MapRevisions(settings());
 				//mapper.Truncate(1170);
 				//mapper.Check(2309, DataMapper.CheckMode.ALL);
 				//mapper.CheckAndTruncate("/test-delta.c");
 
 				//BlameDiff(vcsData);
-				FileHistory(data, vcsData, "/Documentation/merge-pull-opts.txt");
+				//FileHistory(data, vcsData, "/Documentation/merge-pull-opts.txt");
 				//Select(data);
 			}
 
