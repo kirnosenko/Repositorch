@@ -311,20 +311,23 @@ namespace Repositorch.Data.Entities.Mapping
 				.CodeBlocks().InModifications()
 				.CalculateLOC();
 
-			bool correct = currentLOC == fileBlame.Count;
-
-			if (!correct)
+			if (currentLOC != fileBlame.Count)
 			{
 				OnError?.Invoke(string.Format("Incorrect number of lines in file {0}. {1} should be {2}",
 					file.Path, currentLOC, fileBlame.Count));
 			}
 
-			SmartDictionary<string, int> linesByRevision = new SmartDictionary<string, int>(x => 0);
-			foreach (var line in fileBlame)
-			{
-				linesByRevision[line.Value]++;
-			}
-
+			var linesByRevision =
+			(
+				from line in fileBlame
+				group line by line.Value into g
+				select new
+				{
+					Revision = g.Key,
+					CodeSize = g.Count()
+				}
+			).ToArray();
+			
 			var codeBySourceRevision =
 			(
 				from f in s.Get<CodeFile>().Where(x => x.Id == file.Id)
@@ -341,44 +344,42 @@ namespace Repositorch.Data.Entities.Mapping
 				}
 			).Where(x => x.CodeSize != 0).ToArray();
 
-			var errorCode =
-				(
-					from codeFromRevision in codeBySourceRevision
-					where
-						codeFromRevision.CodeSize != linesByRevision[codeFromRevision.Revision]
-					select new
-					{
-						SourceRevision = codeFromRevision.Revision,
-						CodeSize = codeFromRevision.CodeSize,
-						RealCodeSize = linesByRevision[codeFromRevision.Revision]
-					}
-				).ToList();
+			var fileRevisions = linesByRevision.Select(x => x.Revision)
+				.Union(codeBySourceRevision.Select(x => x.Revision)).ToArray();
 
-			correct =
-				correct
-				&&
-				codeBySourceRevision.Count() == linesByRevision.Count
-				&&
-				errorCode.Count == 0;
+			var incorrectCode =
+			(
+				from fileRevision in fileRevisions
+				join codeFromRevision in codeBySourceRevision on fileRevision equals codeFromRevision.Revision into cg
+				from codeFromRevisionNullable in cg.DefaultIfEmpty()
+				join linesFromRevision in linesByRevision on fileRevision equals linesFromRevision.Revision into lg
+				from linesFromRevisionNullable in lg.DefaultIfEmpty()
+				let code = codeFromRevisionNullable != null ? codeFromRevisionNullable.CodeSize : 0
+				let lines = linesFromRevisionNullable != null ? linesFromRevisionNullable.CodeSize : 0
+				where code != lines
+				select new
+				{
+					SourceRevision = fileRevision,
+					CodeSize = code,
+					RealCodeSize = lines
+				}
+			).ToList();
 
-			if (codeBySourceRevision.Count() != linesByRevision.Count)
-			{
-				OnError?.Invoke(string.Format("Number of revisions file {0} contains code from is incorrect. {1} should be {2}",
-					file.Path, codeBySourceRevision.Count(), linesByRevision.Count));
-			}
-			foreach (var error in errorCode)
+			foreach (var error in incorrectCode)
 			{
 				var sourceCommit = s.Get<Commit>()
 					.Where(x => x.Revision == error.SourceRevision)
-					.Single();
+					.SingleOrDefault();
 				OnError?.Invoke(string.Format("Incorrect number of lines in file {0} from revision {1}. {2} should be {3}",
 					file.Path,
-					GetRevisionName(sourceCommit.Revision, sourceCommit.OrderedNumber),
+					sourceCommit != null
+						? GetRevisionName(sourceCommit.Revision, sourceCommit.OrderedNumber)
+						: null,
 					error.CodeSize,
 					error.RealCodeSize));
 			}
 
-			return correct;
+			return currentLOC == fileBlame.Count && incorrectCode.Count == 0;
 		}
 
 		private string GetRevisionName(string revision, int number)

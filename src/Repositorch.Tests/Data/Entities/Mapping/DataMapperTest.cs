@@ -329,8 +329,22 @@ namespace Repositorch.Data.Entities.Mapping
 
 			vcsData.Blame("2", "file1")
 				.Returns(new TestBlame()
-					.AddLinesFromRevision("1", 90)
+					.AddLinesFromRevision("1", 89)
 					.AddLinesFromRevision("2", 11));
+
+			Assert.False(mapper.CheckRevision("2", DataMapper.CheckMode.ALL));
+
+			vcsData.Blame("2", "file1")
+				.Returns(new TestBlame()
+					.AddLinesFromRevision("1", 100));
+
+			Assert.False(mapper.CheckRevision("2", DataMapper.CheckMode.ALL));
+
+			vcsData.Blame("2", "file1")
+				.Returns(new TestBlame()
+					.AddLinesFromRevision("0", 5)
+					.AddLinesFromRevision("1", 90)
+					.AddLinesFromRevision("2", 5));
 
 			Assert.False(mapper.CheckRevision("2", DataMapper.CheckMode.ALL));
 		}
