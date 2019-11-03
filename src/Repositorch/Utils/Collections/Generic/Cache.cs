@@ -2,33 +2,29 @@
 {
 	public class Cache<K, V>
 	{
-		private int sizeLimit;
 		private Func<K, V> source;
-		private Dictionary<K, V> data;
-		private Queue<K> keys;
-
-		public Cache(int sizeLimit, Func<K, V> source)
+		protected Dictionary<K, V> data;
+		
+		public Cache(Func<K, V> source, int initialCacheCapacity = 1000)
 		{
-			this.sizeLimit = sizeLimit;
 			this.source = source;
-			this.data = new Dictionary<K, V>(sizeLimit);
-			this.keys = new Queue<K>(sizeLimit);
+			this.data = new Dictionary<K, V>(initialCacheCapacity);
 		}
-		public V GetData(K key)
+
+		public virtual V GetData(K key)
 		{
-			if (data.ContainsKey(key))
+			if (data.TryGetValue(key, out var value))
 			{
-				return data[key];
+				return value;
 			}
-			while (data.Count >= sizeLimit)
-			{
-				var keyToRemove = keys.Dequeue();
-				data.Remove(keyToRemove);
-			}
-			V value = source(key);
+
+			value = source(key);
 			data.Add(key, value);
-			keys.Enqueue(key);
 			return value;
+		}
+		public void Clear()
+		{
+			data.Clear();
 		}
 	}
 }

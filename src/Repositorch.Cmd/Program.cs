@@ -23,7 +23,7 @@ namespace Repositorch
 				//SingletonSession = true,
 			};
 			var gitClient = new CommandLineGitClient("D:/src/git/.git");
-			var vcsData = new VcsDataCached(new GitData(gitClient), 10, 1000);
+			var vcsData = new VcsDataCached(new GitData(gitClient), 1000, 1000);
 			var mapper = CreateDataMapper(data, vcsData);
 			
 			using (ConsoleTimeLogger.Start("time"))

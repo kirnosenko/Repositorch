@@ -7,14 +7,22 @@ namespace Repositorch.Data.VersionControl
 	{
 		private IVcsData innerData;
 		private Cache<string, Log> logs;
+		private string blamesRevision;
 		private Cache<(string,string), IBlame> blames;
 
-		public VcsDataCached(IVcsData innerData, int revisionsLimit, int filesLimit)
+		public VcsDataCached(
+			IVcsData innerData,
+			int logsCacheSizeLimit = 1000,
+			int blamesCacheInitialCapacity = 1000)
 		{
 			this.innerData = innerData;
-			this.logs = new Cache<string, Log>(revisionsLimit, innerData.Log);
-			this.blames = new Cache<(string revision, string path), IBlame>(
-				filesLimit, k => innerData.Blame(k.revision, k.path));
+			logs = new SizeLimitedCache<string, Log>(
+				innerData.Log,
+				logsCacheSizeLimit);
+			blamesRevision = null;
+			blames = new Cache<(string revision, string path), IBlame>(
+				k => innerData.Blame(k.revision, k.path),
+				blamesCacheInitialCapacity);
 		}
 
 		public string GetRevisionByNumber(int number)
@@ -36,7 +44,13 @@ namespace Repositorch.Data.VersionControl
 		}
 		public IBlame Blame(string revision, string filePath)
 		{
-			return blames.GetData((revision,filePath));
+			if (revision != blamesRevision)
+			{
+				blames.Clear();
+				blamesRevision = revision;
+			}
+
+			return blames.GetData((revision, filePath));
 		}
 	}
 }
