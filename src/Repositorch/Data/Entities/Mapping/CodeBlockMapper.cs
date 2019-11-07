@@ -62,7 +62,7 @@ namespace Repositorch.Data.Entities.Mapping
 						);
 					}
 
-					var isMerge = vcsData.IsMerge(revision);
+					var isMerge = vcsData.Log(revision).IsMerge;
 					var updatedCodeExp = expression.UpdateCode((exp, rev, size) =>
 					{
 						var linesForRevision = linesByRevision.SingleOrDefault(x => x.Revision == rev);

@@ -16,13 +16,12 @@ namespace Repositorch.Data.Entities.Mapping
 
 		public override IEnumerable<ICodeFileMappingExpression> Map(ICommitMappingExpression expression)
 		{
-			string revision = expression.CurrentEntity<Commit>().Revision;
-			var log = vcsData.Log(revision);
+			var log = vcsData.Log(expression.CurrentEntity<Commit>().Revision);
 
-			var filesTouched = vcsData.IsMerge(revision)
+			var filesTouched = log.IsMerge
 				? log.TouchedFiles
 					.Where(x => x.Action == TouchedFileAction.ADDED).Select(x => x.Path)
-					.Union(GetFilesTouchedOnParentBranches(expression, revision))
+					.Union(GetFilesTouchedOnParentBranches(expression, log))
 				: log.TouchedFiles.Select(x => x.Path);
 
 			if (PathSelectors != null)
@@ -38,11 +37,11 @@ namespace Repositorch.Data.Entities.Mapping
 			get; set;
 		}
 		
-		private IEnumerable<string> GetFilesTouchedOnParentBranches(ICommitMappingExpression expression, string revision)
+		private IEnumerable<string> GetFilesTouchedOnParentBranches(
+			ICommitMappingExpression expression, Log log)
 		{
-			var parentRevisions = vcsData.GetRevisionParents(revision).ToArray();
 			var parentBranchMasks = expression.SelectionDSL()
-				.Commits().RevisionIsIn(parentRevisions)
+				.Commits().RevisionIsIn(log.ParentRevisions)
 				.Branches().OfCommits()
 				.Select(b => b.Mask).ToArray();
 			var andMask = BranchMask.And(parentBranchMasks);
@@ -54,18 +53,18 @@ namespace Repositorch.Data.Entities.Mapping
 				.Files().TouchedInAndStillExistAfterCommits()
 				.Select(x => x.Path).ToArray();
 		}
-		private IEnumerable<string> GetFilesTouchedOnDifferentParentBranches(ICommitMappingExpression expression, string revision)
+		private IEnumerable<string> GetFilesTouchedOnDifferentParentBranches(
+			ICommitMappingExpression expression, Log log)
 		{
 			List<string> filesTouchedOnDifferentBranches = new List<string>();
 
-			var parentRevisions = vcsData.GetRevisionParents(revision).ToArray();
 			var parentBranchMasks = expression.SelectionDSL()
-				.Commits().RevisionIsIn(parentRevisions)
+				.Commits().RevisionIsIn(log.ParentRevisions)
 				.Branches().OfCommits()
 				.Select(b => b.Mask).ToArray();
 			var commonParentMask = BranchMask.And(parentBranchMasks);
 
-			if (parentRevisions.Length == 2) // merge of two branches -> simple case
+			if (log.ParentRevisions.Count() == 2) // merge of two branches -> simple case
 			{
 				var firstBranchMask = BranchMask.Xor(parentBranchMasks[0], commonParentMask);
 				var secondBranchMask = BranchMask.Xor(parentBranchMasks[1], commonParentMask);

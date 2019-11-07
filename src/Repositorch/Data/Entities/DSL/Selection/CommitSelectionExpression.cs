@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Repositorch.Data.Entities.DSL.Selection
@@ -27,7 +28,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			return Reselect(s => s.Where(x => x.Revision != revision));
 		}
-		public CommitSelectionExpression RevisionIsIn(string[] revisions)
+		public CommitSelectionExpression RevisionIsIn(IEnumerable<string> revisions)
 		{
 			return Reselect(s => s.Where(x => revisions.Contains(x.Revision)));
 		}

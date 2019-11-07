@@ -7,7 +7,13 @@ namespace Repositorch.Data.VersionControl.Git
 {
 	public class GitRevisions
 	{
-		class RevisionNode
+		public interface IRevisionNode
+		{
+			IEnumerable<string> Parents { get; }
+			IEnumerable<string> Children { get; }
+		}
+
+		class RevisionNode : IRevisionNode
 		{
 			private LinkedList<string> parents;
 			private LinkedList<string> children;
@@ -75,13 +81,9 @@ namespace Repositorch.Data.VersionControl.Git
 			}
 			return revisionsOrdered[index];
 		}
-		public IEnumerable<string> GetRevisionParents(string revision)
+		public IRevisionNode GetRevisionNode(string revision)
 		{
-			return revisionsHashed[revision].Parents;
-		}
-		public IEnumerable<string> GetRevisionChildren(string revision)
-		{
-			return revisionsHashed[revision].Children;
+			return revisionsHashed[revision];
 		}
 	}
 }

@@ -166,8 +166,7 @@ namespace Repositorch.Data.Entities.Mapping
 					.File("file2").Modified()
 			.Submit();
 
-			vcsData.GetRevisionParents("10")
-				.Returns(new string[] { "2", "3" });
+			log.ParentRevisionsAre("2", "3");
 			
 			var commitMappingExpression = mappingDSL.AddCommit("10").OnBranch("111");
 			Assert.Equal(1, (int)mapper.Map(commitMappingExpression.File("file1")).Count());
@@ -192,8 +191,7 @@ namespace Repositorch.Data.Entities.Mapping
 					.File("file4").Added()
 			.Submit();
 
-			vcsData.GetRevisionParents("10")
-				.Returns(new string[] { "2", "3" });
+			log.ParentRevisionsAre("2", "3");
 			log.FileAdded("file1");
 			log.FileRemoved("file2");
 			log.FileAdded("file3");

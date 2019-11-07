@@ -34,7 +34,7 @@ namespace Repositorch.Data.VersionControl
 		}
 	}
 
-	public interface IBlame : IDictionary<int, string>
+	public interface IBlame : IReadOnlyDictionary<int, string>
 	{
 	}
 }

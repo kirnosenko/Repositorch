@@ -36,38 +36,38 @@ private string rev_list_1 =
 			revList = new GitRevisions(rev_list_1.ToStream());
 
 			Assert.Equal(new string[] { },
-				revList.GetRevisionParents("11111"));
+				revList.GetRevisionNode("11111").Parents);
 			Assert.Equal(new string[] { "11111" },
-				revList.GetRevisionParents("22222"));
+				revList.GetRevisionNode("22222").Parents);
 			Assert.Equal(new string[] { "22222" },
-				revList.GetRevisionParents("33333"));
+				revList.GetRevisionNode("33333").Parents);
 			Assert.Equal(new string[] { "11111" },
-				revList.GetRevisionParents("44444"));
+				revList.GetRevisionNode("44444").Parents);
 			Assert.Equal(new string[] { "44444" },
-				revList.GetRevisionParents("55555"));
+				revList.GetRevisionNode("55555").Parents);
 			Assert.Equal(new string[] { "33333", "55555" },
-				revList.GetRevisionParents("66666"));
+				revList.GetRevisionNode("66666").Parents);
 			Assert.Equal(new string[] { },
-				revList.GetRevisionParents("77777"));
+				revList.GetRevisionNode("77777").Parents);
 			Assert.Equal(new string[] { "66666" },
-				revList.GetRevisionParents("88888"));
+				revList.GetRevisionNode("88888").Parents);
 
 			Assert.Equal(new string[] { "22222", "44444" },
-				revList.GetRevisionChildren("11111"));
+				revList.GetRevisionNode("11111").Children);
 			Assert.Equal(new string[] { "33333" },
-				revList.GetRevisionChildren("22222"));
+				revList.GetRevisionNode("22222").Children);
 			Assert.Equal(new string[] { "66666" },
-				revList.GetRevisionChildren("33333"));
+				revList.GetRevisionNode("33333").Children);
 			Assert.Equal(new string[] { "55555" },
-				revList.GetRevisionChildren("44444"));
+				revList.GetRevisionNode("44444").Children);
 			Assert.Equal(new string[] { "66666" },
-				revList.GetRevisionChildren("55555"));
+				revList.GetRevisionNode("55555").Children);
 			Assert.Equal(new string[] { "88888" },
-				revList.GetRevisionChildren("66666"));
+				revList.GetRevisionNode("66666").Children);
 			Assert.Equal(new string[] { },
-				revList.GetRevisionChildren("77777"));
+				revList.GetRevisionNode("77777").Children);
 			Assert.Equal(new string[] { },
-				revList.GetRevisionChildren("88888"));
+				revList.GetRevisionNode("88888").Children);
 		}
 	}
 }

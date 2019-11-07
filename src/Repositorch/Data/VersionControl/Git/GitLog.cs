@@ -7,7 +7,9 @@ namespace Repositorch.Data.VersionControl.Git
 {
 	public class GitLog : Log
 	{
-		public GitLog(Stream log)
+		public GitLog(Stream log,
+			IEnumerable<string> parentRevisions,
+			IEnumerable<string> childRevisions)
 		{
 			TextReader reader = new StreamReader(log);
 
@@ -16,6 +18,8 @@ namespace Repositorch.Data.VersionControl.Git
 			AuthorEmail = reader.ReadLine();
 			Date = DateTime.Parse(reader.ReadLine()).ToUniversalTime();
 			Message = reader.ReadLine();
+			ParentRevisions = parentRevisions;
+			ChildRevisions = childRevisions;
 
 			string line;
 			string[] blocks;

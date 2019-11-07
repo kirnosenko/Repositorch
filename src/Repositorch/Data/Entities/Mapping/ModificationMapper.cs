@@ -21,7 +21,7 @@ namespace Repositorch.Data.Entities.Mapping
 			Log log = vcsData.Log(commit.Revision);
 			var touchedFile = log.TouchedFiles.SingleOrDefault(x => x.Path == filePath);
 
-			if (vcsData.IsMerge(commit.Revision))
+			if (log.IsMerge)
 			{
 				if (touchedFile == null || touchedFile.Action == TouchedFileAction.MODIFIED)
 				{

@@ -111,7 +111,7 @@ D	file3";
 		[Fact]
 		public void Should_parse_general_data_about_revision()
 		{
-			log = new GitLog(log_1.ToStream());
+			log = new GitLog(log_1.ToStream(), null, null);
 
 			Assert.Equal("4bb04f2190d526f8917663f0be62d8026e1ed100", log.Revision);
 			Assert.Equal("Linus Torvalds", log.AuthorName);
@@ -120,9 +120,19 @@ D	file3";
 			Assert.Equal("Rename '.dircache' directory to '.git'", log.Message);
 		}
 		[Fact]
+		public void Should_keep_information_about_parent_and_child_revisions()
+		{
+			var parents = new string[] { "2", "3" };
+			var children = new string[] { "20", "30" };
+			log = new GitLog(log_1.ToStream(), parents, children);
+
+			Assert.Equal(parents, log.ParentRevisions);
+			Assert.Equal(children, log.ChildRevisions);
+		}
+		[Fact]
 		public void Should_keep_alphabetically_sorted_list_of_touched_paths()
 		{
-			log = new GitLog(log_1.ToStream());
+			log = new GitLog(log_1.ToStream(), null, null);
 
 			Assert.Equal(
 				new string[]
@@ -139,7 +149,7 @@ D	file3";
 		[Fact]
 		public void Should_interpret_renamed_file_as_deleted_and_added()
 		{
-			log = new GitLog(log_2.ToStream());
+			log = new GitLog(log_2.ToStream(), null, null);
 
 			Assert.Equal(
 				new string[]
@@ -166,7 +176,7 @@ D	file3";
 		[Fact]
 		public void Should_keep_source_path_for_renamed_path()
 		{
-			log = new GitLog(log_2.ToStream());
+			log = new GitLog(log_2.ToStream(), null, null);
 
 			Assert.Equal(
 				"/git-export.c",
@@ -177,7 +187,7 @@ D	file3";
 		[Fact]
 		public void Should_keep_information_about_copied_paths()
 		{
-			log = new GitLog(log_3.ToStream());
+			log = new GitLog(log_3.ToStream(), null, null);
 
 			Assert.Equal(
 				2,
@@ -191,7 +201,7 @@ D	file3";
 		[Fact]
 		public void Should_parse_filename_with_special_symbols()
 		{
-			log = new GitLog(log_4.ToStream());
+			log = new GitLog(log_4.ToStream(), null, null);
 
 			Assert.Single(
 				log.TouchedFiles
@@ -200,7 +210,7 @@ D	file3";
 		[Fact]
 		public void Should_parse_merge_log()
 		{
-			log = new GitLog(log_5.ToStream());
+			log = new GitLog(log_5.ToStream(), null, null);
 
 			Assert.Equal(20, log.TouchedFiles.Count());
 			Assert.Equal(20, log.TouchedFiles.Select(x => x.Path).Distinct().Count());
@@ -214,7 +224,7 @@ D	file3";
 		[Fact]
 		public void Should_prefer_file_addition_or_removing_over_modification_in_merge_log()
 		{
-			log = new GitLog(log_6.ToStream());
+			log = new GitLog(log_6.ToStream(), null, null);
 
 			Assert.Equal(3, log.TouchedFiles.Count());
 			Assert.Equal(new string[] { "/file1", "/file2", "/file3" },

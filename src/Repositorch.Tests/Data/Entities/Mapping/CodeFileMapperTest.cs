@@ -130,8 +130,7 @@ namespace Repositorch.Data.Entities.Mapping
 					.File("file3").Modified()
 			.Submit();
 
-			vcsData.GetRevisionParents("10")
-				.Returns(new string[] { "3", "4" });
+			log.ParentRevisionsAre("3", "4");
 
 			var expressions = mapper.Map(
 				mappingDSL.AddCommit("10").OnBranch("111")
@@ -156,8 +155,7 @@ namespace Repositorch.Data.Entities.Mapping
 					.File("file2").Removed()
 			.Submit();
 
-			vcsData.GetRevisionParents("10")
-				.Returns(new string[] { "2", "3" });
+			log.ParentRevisionsAre("2", "3");
 			log.FileAdded("file1");
 
 			var expressions = mapper.Map(
@@ -189,8 +187,7 @@ namespace Repositorch.Data.Entities.Mapping
 					.File("file3").Modified()
 			.Submit();
 
-			vcsData.GetRevisionParents("10")
-				.Returns(new string[] { "4", "5" });
+			log.ParentRevisionsAre("4", "5");
 
 			var expressions = mapper.Map(
 				mappingDSL.AddCommit("10").OnBranch("111")

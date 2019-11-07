@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 
 namespace Repositorch.Data.VersionControl.Git
 {
@@ -14,24 +12,18 @@ namespace Repositorch.Data.VersionControl.Git
 			this.git = git;
 			revisions = new GitRevisions(git.RevList());
 		}
+
 		public string GetRevisionByNumber(int number)
 		{
 			return revisions.GetRevisionByNumber(number);
-		}
-		public IEnumerable<string> GetRevisionParents(string revision)
-		{
-			return revisions.GetRevisionParents(revision);
-		}
-		public IEnumerable<string> GetRevisionChildren(string revision)
-		{
-			return revisions.GetRevisionChildren(revision);
 		}
 		
 		public Log Log(string revision)
 		{
 			using (var log = git.Log(revision))
 			{
-				return new GitLog(log);
+				var revisionNode = revisions.GetRevisionNode(revision);
+				return new GitLog(log, revisionNode.Parents, revisionNode.Children);
 			}
 		}
 		public IBlame Blame(string revision, string filePath)

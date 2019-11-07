@@ -29,14 +29,6 @@ namespace Repositorch.Data.VersionControl
 		{
 			return innerData.GetRevisionByNumber(number);
 		}
-		public IEnumerable<string> GetRevisionParents(string revision)
-		{
-			return innerData.GetRevisionParents(revision);
-		}
-		public IEnumerable<string> GetRevisionChildren(string revision)
-		{
-			return innerData.GetRevisionChildren(revision);
-		}
 		
 		public Log Log(string revision)
 		{

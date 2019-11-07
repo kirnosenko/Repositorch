@@ -17,6 +17,9 @@ namespace Repositorch.Data.Entities.Mapping
 		[Fact]
 		public void Should_add_branch_for_commit()
 		{
+			vcsData.Log("1")
+				.Returns(new TestLog("1"));
+
 			mapper.Map(
 				mappingDSL.AddCommit("1")
 			);
@@ -34,10 +37,10 @@ namespace Repositorch.Data.Entities.Mapping
 				.AddCommit("1").OnBranch("1")
 			.Submit();
 
-			vcsData.GetRevisionParents("2")
-				.Returns(new string[] { "1" });
-			vcsData.GetRevisionChildren("1")
-				.Returns(new string[] { "2" });
+			vcsData.Log("1")
+				.Returns(new TestLog("1").ChildRevisionsAre("2"));
+			vcsData.Log("2")
+				.Returns(new TestLog("2").ParentRevisionsAre("1"));
 
 			mapper.Map(
 				mappingDSL.AddCommit("2")
@@ -56,12 +59,12 @@ namespace Repositorch.Data.Entities.Mapping
 				.AddCommit("1").OnBranch("1")
 			.Submit();
 
-			vcsData.GetRevisionParents("2")
-				.Returns(new string[] { "1" });
-			vcsData.GetRevisionParents("3")
-				.Returns(new string[] { "1" });
-			vcsData.GetRevisionChildren("1")
-				.Returns(new string[] { "2", "3" });
+			vcsData.Log("2")
+				.Returns(new TestLog("2").ParentRevisionsAre("1"));
+			vcsData.Log("3")
+				.Returns(new TestLog("3").ParentRevisionsAre("1"));
+			vcsData.Log("1")
+				.Returns(new TestLog("1").ChildRevisionsAre("2", "3"));
 
 			mapper.Map(
 				mappingDSL.AddCommit("2")
@@ -85,10 +88,10 @@ namespace Repositorch.Data.Entities.Mapping
 				.AddCommit("1").OnBranch("1")
 			.Submit();
 
-			vcsData.GetRevisionParents("2")
-				.Returns(new string[] {});
-			vcsData.GetRevisionChildren("1")
-				.Returns(new string[] { "3" });
+			vcsData.Log("2")
+				.Returns(new TestLog("2").ParentRevisionsAre(new string[] { }));
+			vcsData.Log("1")
+				.Returns(new TestLog("1").ChildRevisionsAre("3"));
 
 			mapper.Map(
 				mappingDSL.AddCommit("2")
@@ -110,12 +113,12 @@ namespace Repositorch.Data.Entities.Mapping
 				.AddCommit("2").OnBranch("01")
 			.Submit();
 
-			vcsData.GetRevisionParents("3")
-				.Returns(new string[] { "1", "2" });
-			vcsData.GetRevisionChildren("1")
-				.Returns(new string[] { "3" });
-			vcsData.GetRevisionChildren("2")
-				.Returns(new string[] { "3" });
+			vcsData.Log("3")
+				.Returns(new TestLog("3").ParentRevisionsAre("1", "2"));
+			vcsData.Log("1")
+				.Returns(new TestLog("1").ChildRevisionsAre("3"));
+			vcsData.Log("2")
+				.Returns(new TestLog("2").ChildRevisionsAre("3"));
 
 			mapper.Map(
 				mappingDSL.AddCommit("3")
@@ -137,12 +140,12 @@ namespace Repositorch.Data.Entities.Mapping
 				.AddCommit("2").OnBranch("01")
 			.Submit();
 
-			vcsData.GetRevisionParents("3")
-				.Returns(new string[] { "1", "2" });
-			vcsData.GetRevisionChildren("1")
-				.Returns(new string[] { "3" });
-			vcsData.GetRevisionChildren("2")
-				.Returns(new string[] { "3", "4" });
+			vcsData.Log("3")
+				.Returns(new TestLog("3").ParentRevisionsAre("1", "2"));
+			vcsData.Log("1")
+				.Returns(new TestLog("1").ChildRevisionsAre("3"));
+			vcsData.Log("2")
+				.Returns(new TestLog("2").ChildRevisionsAre("3", "4"));
 
 			mapper.Map(
 				mappingDSL.AddCommit("3")

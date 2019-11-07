@@ -18,11 +18,11 @@ namespace Repositorch.Data.Entities.Mapping
 		[Fact]
 		public void Should_map_added_lines()
 		{
-			var blame = new TestBlame()
-				.AddLinesFromRevision("abc", 3);
-			
-			vcsData.Blame(Arg.Is<string>("abc"), Arg.Is<string>("file1"))
-				.Returns(blame);
+			vcsData.Log("abc")
+				.Returns(new TestLog("abc"));
+			vcsData.Blame("abc", "file1")
+				.Returns(new TestBlame()
+					.AddLinesFromRevision("abc", 3));
 
 			mapper.Map(
 				mappingDSL.AddCommit("abc").OnBranch("1")
@@ -66,12 +66,13 @@ namespace Repositorch.Data.Entities.Mapping
 						.Code(20)
 			.Submit();
 
-			var blame = new TestBlame()
-				.AddLinesFromRevision("abc", 10)
-				.AddLinesFromRevision("ab", 15);
+			vcsData.Log("abc")
+				.Returns(new TestLog("abc"));
 			vcsData.Blame("abc", "file1")
-				.Returns(blame);
-			
+				.Returns(new TestBlame()
+					.AddLinesFromRevision("abc", 10)
+					.AddLinesFromRevision("ab", 15));
+
 			mapper.Map(
 				mappingDSL.AddCommit("abc").OnBranch("1")
 					.File("file1").Modified()
@@ -105,12 +106,13 @@ namespace Repositorch.Data.Entities.Mapping
 						.Code(-20).ForCodeAddedInitiallyInRevision("1")
 			.Submit();
 
-			var blame = new TestBlame()
-				.AddLinesFromRevision("1", 90)
-				.AddLinesFromRevision("2", 5)
-				.AddLinesFromRevision("4", 5);
+			vcsData.Log("4")
+				.Returns(new TestLog("4"));
 			vcsData.Blame("4", "file1")
-				.Returns(blame);
+				.Returns(new TestBlame()
+					.AddLinesFromRevision("1", 90)
+					.AddLinesFromRevision("2", 5)
+					.AddLinesFromRevision("4", 5));
 
 			mapper.Map(
 				mappingDSL.AddCommit("4").OnBranch("11")
@@ -139,11 +141,10 @@ namespace Repositorch.Data.Entities.Mapping
 						.Code(5)
 			.Submit();
 
-			var blame = new TestBlame()
-				.AddLinesFromRevision("a", 10)
-				.AddLinesFromRevision("ab", 5);
 			vcsData.Blame("abc", "file2")
-				.Returns(blame);
+				.Returns(new TestBlame()
+					.AddLinesFromRevision("a", 10)
+					.AddLinesFromRevision("ab", 5));
 
 			mapper.Map(
 				mappingDSL.AddCommit("abc").OnBranch("1")
@@ -168,12 +169,11 @@ namespace Repositorch.Data.Entities.Mapping
 						.Code(10)
 			.Submit();
 
-			var blame = new TestBlame()
-				.AddLinesFromRevision("a", 10)
-				.AddLinesFromRevision("abc", 5);
 			vcsData.Blame("abc", "file2")
-				.Returns(blame);
-			
+				.Returns(new TestBlame()
+					.AddLinesFromRevision("a", 10)
+					.AddLinesFromRevision("abc", 5));
+
 			mapper.Map(
 				mappingDSL.AddCommit("abc").OnBranch("1")
 					.File("file2").CopiedFrom("file1", "a")
@@ -203,14 +203,13 @@ namespace Repositorch.Data.Entities.Mapping
 						.Code(-10).ForCodeAddedInitiallyInRevision("1")
 			.Submit();
 
-			var blame = new TestBlame()
-				.AddLinesFromRevision("1", 90)
-				.AddLinesFromRevision("2", 5)
-				.AddLinesFromRevision("3", 10);
+			vcsData.Log("4")
+				.Returns(new TestLog("4").ParentRevisionsAre("2", "3"));
 			vcsData.Blame("4", "file1")
-				.Returns(blame);
-			vcsData.GetRevisionParents("4")
-				.Returns(new string[] { "2", "3" });
+				.Returns(new TestBlame()
+					.AddLinesFromRevision("1", 90)
+					.AddLinesFromRevision("2", 5)
+					.AddLinesFromRevision("3", 10));
 
 			mapper.Map(
 				mappingDSL.AddCommit("4").OnBranch("111")
@@ -261,10 +260,10 @@ namespace Repositorch.Data.Entities.Mapping
 				.AddCommit("7").OnBranch("1011")
 			.Submit();
 
+			vcsData.Log("10")
+				.Returns(new TestLog("10").ParentRevisionsAre("6", "7"));
 			vcsData.Blame("10", "file1")
 				.Returns((TestBlame)null);
-			vcsData.GetRevisionParents("10")
-				.Returns(new string[] { "6", "7" });
 
 			mapper.Map(
 				mappingDSL.AddCommit("10").OnBranch("1111")
@@ -295,11 +294,12 @@ namespace Repositorch.Data.Entities.Mapping
 						.Code(30)
 			.Submit();
 
-			var blame = new TestBlame()
-				.AddLinesFromRevision("1", 80)
-				.AddLinesFromRevision("2", 30);
+			vcsData.Log("3")
+				.Returns(new TestLog("3"));
 			vcsData.Blame("3", "file1")
-				.Returns(blame);
+				.Returns(new TestBlame()
+					.AddLinesFromRevision("1", 80)
+					.AddLinesFromRevision("2", 30));
 
 			mapper.Map(
 				mappingDSL.AddCommit("3").OnBranch("1")
@@ -315,9 +315,10 @@ namespace Repositorch.Data.Entities.Mapping
 		[Fact]
 		public void Should_not_revert_addition_or_removing_of_empty_file()
 		{
-			var blame = new TestBlame();
+			vcsData.Log("1")
+				.Returns(new TestLog("1"));
 			vcsData.Blame("1", "file1")
-				.Returns(blame);
+				.Returns(new TestBlame());
 
 			mapper.Map(
 				mappingDSL.AddCommit("1").OnBranch("1")

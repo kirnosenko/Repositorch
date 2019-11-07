@@ -10,6 +10,10 @@ namespace Repositorch.Data.Entities.Mapping
 	{
 		protected class TestLog : Log
 		{
+			public TestLog(string revision)
+				: this(revision, "", "", DateTime.Now, "")
+			{
+			}
 			public TestLog(string revision, string name, string email, DateTime date, string message)
 			{
 				Revision = revision;
@@ -17,29 +21,46 @@ namespace Repositorch.Data.Entities.Mapping
 				AuthorEmail = email;
 				Date = date;
 				Message = message;
+				ParentRevisions = Enumerable.Empty<string>();
+				ChildRevisions = Enumerable.Empty<string>();
 				touchedFiles = new List<TouchedFile>();
 			}
 
-			public void FileAdded(string path)
+			public TestLog ParentRevisionsAre(params string[] parentRevisions)
+			{
+				ParentRevisions = parentRevisions;
+				return this;
+			}
+			public TestLog ChildRevisionsAre(params string[] childRevisions)
+			{
+				ChildRevisions = childRevisions;
+				return this;
+			}
+			public TestLog FileAdded(string path)
 			{
 				TouchPath(path, TouchedFileAction.ADDED, null, null);
+				return this;
 			}
-			public void FileModified(string path)
+			public TestLog FileModified(string path)
 			{
 				TouchPath(path, TouchedFileAction.MODIFIED, null, null);
+				return this;
 			}
-			public void FileCopied(string path, string sourcePath, string sourceRevision)
+			public TestLog FileCopied(string path, string sourcePath, string sourceRevision)
 			{
 				TouchPath(path, TouchedFileAction.ADDED, sourcePath, sourceRevision);
+				return this;
 			}
-			public void FileRemoved(string path)
+			public TestLog FileRemoved(string path)
 			{
 				TouchPath(path, TouchedFileAction.REMOVED, null, null);
+				return this;
 			}
-			public void FileRenamed(string path, string sourcePath)
+			public TestLog FileRenamed(string path, string sourcePath)
 			{
 				FileRemoved(sourcePath);
 				FileCopied(path, sourcePath, null);
+				return this;
 			}
 
 			private void TouchPath(string path, TouchedFileAction action, string sourcePath, string sourceRevision)

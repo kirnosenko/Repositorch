@@ -14,10 +14,9 @@ namespace Repositorch.Data.Entities.Mapping
 		}
 		public override IEnumerable<IBranchMappingExpression> Map(ICommitMappingExpression expression)
 		{
-			var parentRevisions = vcsData.GetRevisionParents(
-				expression.CurrentEntity<Commit>().Revision).ToArray();
+			var log = vcsData.Log(expression.CurrentEntity<Commit>().Revision);
 
-			if (parentRevisions.Length == 0) // the very first revision or no-parent revision
+			if (log.IsOrphan)
 			{
 				return new BranchMappingExpression[]
 				{
@@ -27,12 +26,12 @@ namespace Repositorch.Data.Entities.Mapping
 			else // one or more parent revisions
 			{
 				var parentBranches =
-					(from pr in parentRevisions
+					(from pr in log.ParentRevisions
 					join c in expression.Get<Commit>() on pr equals c.Revision
 					join b in expression.Get<Branch>() on c.BranchId equals b.Id
 					select b).ToArray();
-				var parentChildren = parentRevisions
-					.SelectMany(pr => vcsData.GetRevisionChildren(pr))
+				var parentChildren = log.ParentRevisions
+					.SelectMany(pr => vcsData.Log(pr).ChildRevisions)
 					.Distinct().Count();
 
 				if (parentBranches.Length == 1) // single-parent revision
