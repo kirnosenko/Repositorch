@@ -126,16 +126,15 @@ namespace Repositorch.Data.Entities.Mapping
 		{
 			using (var s = data.OpenSession())
 			{
-				var expressionStack = new Stack<IRepositoryMappingExpression>();
-				expressionStack.Push(new RepositoryMappingExpression(s)
+				var rootExp = new RepositoryMappingExpression(s)
 				{
 					Revision = revision
-				});
-				MapData(0, expressionStack);
+				};
+				MapData(0, rootExp);
 				s.SubmitChanges();
 			}
 		}
-		private void MapData(int mapperIndex, Stack<IRepositoryMappingExpression> expressionsStack)
+		private void MapData(int mapperIndex, IRepositoryMappingExpression parentExpression)
 		{
 			if (mapperIndex >= mappers.Count)
 			{
@@ -143,21 +142,17 @@ namespace Repositorch.Data.Entities.Mapping
 			}
 
 			var mapper = mappers[mapperIndex];
-			var exp = expressionsStack.Peek();
-
-			var newExpressions = mapper(exp).ToArray();
+			var newExpressions = mapper(parentExpression).ToArray();
 			if (newExpressions.Length > 0)
 			{
 				foreach (var newExp in newExpressions)
 				{
-					expressionsStack.Push(newExp);
-					MapData(mapperIndex + 1, expressionsStack);
-					expressionsStack.Pop();
+					MapData(mapperIndex + 1, newExp);
 				}
 			}
 			else
 			{
-				MapData(mapperIndex + 1, expressionsStack);
+				MapData(mapperIndex + 1, parentExpression);
 			}
 		}
 		public void Truncate(int revisionsToKeep)
