@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Repositorch.Data.VersionControl;
 using Repositorch.Data.Entities.DSL.Mapping;
 
 namespace Repositorch.Data.Entities.Mapping
 {
-	public class BugFixMapper : EntityMapper<ICommitMappingExpression, IBugFixMappingExpression>
+	public class BugFixMapper : Mapper<ICommitMappingExpression, IBugFixMappingExpression>
 	{
 		private IBugFixDetector bugFixDetector;
 
@@ -19,12 +18,11 @@ namespace Repositorch.Data.Entities.Mapping
 		{
 			if (bugFixDetector.IsBugFix(expression.CurrentEntity<Commit>()))
 			{
-				return new BugFixMappingExpression[]
-				{
-					expression.IsBugFix()
-				};
+				return SingleExpression(expression
+					.IsBugFix());
 			}
-			return Enumerable.Empty<BugFixMappingExpression>();
+
+			return NoExpressions();
 		}
 	}
 }

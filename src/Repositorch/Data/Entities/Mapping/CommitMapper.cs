@@ -5,7 +5,7 @@ using Repositorch.Data.Entities.DSL.Mapping;
 
 namespace Repositorch.Data.Entities.Mapping
 {
-	public class CommitMapper : EntityMapper<IRepositoryMappingExpression,ICommitMappingExpression>
+	public class CommitMapper : Mapper<IRepositoryMappingExpression,ICommitMappingExpression>
 	{
 		public CommitMapper(IVcsData vcsData)
 			: base(vcsData)
@@ -13,18 +13,12 @@ namespace Repositorch.Data.Entities.Mapping
 		}
 		public override IEnumerable<ICommitMappingExpression> Map(IRepositoryMappingExpression expression)
 		{
-			return new CommitMappingExpression[]
-			{
-				ExpressionFor(expression)
-			};
-		}
-		protected virtual CommitMappingExpression ExpressionFor(IRepositoryMappingExpression expression)
-		{
 			Log log = vcsData.Log(expression.Revision);
 
-			return expression.AddCommit(log.Revision)
+			return SingleExpression(expression
+				.AddCommit(log.Revision)
 				.At(log.Date)
-				.WithMessage(log.Message);
+				.WithMessage(log.Message));
 		}
 	}
 }

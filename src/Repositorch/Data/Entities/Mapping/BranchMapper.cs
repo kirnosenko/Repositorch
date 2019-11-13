@@ -6,7 +6,7 @@ using Repositorch.Data.Entities.DSL.Mapping;
 
 namespace Repositorch.Data.Entities.Mapping
 {
-	public class BranchMapper : EntityMapper<ICommitMappingExpression, IBranchMappingExpression>
+	public class BranchMapper : Mapper<ICommitMappingExpression, IBranchMappingExpression>
 	{
 		public BranchMapper(IVcsData vcsData)
 			: base(vcsData)
@@ -18,10 +18,8 @@ namespace Repositorch.Data.Entities.Mapping
 
 			if (log.IsOrphan)
 			{
-				return new BranchMappingExpression[]
-				{
-					expression.OnFreshBranch()
-				};
+				return SingleExpression(expression
+					.OnFreshBranch());
 			}
 			else // one or more parent revisions
 			{
@@ -38,36 +36,29 @@ namespace Repositorch.Data.Entities.Mapping
 				{
 					if (parentChildren == 1)
 					{
-						return new BranchMappingExpression[]
-						{
-							expression.OnBranch(parentBranches[0].Mask)
-						};
+						return SingleExpression(expression
+							.OnBranch(parentBranches[0].Mask));
 					}
 					else
 					{
-						return new BranchMappingExpression[]
-						{
-							expression.OnSubBranch(parentBranches[0].Mask)
-						};
+						return SingleExpression(expression
+							.OnSubBranch(parentBranches[0].Mask));
 					}
 				}
 				else // multi-parent revision (merge)
 				{
-					var combinedMask = BranchMask.Or(parentBranches.Select(x => x.Mask).ToArray());
+					var combinedMask = BranchMask.Or(
+						parentBranches.Select(x => x.Mask).ToArray());
 					
 					if (parentChildren == 1)
 					{
-						return new BranchMappingExpression[]
-						{
-							expression.OnBranch(combinedMask)
-						};
+						return SingleExpression(expression
+							.OnBranch(combinedMask));
 					}
 					else
 					{
-						return new BranchMappingExpression[]
-						{
-							expression.OnSubBranch(combinedMask)
-						};
+						return SingleExpression(expression
+							.OnSubBranch(combinedMask));
 					}
 				}
 			}

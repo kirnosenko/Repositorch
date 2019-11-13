@@ -9,6 +9,7 @@ namespace Repositorch.Data.VersionControl
 		private Cache<string, Log> logs;
 		private string blamesRevision;
 		private Cache<(string,string), IBlame> blames;
+		private Object blamesClearLock;
 
 		public VcsDataCached(
 			IVcsData innerData,
@@ -23,6 +24,7 @@ namespace Repositorch.Data.VersionControl
 			blames = new Cache<(string revision, string path), IBlame>(
 				k => innerData.Blame(k.revision, k.path),
 				blamesCacheInitialCapacity);
+			blamesClearLock = new Object();
 		}
 
 		public string GetRevisionByNumber(int number)
@@ -36,10 +38,13 @@ namespace Repositorch.Data.VersionControl
 		}
 		public IBlame Blame(string revision, string filePath)
 		{
-			if (revision != blamesRevision)
+			lock (blamesClearLock)
 			{
-				blames.Clear();
-				blamesRevision = revision;
+				if (revision != blamesRevision)
+				{
+					blames.Clear();
+					blamesRevision = revision;
+				}
 			}
 
 			return blames.GetData((revision, filePath));

@@ -7,7 +7,7 @@ using Repositorch.Data.Entities.DSL.Selection;
 
 namespace Repositorch.Data.Entities.Mapping
 {
-	public class CodeFileMapper : EntityMapper<ICommitMappingExpression,ICodeFileMappingExpression>
+	public class CodeFileMapper : Mapper<ICommitMappingExpression,ICodeFileMappingExpression>
 	{
 		public CodeFileMapper(IVcsData vcsData)
 			: base(vcsData)

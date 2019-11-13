@@ -5,7 +5,7 @@ using Repositorch.Data.Entities.DSL.Mapping;
 
 namespace Repositorch.Data.Entities.Mapping
 {
-	public class AuthorMapper : EntityMapper<ICommitMappingExpression, IAuthorMappingExpression>
+	public class AuthorMapper : Mapper<ICommitMappingExpression, IAuthorMappingExpression>
 	{
 		public AuthorMapper(IVcsData vcsData)
 			: base(vcsData)
@@ -15,10 +15,9 @@ namespace Repositorch.Data.Entities.Mapping
 		{
 			Log log = vcsData.Log(expression.CurrentEntity<Commit>().Revision);
 
-			return new AuthorMappingExpression[]
-			{
-				expression.AuthorIs(log.AuthorName).HasEmail(log.AuthorEmail)
-			};
+			return SingleExpression(expression
+				.AuthorIs(log.AuthorName)
+				.HasEmail(log.AuthorEmail));
 		}
 	}
 }

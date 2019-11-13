@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
+using System.Threading.Tasks;
 using Repositorch.Data.Entities.DSL.Mapping;
 using Repositorch.Data.Entities.DSL.Selection;
 using Repositorch.Data.Entities.DSL.Selection.Metrics;
@@ -56,31 +58,58 @@ namespace Repositorch.Data.Entities.Mapping
 		private IDataStore data;
 		private IVcsData vcsData;
 
-		private List<Func<IRepositoryMappingExpression, IEnumerable<IRepositoryMappingExpression>>> mappers =
-			new List<Func<IRepositoryMappingExpression, IEnumerable<IRepositoryMappingExpression>>>();
+		private List<Func<IEnumerable<IRepositoryMappingExpression>, IEnumerable<IRepositoryMappingExpression>>> mappers =
+			new List<Func<IEnumerable<IRepositoryMappingExpression>, IEnumerable<IRepositoryMappingExpression>>>();
 
 		public DataMapper(IDataStore data, IVcsData vcsData)
 		{
 			this.data = data;
 			this.vcsData = vcsData;
 		}
-		public void RegisterMapper<IME, OME>(EntityMapper<IME, OME> mapper)
-			where IME : IRepositoryMappingExpression
-			where OME : IRepositoryMappingExpression
+		public void RegisterMapper<IME, OME>(Mapper<IME, OME> mapper)
+			where IME : class, IRepositoryMappingExpression
+			where OME : class, IRepositoryMappingExpression
 		{
-			mappers.Add((exp) =>
+			mappers.Add((expressions) =>
 			{
-				var newExpressions = new List<IRepositoryMappingExpression>();
-
-				if (typeof(IME).IsAssignableFrom(exp.GetType()))
+				if (!mapper.AllowParallel)
 				{
-					foreach (var resultExp in mapper.Map((IME)exp))
+					var newExpressions = new List<IRepositoryMappingExpression>();
+					foreach (var exp in expressions)
 					{
-						newExpressions.Add(resultExp);
+						IME inputExp = exp as IME;
+						if (inputExp != null)
+						{
+							foreach (var resultExp in mapper.Map(inputExp))
+							{
+								newExpressions.Add(resultExp);
+							}
+						}
 					}
+					return newExpressions;
 				}
-
-				return newExpressions;
+				else
+				{
+					var newExpressions = new ConcurrentBag<IRepositoryMappingExpression>();
+					Parallel.ForEach(
+						expressions,
+						new ParallelOptions
+						{
+							MaxDegreeOfParallelism = Math.Min(expressions.Count(), 16)
+						},
+						exp =>
+						{
+							IME inputExp = exp as IME;
+							if (inputExp != null)
+							{
+								foreach (var resultExp in mapper.Map(inputExp))
+								{
+									newExpressions.Add(resultExp);
+								}
+							}
+						});
+					return newExpressions;
+				}
 			});
 		}
 		public void MapRevisions(MappingSettings settings)
@@ -126,33 +155,23 @@ namespace Repositorch.Data.Entities.Mapping
 		{
 			using (var s = data.OpenSession())
 			{
-				var rootExp = new RepositoryMappingExpression(s)
+				IEnumerable<IRepositoryMappingExpression> expressions =
+					new IRepositoryMappingExpression[]
+					{
+						new RepositoryMappingExpression(s)
+						{
+							Revision = revision
+						}
+					};
+				foreach (var mapper in mappers)
 				{
-					Revision = revision
-				};
-				MapData(0, rootExp);
-				s.SubmitChanges();
-			}
-		}
-		private void MapData(int mapperIndex, IRepositoryMappingExpression parentExpression)
-		{
-			if (mapperIndex >= mappers.Count)
-			{
-				return;
-			}
-
-			var mapper = mappers[mapperIndex];
-			var newExpressions = mapper(parentExpression).ToArray();
-			if (newExpressions.Length > 0)
-			{
-				foreach (var newExp in newExpressions)
-				{
-					MapData(mapperIndex + 1, newExp);
+					var newExpressions = mapper(expressions);
+					if (newExpressions.Count() > 0)
+					{
+						expressions = newExpressions;
+					}
 				}
-			}
-			else
-			{
-				MapData(mapperIndex + 1, parentExpression);
+				s.SubmitChanges();
 			}
 		}
 		public void Truncate(int revisionsToKeep)

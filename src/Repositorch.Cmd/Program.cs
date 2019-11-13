@@ -30,7 +30,7 @@ namespace Repositorch
 			{
 				Func<DataMapper.MappingSettings> settings = () => new DataMapper.MappingSettings()
 				{
-					StopRevision = vcsData.GetRevisionByNumber(2000),
+					StopRevision = vcsData.GetRevisionByNumber(3000),
 					Check = DataMapper.CheckMode.TOUCHED,
 				};
 				mapper.MapRevisions(settings());
@@ -60,6 +60,8 @@ namespace Repositorch
 				new CodeFileMapper(vcsData));
 			dataMapper.RegisterMapper(
 				new ModificationMapper(vcsData));
+			dataMapper.RegisterMapper(
+				new BlamePreLoader(vcsData));
 			dataMapper.RegisterMapper(
 				new CodeBlockMapper(vcsData));
 			dataMapper.OnMapRevision += revision =>

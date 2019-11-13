@@ -7,7 +7,7 @@ using Repositorch.Data.Entities.DSL.Selection;
 
 namespace Repositorch.Data.Entities.Mapping
 {
-	public class ModificationMapper : EntityMapper<ICodeFileMappingExpression,IModificationMappingExpression>
+	public class ModificationMapper : Mapper<ICodeFileMappingExpression,IModificationMappingExpression>
 	{
 		public ModificationMapper(IVcsData vcsData)
 			: base(vcsData)
@@ -25,7 +25,7 @@ namespace Repositorch.Data.Entities.Mapping
 			{
 				if (touchedFile == null || touchedFile.Action == TouchedFileAction.MODIFIED)
 				{
-					return Enumerable.Repeat(expression.Modified(), 1);
+					return SingleExpression(expression.Modified());
 				}
 
 				var branchMask = expression.CurrentEntity<Branch>().Mask;
@@ -41,14 +41,13 @@ namespace Repositorch.Data.Entities.Mapping
 				{
 					if (touchedFile.Action == TouchedFileAction.ADDED)
 					{
-						return Enumerable.Repeat(
-							expression.Added(), 1);
+						return SingleExpression(expression.Added());
 					}
 
-					return Enumerable.Repeat(expression.Removed(), 1);
+					return SingleExpression(expression.Removed());
 				}
 
-				return Enumerable.Empty<IModificationMappingExpression>();
+				return NoExpressions();
 			}
 
 			switch (touchedFile.Action)

@@ -6,7 +6,7 @@ using Repositorch.Data.Entities.DSL.Mapping;
 
 namespace Repositorch.Data.Entities.Mapping
 {
-	public class CodeBlockMapper : EntityMapper<IModificationMappingExpression,ICodeBlockMappingExpression>
+	public class CodeBlockMapper : Mapper<IModificationMappingExpression,ICodeBlockMappingExpression>
 	{
 		public CodeBlockMapper(IVcsData vcsData)
 			: base(vcsData)
@@ -16,10 +16,10 @@ namespace Repositorch.Data.Entities.Mapping
 		public override IEnumerable<ICodeBlockMappingExpression> Map(IModificationMappingExpression expression)
 		{
 			Modification modification = expression.CurrentEntity<Modification>();
-
 			if (modification.Action == TouchedFileAction.REMOVED)
 			{
-				return Enumerable.Repeat(expression.RemoveCode(), 1);
+				return SingleExpression(expression
+					.RemoveCode());
 			}
 
 			List<CodeBlockMappingExpression> codeBlockExpressions = new List<CodeBlockMappingExpression>();
