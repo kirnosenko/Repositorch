@@ -58,7 +58,7 @@ namespace Repositorch.Data.VersionControl.Git
 		private Stream GetLog(string revision)
 		{
 			return RunCommand(
-				"log -n 1 -C -m --format=format:%H%n%cn%n%ce%n%ci%n%s --name-status {0}",
+				"log -n 1 -C -m --format=format:%H%n%cn%n%ce%n%ci%n%s%n%D --name-status {0}",
 				revision
 			);
 		}

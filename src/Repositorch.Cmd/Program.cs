@@ -16,22 +16,22 @@ namespace Repositorch
 	{
 		static void Main(string[] args)
 		{
-			var data = new SqlServerDataStore("git")
+			var data = new SqlServerDataStore("tortoisegit")
 			//var data = new PostgreSqlDataStore("git", "postgres", "123")
 			{
 				//Logging = true,
 				//SingletonSession = true,
 			};
-			var gitClient = new CommandLineGitClient("D:/src/git/.git");
+			var gitClient = new CommandLineGitClient("D:/src/tortoisegit/.git");
 			var vcsData = new VcsDataCached(gitClient, 1000, 1000);
 			var mapper = CreateDataMapper(data, vcsData);
 			
 			using (ConsoleTimeLogger.Start("time"))
 			{
-				Func<DataMapper.MappingSettings> settings = () => new DataMapper.MappingSettings()
+				Func<VcsDataMapper.MappingSettings> settings = () => new VcsDataMapper.MappingSettings()
 				{
-					StopRevision = vcsData.GetRevisionByNumber(3000),
-					Check = DataMapper.CheckMode.TOUCHED,
+					StopRevision = vcsData.GetRevisionByNumber(1000),
+					Check = VcsDataMapper.CheckMode.TOUCHED,
 				};
 				mapper.MapRevisions(settings());
 				//mapper.Truncate(1170);
@@ -45,11 +45,13 @@ namespace Repositorch
 
 			Console.ReadKey();
 		}
-		static DataMapper CreateDataMapper(IDataStore data, IVcsData vcsData)
+		static VcsDataMapper CreateDataMapper(IDataStore data, IVcsData vcsData)
 		{
-			DataMapper dataMapper = new DataMapper(data, vcsData);
+			VcsDataMapper dataMapper = new VcsDataMapper(data, vcsData);
 			dataMapper.RegisterMapper(
 				new CommitMapper(vcsData));
+			dataMapper.RegisterMapper(
+				new TagMapper(vcsData));
 			dataMapper.RegisterMapper(
 				new AuthorMapper(vcsData));
 			dataMapper.RegisterMapper(
@@ -61,7 +63,7 @@ namespace Repositorch
 			dataMapper.RegisterMapper(
 				new ModificationMapper(vcsData));
 			dataMapper.RegisterMapper(
-				new BlamePreLoader(vcsData));
+				new BlamePreLoader(vcsData), true);
 			dataMapper.RegisterMapper(
 				new CodeBlockMapper(vcsData));
 			dataMapper.OnMapRevision += revision =>

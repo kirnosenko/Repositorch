@@ -13,6 +13,7 @@ namespace Repositorch.Data.VersionControl
 		public string AuthorEmail { get; protected set; }
 		public DateTime Date { get; protected set; }
 		public string Message { get; protected set; }
+		public IEnumerable<string> Tags { get; protected set; }
 		public IEnumerable<string> ParentRevisions { get; protected set; }
 		public IEnumerable<string> ChildRevisions { get; protected set; }
 

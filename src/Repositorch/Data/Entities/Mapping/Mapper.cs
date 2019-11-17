@@ -18,11 +18,7 @@ namespace Repositorch.Data.Entities.Mapping
 			this.vcsData = vcsData;
 		}
 		public abstract IEnumerable<OME> Map(IME expression);
-		public virtual bool AllowParallel
-		{
-			get { return false; }
-		}
-
+		
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected IEnumerable<OME> SingleExpression(OME expression)
 		{

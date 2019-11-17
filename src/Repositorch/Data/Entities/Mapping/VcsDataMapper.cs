@@ -35,7 +35,7 @@ namespace Repositorch.Data.Entities.Mapping
 		}
 	}
 
-	public class DataMapper
+	public class VcsDataMapper
 	{
 		public enum CheckMode
 		{
@@ -61,18 +61,18 @@ namespace Repositorch.Data.Entities.Mapping
 		private List<Func<IEnumerable<IRepositoryMappingExpression>, IEnumerable<IRepositoryMappingExpression>>> mappers =
 			new List<Func<IEnumerable<IRepositoryMappingExpression>, IEnumerable<IRepositoryMappingExpression>>>();
 
-		public DataMapper(IDataStore data, IVcsData vcsData)
+		public VcsDataMapper(IDataStore data, IVcsData vcsData)
 		{
 			this.data = data;
 			this.vcsData = vcsData;
 		}
-		public void RegisterMapper<IME, OME>(Mapper<IME, OME> mapper)
+		public void RegisterMapper<IME, OME>(Mapper<IME, OME> mapper, bool parallel = false)
 			where IME : class, IRepositoryMappingExpression
 			where OME : class, IRepositoryMappingExpression
 		{
 			mappers.Add((expressions) =>
 			{
-				if (!mapper.AllowParallel)
+				if (!parallel)
 				{
 					var newExpressions = new List<IRepositoryMappingExpression>();
 					foreach (var exp in expressions)

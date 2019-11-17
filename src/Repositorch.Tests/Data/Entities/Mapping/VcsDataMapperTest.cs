@@ -9,20 +9,20 @@ using Repositorch.Data.Entities.Persistent;
 
 namespace Repositorch.Data.Entities.Mapping
 {
-	public class DataMapperTest : BaseMapperTest
+	public class VcsDataMapperTest : BaseMapperTest
 	{
 		private IDataStore data;
-		private DataMapper mapper;
-		private DataMapper.MappingSettings settings;
+		private VcsDataMapper mapper;
+		private VcsDataMapper.MappingSettings settings;
 		private CommitMapper commitMapper;
 		private BugFixMapper bugFixMapper;
 		private CodeFileMapper fileMapper;
 		
-		public DataMapperTest()
+		public VcsDataMapperTest()
 		{
 			data = new InMemoryDataStore(Guid.NewGuid().ToString());
-			mapper = new DataMapper(data, vcsData);
-			settings = new DataMapper.MappingSettings();
+			mapper = new VcsDataMapper(data, vcsData);
+			settings = new VcsDataMapper.MappingSettings();
 			commitMapper = Substitute.For<CommitMapper>((IVcsData)null);
 			bugFixMapper = Substitute.For<BugFixMapper>(null, null);
 			fileMapper = Substitute.For<CodeFileMapper>((IVcsData)null);
@@ -310,7 +310,7 @@ namespace Repositorch.Data.Entities.Mapping
 			vcsData.Blame("1", "file1")
 				.Returns(new TestBlame().AddLinesFromRevision("1", 100));
 
-			Assert.True(mapper.CheckRevision("1", DataMapper.CheckMode.ALL));
+			Assert.True(mapper.CheckRevision("1", VcsDataMapper.CheckMode.ALL));
 
 			data.UsingSession(s =>
 				s.MappingDSL()
@@ -325,20 +325,20 @@ namespace Repositorch.Data.Entities.Mapping
 					.AddLinesFromRevision("1", 90)
 					.AddLinesFromRevision("2", 10));
 
-			Assert.True(mapper.CheckRevision("2", DataMapper.CheckMode.ALL));
+			Assert.True(mapper.CheckRevision("2", VcsDataMapper.CheckMode.ALL));
 
 			vcsData.Blame("2", "file1")
 				.Returns(new TestBlame()
 					.AddLinesFromRevision("1", 89)
 					.AddLinesFromRevision("2", 11));
 
-			Assert.False(mapper.CheckRevision("2", DataMapper.CheckMode.ALL));
+			Assert.False(mapper.CheckRevision("2", VcsDataMapper.CheckMode.ALL));
 
 			vcsData.Blame("2", "file1")
 				.Returns(new TestBlame()
 					.AddLinesFromRevision("1", 100));
 
-			Assert.False(mapper.CheckRevision("2", DataMapper.CheckMode.ALL));
+			Assert.False(mapper.CheckRevision("2", VcsDataMapper.CheckMode.ALL));
 
 			vcsData.Blame("2", "file1")
 				.Returns(new TestBlame()
@@ -346,7 +346,7 @@ namespace Repositorch.Data.Entities.Mapping
 					.AddLinesFromRevision("1", 90)
 					.AddLinesFromRevision("2", 5));
 
-			Assert.False(mapper.CheckRevision("2", DataMapper.CheckMode.ALL));
+			Assert.False(mapper.CheckRevision("2", VcsDataMapper.CheckMode.ALL));
 		}
 		[Fact]
 		public void Should_truncate_unsuccessfully_mapped_revision()
@@ -363,7 +363,7 @@ namespace Repositorch.Data.Entities.Mapping
 
 			settings.StartRevision = "1";
 			settings.StopRevision = "1";
-			settings.Check = DataMapper.CheckMode.ALL;
+			settings.Check = VcsDataMapper.CheckMode.ALL;
 			mapper.MapRevisions(settings);
 
 			data.UsingSession(s =>

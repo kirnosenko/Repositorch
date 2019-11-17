@@ -82,6 +82,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			{
 				return parentExp;
 			}
+
 			var revisionData = (
 				from c in parentExp.Queryable<Commit>().Where(x => x.Revision == revision)
 				join b in parentExp.Queryable<Branch>() on c.BranchId equals b.Id
@@ -89,7 +90,12 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				{
 					Number = c.OrderedNumber,
 					Branch = b,
-				}).Single();
+				}).SingleOrDefault();
+			if (revisionData == null)
+			{
+				return parentExp;
+			}
+
 			return parentExp
 				.Reselect(s => numberFilter(s, revisionData.Number))
 				.Reselect(s => branchFilter(s, revisionData.Branch.Mask));

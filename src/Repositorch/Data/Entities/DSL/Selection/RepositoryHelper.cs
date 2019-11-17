@@ -2,7 +2,7 @@
 
 namespace Repositorch.Data.Entities.DSL.Selection
 {
-	public static class RepositoryResolverHelper
+	public static class RepositoryHelper
 	{
 		public static RepositorySelectionExpression SelectionDSL(
 			this IRepository repository,

@@ -233,7 +233,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				.Select(c => c.Revision));
 		}
 		[Fact]
-		public void Should_ignore_null_values_for_commit_relative_selection()
+		public void Should_ignore_invalid_values_for_commit_relative_selection()
 		{
 			mappingDSL
 				.AddCommit("1")
@@ -248,6 +248,10 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				.FromRevision(null)
 				.TillRevision(null)
 				.BeforeRevision(null)
+				.AfterRevision("5")
+				.FromRevision("5")
+				.TillRevision("5")
+				.BeforeRevision("5")
 				.Count());
 		}
 	}

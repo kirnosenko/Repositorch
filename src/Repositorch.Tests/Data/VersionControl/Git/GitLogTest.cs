@@ -13,6 +13,7 @@ Linus Torvalds
 torvalds@ppc970.osdl.org
 2005-04-11 15:47:57 -0700
 Rename '.dircache' directory to '.git'
+
 M	README
 M	cache.h
 M	init-db.c
@@ -26,6 +27,7 @@ Linus Torvalds
 torvalds@ppc970.osdl.org
 2005-04-29 14:09:11 -0700
 Rename git core commands to be 'git-xxxx' to avoid name clashes.
+
 M	Makefile
 R100	show-diff.c	diff-files.c
 R100	git-export.c	export.c
@@ -37,6 +39,7 @@ adrian
 ???
 2005-07-14 18:20:03 +0000
 Created django.contrib and moved comments into it
+
 C100	django/views/comments/__init__.py	django/contrib/__init__.py
 C100	django/views/comments/__init__.py	django/contrib/comments/__init__.py";
 
@@ -46,6 +49,7 @@ jezdez
 ???
 2011-02-14 23:45:32 +0000
 Fixed the staticfiles management commands collectstatic and findstatic to not raise encoding related exceptions when handlings filenames with non-ASCII characters.
+
 M	django/contrib/staticfiles/management/commands/collectstatic.py
 M	django/contrib/staticfiles/management/commands/findstatic.py
 A	'tests/regressiontests/staticfiles_tests/apps/test/static/test/spec\314\247ial.txt'
@@ -57,6 +61,7 @@ Linus Torvalds
 torvalds@ppc970.osdl.org
 2005-04-18 12:12:00 -0700
 Merge the new object model thing from Daniel Barkalow
+
 M	Makefile
 A	blob.c
 A	blob.h
@@ -75,6 +80,7 @@ Linus Torvalds
 torvalds@ppc970.osdl.org
 2005-04-18 12:12:00 -0700
 Merge the new object model thing from Daniel Barkalow
+
 M	Makefile
 M	README
 M	checkout-cache.c
@@ -93,6 +99,7 @@ alan
 alan@mail
 2000-01-01 00:00:00 -0700
 message
+
 M	file1
 A	file2
 M	file3
@@ -102,9 +109,19 @@ alan
 alan@mail
 2000-01-01 00:00:00 -0700
 message
+
 M	file1
 M	file2
 D	file3";
+
+private string log_7 =
+@"10
+alan
+alan@mail
+2000-01-01 00:00:00 -0700
+message
+HEAD -> master, tag: qwe, tag: ab,c, tag: 0.99
+A	file1";
 
 		private GitLog log;
 		
@@ -236,6 +253,13 @@ D	file3";
 					TouchedFileAction.REMOVED
 				},
 				log.TouchedFiles.Select(x => x.Action));
+		}
+		[Fact]
+		public void Should_get_tags_from_log()
+		{
+			log = new GitLog(log_7.ToStream(), null, null);
+
+			Assert.Equal(new string[] { "qwe", "ab,c", "0.99" }, log.Tags);
 		}
 	}
 }

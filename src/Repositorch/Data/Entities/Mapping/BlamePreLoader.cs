@@ -23,9 +23,5 @@ namespace Repositorch.Data.Entities.Mapping
 
 			return SingleExpression(expression);
 		}
-		public override bool AllowParallel
-		{
-			get { return true; }
-		}
 	}
 }

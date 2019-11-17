@@ -21,11 +21,17 @@ namespace Repositorch.Data.Entities.Mapping
 				AuthorEmail = email;
 				Date = date;
 				Message = message;
+				Tags = Enumerable.Empty<string>();
 				ParentRevisions = Enumerable.Empty<string>();
 				ChildRevisions = Enumerable.Empty<string>();
 				touchedFiles = new List<TouchedFile>();
 			}
 
+			public TestLog TagsAre(params string[] tags)
+			{
+				Tags = tags;
+				return this;
+			}
 			public TestLog ParentRevisionsAre(params string[] parentRevisions)
 			{
 				ParentRevisions = parentRevisions;

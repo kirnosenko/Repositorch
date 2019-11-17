@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Repositorch.Data.VersionControl.Git
 {
@@ -18,6 +19,25 @@ namespace Repositorch.Data.VersionControl.Git
 			AuthorEmail = reader.ReadLine();
 			Date = DateTime.Parse(reader.ReadLine()).ToUniversalTime();
 			Message = reader.ReadLine();
+			var tags = reader.ReadLine();
+			if (tags == string.Empty)
+			{
+				Tags = Enumerable.Empty<string>();
+			}
+			else
+			{
+				Regex tagRegExp = new Regex(@"tag: (.*?)(, |$)");
+				var matches = tagRegExp.Matches(tags);
+				if (matches.Count > 0)
+				{
+					var list = new List<string>();
+					foreach (Match m in matches)
+					{
+						list.Add(m.Groups[1].Value);
+					}
+					Tags = list;
+				}
+			}
 			ParentRevisions = parentRevisions;
 			ChildRevisions = childRevisions;
 
@@ -31,7 +51,7 @@ namespace Repositorch.Data.VersionControl.Git
 				if (line == string.Empty)
 				{
 					// skip revision info section
-					for (int i = 0; i < 6; i++)
+					for (int i = 0; i < 7; i++)
 					{
 						line = reader.ReadLine();
 					}
