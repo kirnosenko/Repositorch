@@ -9,7 +9,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		IRepositoryMappingExpression Submit();
 		IRepositoryMappingExpression Revert();
 		T CurrentEntity<T>() where T : class;
-		T CurrentExpression<T>() where T : class, IRepositoryMappingExpression;
+		IEnumerable<T> AllEntities<T>() where T : class;
 		string Revision { get; }
 	}
 
@@ -58,9 +58,9 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		{
 			return default(T);
 		}
-		public T CurrentExpression<T>() where T : class, IRepositoryMappingExpression
+		public IEnumerable<T> AllEntities<T>() where T : class
 		{
-			return default(T);
+			yield break;
 		}
 		public string Revision
 		{

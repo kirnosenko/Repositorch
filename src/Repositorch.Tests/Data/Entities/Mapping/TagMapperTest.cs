@@ -42,5 +42,21 @@ namespace Repositorch.Data.Entities.Mapping
 
 			Assert.Equal(0, Get<Tag>().Count());
 		}
+		[Fact]
+		public void Should_allow_to_get_all_tags_from_expression()
+		{
+			vcsData.Log("1")
+				.Returns(new TestLog("1").TagsAre("1.1", "fix"));
+
+			var expressions = mapper.Map(
+				mappingDSL.AddCommit("1")
+			);
+			SubmitChanges();
+
+			Assert.Equal(1, (int)expressions.Count());
+			Assert.Equal("fix", expressions.First().CurrentEntity<Tag>().Title);
+			Assert.Equal(new string[] { "1.1", "fix" },
+				expressions.First().AllEntities<Tag>().Select(x => x.Title));
+		}
 	}
 }

@@ -53,13 +53,16 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			}
 			return parentExp.CurrentEntity<T>();
 		}
-		public virtual T CurrentExpression<T>() where T : class, IRepositoryMappingExpression
+		public IEnumerable<T> AllEntities<T>() where T : class
 		{
-			if (typeof(T) == this.GetType())
+			foreach (var e in parentExp.AllEntities<T>())
 			{
-				return this as T;
+				yield return e;
 			}
-			return parentExp.CurrentExpression<T>();
+			if (typeof(T) == typeof(E))
+			{
+				yield return entity as T;
+			}
 		}
 		public string Revision
 		{

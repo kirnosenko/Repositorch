@@ -20,7 +20,7 @@ namespace Repositorch.Data.VersionControl.Git
 			Date = DateTime.Parse(reader.ReadLine()).ToUniversalTime();
 			Message = reader.ReadLine();
 			var tags = reader.ReadLine();
-			if (tags == string.Empty)
+			if (string.IsNullOrEmpty(tags))
 			{
 				Tags = Enumerable.Empty<string>();
 			}

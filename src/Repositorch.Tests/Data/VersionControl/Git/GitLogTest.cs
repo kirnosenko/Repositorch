@@ -123,6 +123,13 @@ message
 HEAD -> master, tag: qwe, tag: ab,c, tag: 0.99
 A	file1";
 
+private string log_8 =
+@"e90a4c0ed17b66c302f48ec0a234cac6f27e5eec
+Linus Torvalds
+torvalds@ppc970.osdl.org
+2005-04-18 16:11:32 -0700
+Add 'dotest' and 'applypatch' scripts to actually make things useful.";
+
 		private GitLog log;
 		
 		[Fact]
@@ -260,6 +267,14 @@ A	file1";
 			log = new GitLog(log_7.ToStream(), null, null);
 
 			Assert.Equal(new string[] { "qwe", "ab,c", "0.99" }, log.Tags);
+		}
+		[Fact]
+		public void Should_parse_correctly_log_without_tags_and_empty_file_list()
+		{
+			log = new GitLog(log_8.ToStream(), null, null);
+
+			Assert.Equal(new string[] { }, log.Tags);
+			Assert.Equal(new TouchedFile[] { }, log.TouchedFiles);
 		}
 	}
 }

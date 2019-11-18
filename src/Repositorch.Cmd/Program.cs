@@ -16,13 +16,13 @@ namespace Repositorch
 	{
 		static void Main(string[] args)
 		{
-			var data = new SqlServerDataStore("tortoisegit")
+			var data = new SqlServerDataStore("git")
 			//var data = new PostgreSqlDataStore("git", "postgres", "123")
 			{
 				//Logging = true,
 				//SingletonSession = true,
 			};
-			var gitClient = new CommandLineGitClient("D:/src/tortoisegit/.git");
+			var gitClient = new CommandLineGitClient("D:/src/git/.git");
 			var vcsData = new VcsDataCached(gitClient, 1000, 1000);
 			var mapper = CreateDataMapper(data, vcsData);
 			
@@ -30,11 +30,11 @@ namespace Repositorch
 			{
 				Func<VcsDataMapper.MappingSettings> settings = () => new VcsDataMapper.MappingSettings()
 				{
-					StopRevision = vcsData.GetRevisionByNumber(1000),
+					StopRevision = vcsData.GetRevisionByNumber(2000),
 					Check = VcsDataMapper.CheckMode.TOUCHED,
 				};
 				mapper.MapRevisions(settings());
-				//mapper.Truncate(1170);
+				//mapper.Truncate(1000);
 				//mapper.Check(2309, DataMapper.CheckMode.ALL);
 				//mapper.CheckAndTruncate("/test-delta.c");
 
