@@ -12,20 +12,34 @@ namespace Repositorch.Data.VersionControl.Git
 			RepositoryPath = repositoryPath;
 			GitCommand = "git";
 			Branch = "master";
-
-			revisions = new GitRevisions(GetRevList());
+			IgnoreBinary = false;
 		}
 
 		public string GetRevisionByNumber(int number)
 		{
+			if (revisions == null)
+			{
+				revisions = new GitRevisions(GetRevList());
+			}
+
 			return revisions.GetRevisionByNumber(number);
 		}
 		public Log Log(string revision)
 		{
-			using (var log = GetLog(revision))
+			if (revisions == null)
+			{
+				revisions = new GitRevisions(GetRevList());
+			}
+
+			using (var log = GetLog(revision, IgnoreBinary))
 			{
 				var revisionNode = revisions.GetRevisionNode(revision);
-				return new GitLog(log, revisionNode.Parents, revisionNode.Children);
+				if (!IgnoreBinary)
+				{
+					return new GitLog(log, revisionNode.Parents, revisionNode.Children);
+				}
+
+				return new GitLogExtended(log, revisionNode.Parents, revisionNode.Children);
 			}
 		}
 		public IBlame Blame(string revision, string filePath)
@@ -47,6 +61,10 @@ namespace Repositorch.Data.VersionControl.Git
 		{
 			get; set;
 		}
+		public bool IgnoreBinary
+		{
+			get; set;
+		}
 
 		private Stream GetRevList()
 		{
@@ -55,10 +73,11 @@ namespace Repositorch.Data.VersionControl.Git
 				Branch
 			);
 		}
-		private Stream GetLog(string revision)
+		private Stream GetLog(string revision, bool extended)
 		{
 			return RunCommand(
-				"log -n 1 -C -m --format=format:%H%n%cn%n%ce%n%ci%n%s%n%D --name-status {0}",
+				"log -n 1 -C -m --format=format:%H%n%cn%n%ce%n%ci%n%s%n%D --encoding=UTF-8 {0} {1}",
+				extended ? "--numstat --summary" : "--name-status",
 				revision
 			);
 		}

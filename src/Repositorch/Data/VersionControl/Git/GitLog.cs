@@ -6,6 +6,10 @@ using System.Text.RegularExpressions;
 
 namespace Repositorch.Data.VersionControl.Git
 {
+	/// <summary>
+	/// Simple version of git log to get information about commit 
+	/// and touched files.
+	/// </summary>
 	public class GitLog : Log
 	{
 		public GitLog(Stream log,
@@ -41,9 +45,12 @@ namespace Repositorch.Data.VersionControl.Git
 			ParentRevisions = parentRevisions;
 			ChildRevisions = childRevisions;
 
+			ParseTouchedFiles(reader);
+		}
+
+		protected virtual void ParseTouchedFiles(TextReader reader)
+		{
 			string line;
-			string[] blocks;
-			TouchedFileGitAction action;
 			touchedFiles = new List<TouchedFile>();
 
 			while ((line = reader.ReadLine()) != null)
@@ -57,50 +64,61 @@ namespace Repositorch.Data.VersionControl.Git
 					}
 				}
 
-				blocks = line.Split('	');
-				action = ParsePathAction(blocks[0]);
-
-				switch (action)
+				var blocks = line.Split('	');
+				var action = ParsePathAction(blocks[0]);
+				string path = blocks[1];
+				string sourcePath = null;
+				if (action == TouchedFileGitAction.RENAMED || action == TouchedFileGitAction.COPIED)
 				{
-					case TouchedFileGitAction.MODIFIED:
-						TouchFile(TouchedFileAction.MODIFIED, blocks[1]);
-						break;
-					case TouchedFileGitAction.ADDED:
-						TouchFile(TouchedFileAction.ADDED, blocks[1]);
-						break;
-					case TouchedFileGitAction.DELETED:
-						TouchFile(TouchedFileAction.REMOVED, blocks[1]);
-						break;
-					case TouchedFileGitAction.RENAMED:
-						TouchFile(TouchedFileAction.REMOVED, blocks[1]);
-						TouchFile(TouchedFileAction.ADDED, blocks[2], blocks[1]);
-						break;
-					case TouchedFileGitAction.COPIED:
-						TouchFile(TouchedFileAction.ADDED, blocks[2], blocks[1]);
-						break;
-					default:
-						break;
+					path = blocks[2];
+					sourcePath = blocks[1];
 				}
+				MapTouchedFile(action, path, sourcePath, AddOrModifyTouchedFile);
 			}
 			touchedFiles.Sort((x, y) => string.CompareOrdinal(x.Path.ToLower(), y.Path.ToLower()));
 		}
-		private void TouchFile(TouchedFileAction action, string path)
+		protected void MapTouchedFile(
+			TouchedFileGitAction action,
+			string path,
+			string sourcePath,
+			Action<TouchedFileAction,string,string> touchedFileMapper)
 		{
-			TouchFile(action, path, null);
-		}
-		private void TouchFile(TouchedFileAction action, string path, string sourcePath)
-		{
-			path = path.Replace("\"", "");
-			if (sourcePath != null)
+			switch (action)
 			{
-				sourcePath = sourcePath.Replace("\"", "");
+				case TouchedFileGitAction.MODIFIED:
+					touchedFileMapper(TouchedFileAction.MODIFIED, path, sourcePath);
+					break;
+				case TouchedFileGitAction.ADDED:
+					touchedFileMapper(TouchedFileAction.ADDED, path, sourcePath);
+					break;
+				case TouchedFileGitAction.DELETED:
+					touchedFileMapper(TouchedFileAction.REMOVED, path, sourcePath);
+					break;
+				case TouchedFileGitAction.RENAMED:
+					touchedFileMapper(TouchedFileAction.REMOVED, sourcePath, null);
+					touchedFileMapper(TouchedFileAction.ADDED, path, sourcePath);
+					break;
+				case TouchedFileGitAction.COPIED:
+					touchedFileMapper(TouchedFileAction.ADDED, path, sourcePath);
+					break;
+				default:
+					break;
+			}
+		}
+		protected string GitPathToPath(string path)
+		{
+			if (path == null)
+			{
+				return null;
 			}
 
-			path = "/" + path;
-			if (sourcePath != null)
-			{
-				sourcePath = "/" + sourcePath;
-			}
+			return "/" + path.Replace("\"", "");
+		}
+		protected void AddOrModifyTouchedFile(TouchedFileAction action, string path, string sourcePath)
+		{
+			path = GitPathToPath(path);
+			sourcePath = GitPathToPath(sourcePath);
+
 			var touchedFile = touchedFiles.Where(x => x.Path == path).SingleOrDefault();
 			if (touchedFile == null)
 			{
@@ -120,6 +138,7 @@ namespace Repositorch.Data.VersionControl.Git
 				}
 			}
 		}
+
 		private TouchedFileGitAction ParsePathAction(string action)
 		{
 			switch (action.Substring(0, 1).ToUpper())

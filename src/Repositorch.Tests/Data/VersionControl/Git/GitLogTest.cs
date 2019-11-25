@@ -209,18 +209,22 @@ Add 'dotest' and 'applypatch' scripts to actually make things useful.";
 					.SourcePath);
 		}
 		[Fact]
-		public void Should_keep_information_about_copied_paths()
+		public void Should_interpret_copied_file_as_added_and_keep_source_path()
 		{
 			log = new GitLog(log_3.ToStream(), null, null);
 
-			Assert.Equal(
-				2,
-				log.TouchedFiles.Count());
-			Assert.Equal(
-				2,
+			Assert.Equal(2, log.TouchedFiles.Count());
+			Assert.Equal(2, log.TouchedFiles
+				.Where(x => x.Action == TouchedFileAction.ADDED)
+				.Count());
+			Assert.Equal("/django/views/comments/__init__.py",
 				log.TouchedFiles
-					.Where(x => x.Action == TouchedFileAction.ADDED)
-					.Count());
+					.Single(x => x.Path == "/django/contrib/__init__.py")
+					.SourcePath);
+			Assert.Equal("/django/views/comments/__init__.py",
+				log.TouchedFiles
+					.Single(x => x.Path == "/django/contrib/comments/__init__.py")
+					.SourcePath);
 		}
 		[Fact]
 		public void Should_parse_filename_with_special_symbols()

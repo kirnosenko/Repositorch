@@ -16,13 +16,17 @@ namespace Repositorch
 	{
 		static void Main(string[] args)
 		{
-			var data = new SqlServerDataStore("git")
+			var data = new SqlServerDataStore("x64dbg")
 			//var data = new PostgreSqlDataStore("git", "postgres", "123")
 			{
 				//Logging = true,
 				//SingletonSession = true,
 			};
-			var gitClient = new CommandLineGitClient("D:/src/git/.git");
+			var gitClient = new CommandLineGitClient("D:/src/x64dbg/.git")
+			{
+				Branch = "development",
+				IgnoreBinary = true,
+			};
 			var vcsData = new VcsDataCached(gitClient, 1000, 1000);
 			var mapper = CreateDataMapper(data, vcsData);
 			
@@ -30,7 +34,7 @@ namespace Repositorch
 			{
 				Func<VcsDataMapper.MappingSettings> settings = () => new VcsDataMapper.MappingSettings()
 				{
-					StopRevision = vcsData.GetRevisionByNumber(2000),
+					StopRevision = vcsData.GetRevisionByNumber(1000),
 					Check = VcsDataMapper.CheckMode.TOUCHED,
 				};
 				mapper.MapRevisions(settings());
@@ -38,6 +42,7 @@ namespace Repositorch
 				//mapper.Check(2309, DataMapper.CheckMode.ALL);
 				//mapper.CheckAndTruncate("/test-delta.c");
 
+				//GetLog(vcsData);
 				//BlameDiff(vcsData);
 				//FileHistory(data, vcsData, "/Documentation/merge-pull-opts.txt");
 				//Select(data);
@@ -85,6 +90,12 @@ namespace Repositorch
 			return dataMapper;
 		}
 
+		static void GetLog(IVcsData vcsData)
+		{
+			var r0 = "6c9de40fbcd0dbc62bffce68a82d170d62bb0df0";
+			
+			var log = vcsData.Log(r0);
+		}
 		static void BlameDiff(IVcsData vcsData)
 		{
 			var r0 = "41f93a2c903a45167b26c2dc93d45ffa9a9bbd49";
