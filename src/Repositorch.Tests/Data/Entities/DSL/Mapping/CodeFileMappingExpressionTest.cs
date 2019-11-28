@@ -15,8 +15,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			.Submit();
 
 			Assert.Equal(1, Get<CodeFile>().Count());
-			var f = Get<CodeFile>().Single();
-			Assert.Equal("file1", f.Path);
+			Assert.Equal("file1", Get<CodeFile>().Single().Path);
 		}
 		[Fact]
 		public void Should_use_the_same_file_for_all_path_reincarnations()

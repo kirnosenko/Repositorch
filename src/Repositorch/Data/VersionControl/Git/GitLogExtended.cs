@@ -13,7 +13,7 @@ namespace Repositorch.Data.VersionControl.Git
 	public class GitLogExtended : GitLog
 	{
 		private readonly static Regex RenameOrCopyExp = new Regex(
-			@"(rename|copy) ((?<prefix>.*?){)?(?<old>.*?) => (?<new>.*?)(}(?<sufix>.*?))? \(\d+%\)");
+			@"(rename|copy) (?<fullpath>(((?<prefix>.*?){)?(?<old>.*?) => (?<new>.*?)(}(?<sufix>.*?))?)) \(\d+%\)");
 
 		public GitLogExtended(Stream log,
 			IEnumerable<string> parentRevisions,
@@ -26,6 +26,7 @@ namespace Repositorch.Data.VersionControl.Git
 		{
 			string line;
 			touchedFiles = new List<TouchedFile>();
+			List<string> binaryPaths = new List<string>();
 
 			while ((line = reader.ReadLine()) != null)
 			{
@@ -42,14 +43,25 @@ namespace Repositorch.Data.VersionControl.Git
 				switch (blocks.Length)
 				{
 					case 3:
-						if (blocks[0] != "-" && blocks[1] != "-")
 						{
-							if (!blocks[2].Contains(" => "))
+							var isBinary = (blocks[0] == "-" && blocks[1] == "-");
+							var path = blocks[2];
+							if (isBinary)
+							{
+								binaryPaths.Add(path);
+							}
+							if (!path.Contains(" => "))
 							{
 								AddOrModifyTouchedFile(
-									TouchedFileAction.MODIFIED, blocks[2], null);
+									TouchedFileAction.MODIFIED,
+									path,
+									null,
+									isBinary
+										? TouchedFile.ContentType.BINARY
+										: TouchedFile.ContentType.TEXT);
 							}
 						}
+						
 						break;
 					case 1:
 						blocks = line.TrimStart(' ').Split(' ');
@@ -58,13 +70,21 @@ namespace Repositorch.Data.VersionControl.Git
 						{
 							case TouchedFileGitAction.ADDED:
 							case TouchedFileGitAction.DELETED:
-								MapTouchedFile(action, blocks[3], null, ModifyTouchedFile);
+								MapTouchedFile(
+									action,
+									blocks[3],
+									null,
+									binaryPaths.Contains(blocks[3])
+										? TouchedFile.ContentType.BINARY
+										: TouchedFile.ContentType.TEXT,
+									ModifyTouchedFile);
 								break;
 							case TouchedFileGitAction.RENAMED:
 							case TouchedFileGitAction.COPIED:
 								var match = RenameOrCopyExp.Match(line);
 								if (match.Success)
 								{
+									string fullpath = match.Groups["fullpath"].Value;
 									string prefix = match.Groups["prefix"].Value;
 									string oldPart = match.Groups["old"].Value;
 									string newPart = match.Groups["new"].Value;
@@ -73,12 +93,23 @@ namespace Repositorch.Data.VersionControl.Git
 									var oldPath = (prefix + oldPart + sufix).Replace("//", "/");
 									var newPath = (prefix + newPart + sufix).Replace("//", "/");
 
+									var isBinary = binaryPaths.Contains(fullpath);
 									AddOrModifyTouchedFile(
-										TouchedFileAction.ADDED, newPath, oldPath);
+										TouchedFileAction.ADDED,
+										newPath,
+										oldPath,
+										isBinary
+											? TouchedFile.ContentType.BINARY
+											: TouchedFile.ContentType.TEXT);
 									if (action == TouchedFileGitAction.RENAMED)
 									{
 										AddOrModifyTouchedFile(
-											TouchedFileAction.REMOVED, oldPath, null);
+											TouchedFileAction.REMOVED,
+											oldPath,
+											null,
+											isBinary
+												? TouchedFile.ContentType.BINARY
+												: TouchedFile.ContentType.TEXT);
 									}
 								}
 								else
@@ -91,7 +122,11 @@ namespace Repositorch.Data.VersionControl.Git
 				}
 			}
 		}
-		protected void ModifyTouchedFile(TouchedFileAction action, string path, string sourcePath)
+		protected void ModifyTouchedFile(
+			TouchedFileAction action,
+			string path,
+			string sourcePath,
+			TouchedFile.ContentType type)
 		{
 			path = GitPathToPath(path);
 			sourcePath = GitPathToPath(sourcePath);
@@ -101,6 +136,7 @@ namespace Repositorch.Data.VersionControl.Git
 			{
 				touchedFile.Action = action;
 				touchedFile.SourcePath = sourcePath;
+				touchedFile.Type = type;
 			}
 		}
 		protected TouchedFileGitAction GetFileGitAction(string action)

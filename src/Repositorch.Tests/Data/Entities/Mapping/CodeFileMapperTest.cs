@@ -3,6 +3,7 @@ using System.Linq;
 using Xunit;
 using NSubstitute;
 using Repositorch.Data.Entities.DSL.Mapping;
+using Repositorch.Data.VersionControl;
 
 namespace Repositorch.Data.Entities.Mapping
 {
@@ -195,6 +196,49 @@ namespace Repositorch.Data.Entities.Mapping
 
 			Assert.Equal(new string[] { "file2", "file3" },
 				expressions.Select(x => x.CurrentEntity<CodeFile>().Path));
+		}
+		[Fact]
+		public void Should_ignore_binary_files()
+		{
+			log.FileAdded("file1", TouchedFile.ContentType.TEXT);
+			log.FileAdded("file2", TouchedFile.ContentType.BINARY);
+
+			mapper.Map(
+				mappingDSL.AddCommit("10")
+			);
+			SubmitChanges();
+
+			Assert.Equal(1, Get<CodeFile>().Count());
+			Assert.Equal("file1", Get<CodeFile>().Single().Path);
+		}
+		[Fact]
+		public void Should_not_ignore_binary_files_if_they_were_added_as_non_binary()
+		{
+			mappingDSL
+				.AddCommit("9")
+					.File("file1").Added()
+			.Submit();
+
+			log.FileModified("file1", TouchedFile.ContentType.BINARY);
+			
+			var exp = mapper.Map(
+				mappingDSL.AddCommit("10")
+			);
+			SubmitChanges();
+
+			Assert.True(exp.Count() == 1);
+		}
+		[Fact]
+		public void Should_ignore_non_binary_files_if_they_were_not_added_as_binary()
+		{
+			log.FileModified("file1", TouchedFile.ContentType.TEXT);
+
+			var exp = mapper.Map(
+				mappingDSL.AddCommit("10")
+			);
+			SubmitChanges();
+
+			Assert.True(exp.Count() == 0);
 		}
 	}
 }

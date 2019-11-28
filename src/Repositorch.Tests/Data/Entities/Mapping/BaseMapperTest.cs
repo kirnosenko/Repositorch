@@ -42,41 +42,60 @@ namespace Repositorch.Data.Entities.Mapping
 				ChildRevisions = childRevisions;
 				return this;
 			}
-			public TestLog FileAdded(string path)
+			public TestLog FileAdded(
+				string path,
+				TouchedFile.ContentType type = TouchedFile.ContentType.UNKNOWN)
 			{
-				TouchPath(path, TouchedFileAction.ADDED, null, null);
+				TouchPath(path, TouchedFileAction.ADDED, null, null, type);
 				return this;
 			}
-			public TestLog FileModified(string path)
+			public TestLog FileModified(
+				string path,
+				TouchedFile.ContentType type = TouchedFile.ContentType.UNKNOWN)
 			{
-				TouchPath(path, TouchedFileAction.MODIFIED, null, null);
+				TouchPath(path, TouchedFileAction.MODIFIED, null, null, type);
 				return this;
 			}
-			public TestLog FileCopied(string path, string sourcePath, string sourceRevision)
+			public TestLog FileCopied(
+				string path,
+				string sourcePath,
+				string sourceRevision,
+				TouchedFile.ContentType type = TouchedFile.ContentType.UNKNOWN)
 			{
-				TouchPath(path, TouchedFileAction.ADDED, sourcePath, sourceRevision);
+				TouchPath(path, TouchedFileAction.ADDED, sourcePath, sourceRevision, type);
 				return this;
 			}
-			public TestLog FileRemoved(string path)
+			public TestLog FileRemoved(
+				string path,
+				TouchedFile.ContentType type = TouchedFile.ContentType.UNKNOWN)
 			{
-				TouchPath(path, TouchedFileAction.REMOVED, null, null);
+				TouchPath(path, TouchedFileAction.REMOVED, null, null, type);
 				return this;
 			}
-			public TestLog FileRenamed(string path, string sourcePath)
+			public TestLog FileRenamed(
+				string path,
+				string sourcePath,
+				TouchedFile.ContentType type = TouchedFile.ContentType.UNKNOWN)
 			{
-				FileRemoved(sourcePath);
-				FileCopied(path, sourcePath, null);
+				FileRemoved(sourcePath, type);
+				FileCopied(path, sourcePath, null, type);
 				return this;
 			}
 
-			private void TouchPath(string path, TouchedFileAction action, string sourcePath, string sourceRevision)
+			private void TouchPath(
+				string path,
+				TouchedFileAction action,
+				string sourcePath,
+				string sourceRevision,
+				TouchedFile.ContentType type)
 			{
 				touchedFiles.Add(new TouchedFile()
 				{
 					Path = path,
 					Action = action,
 					SourcePath = sourcePath,
-					SourceRevision = sourceRevision
+					SourceRevision = sourceRevision,
+					Type = type,
 				});
 			}
 		}

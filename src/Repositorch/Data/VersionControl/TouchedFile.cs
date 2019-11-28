@@ -7,6 +7,13 @@ namespace Repositorch.Data.VersionControl
 	/// </summary>
 	public class TouchedFile
 	{
+		public enum ContentType
+		{
+			UNKNOWN,
+			TEXT,
+			BINARY
+		}
+
 		/// <summary>
 		/// Path to the touched file.
 		/// </summary>
@@ -15,6 +22,10 @@ namespace Repositorch.Data.VersionControl
 		/// Action on the touched file.
 		/// </summary>
 		public TouchedFileAction Action;
+		/// <summary>
+		/// Content type of the touched file.
+		/// </summary>
+		public ContentType Type;
 		/// <summary>
 		/// The source path for a copied file.
 		/// Null for a file created from scratch.

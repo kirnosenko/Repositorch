@@ -174,13 +174,15 @@ Merge branch 'jc/withraw' into next
 				.Should().Be(2);
 		}
 		[Fact]
-		public void Should_ignore_binary_files()
+		public void Should_identify_file_type()
 		{
 			log = new GitLogExtended(log_2.ToStream(), null, null);
 
 			log.TouchedFiles.Count()
-				.Should().Be(1);
-			var file = log.TouchedFiles.First();
+				.Should().Be(8);
+			log.TouchedFiles.Where(x => x.Type == TouchedFile.ContentType.BINARY).Count()
+				.Should().Be(7);
+			var file = log.TouchedFiles.Single(x => x.Type == TouchedFile.ContentType.TEXT);
 			Assert.Equal("/.gitignore", file.Path);
 			Assert.Equal(TouchedFileAction.MODIFIED, file.Action);
 			Assert.Null(file.SourcePath);

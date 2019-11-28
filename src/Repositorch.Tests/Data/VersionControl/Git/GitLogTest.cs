@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Xunit;
+using FluentAssertions;
 
 namespace Repositorch.Data.VersionControl.Git
 {
@@ -169,6 +170,14 @@ Add 'dotest' and 'applypatch' scripts to actually make things useful.";
 					"/update-cache.c"
 				},
 				log.TouchedFiles.Select(x => x.Path));
+		}
+		[Fact]
+		public void Should_not_identify_file_type()
+		{
+			log = new GitLog(log_1.ToStream(), null, null);
+
+			log.TouchedFiles.Where(x => x.Type != TouchedFile.ContentType.UNKNOWN)
+				.Should().BeEmpty();
 		}
 		[Fact]
 		public void Should_interpret_renamed_file_as_deleted_and_added()

@@ -30,7 +30,7 @@ namespace Repositorch.Data.VersionControl.Git
 			}
 			else
 			{
-				Regex tagRegExp = new Regex(@"tag: (.*?)(, |$)");
+				Regex tagRegExp = new Regex(@"tag: (.+?)(, |$)");
 				var matches = tagRegExp.Matches(tags);
 				if (matches.Count > 0)
 				{
@@ -73,7 +73,12 @@ namespace Repositorch.Data.VersionControl.Git
 					path = blocks[2];
 					sourcePath = blocks[1];
 				}
-				MapTouchedFile(action, path, sourcePath, AddOrModifyTouchedFile);
+				MapTouchedFile(
+					action,
+					path,
+					sourcePath,
+					TouchedFile.ContentType.UNKNOWN,
+					AddOrModifyTouchedFile);
 			}
 			touchedFiles.Sort((x, y) => string.CompareOrdinal(x.Path.ToLower(), y.Path.ToLower()));
 		}
@@ -81,25 +86,26 @@ namespace Repositorch.Data.VersionControl.Git
 			TouchedFileGitAction action,
 			string path,
 			string sourcePath,
-			Action<TouchedFileAction,string,string> touchedFileMapper)
+			TouchedFile.ContentType type,
+			Action<TouchedFileAction,string,string,TouchedFile.ContentType> touchedFileMapper)
 		{
 			switch (action)
 			{
 				case TouchedFileGitAction.MODIFIED:
-					touchedFileMapper(TouchedFileAction.MODIFIED, path, sourcePath);
+					touchedFileMapper(TouchedFileAction.MODIFIED, path, sourcePath, type);
 					break;
 				case TouchedFileGitAction.ADDED:
-					touchedFileMapper(TouchedFileAction.ADDED, path, sourcePath);
+					touchedFileMapper(TouchedFileAction.ADDED, path, sourcePath, type);
 					break;
 				case TouchedFileGitAction.DELETED:
-					touchedFileMapper(TouchedFileAction.REMOVED, path, sourcePath);
+					touchedFileMapper(TouchedFileAction.REMOVED, path, sourcePath, type);
 					break;
 				case TouchedFileGitAction.RENAMED:
-					touchedFileMapper(TouchedFileAction.REMOVED, sourcePath, null);
-					touchedFileMapper(TouchedFileAction.ADDED, path, sourcePath);
+					touchedFileMapper(TouchedFileAction.REMOVED, sourcePath, null, type);
+					touchedFileMapper(TouchedFileAction.ADDED, path, sourcePath, type);
 					break;
 				case TouchedFileGitAction.COPIED:
-					touchedFileMapper(TouchedFileAction.ADDED, path, sourcePath);
+					touchedFileMapper(TouchedFileAction.ADDED, path, sourcePath, type);
 					break;
 				default:
 					break;
@@ -114,7 +120,11 @@ namespace Repositorch.Data.VersionControl.Git
 
 			return "/" + path.Replace("\"", "");
 		}
-		protected void AddOrModifyTouchedFile(TouchedFileAction action, string path, string sourcePath)
+		protected void AddOrModifyTouchedFile(
+			TouchedFileAction action,
+			string path,
+			string sourcePath,
+			TouchedFile.ContentType type)
 		{
 			path = GitPathToPath(path);
 			sourcePath = GitPathToPath(sourcePath);
@@ -126,7 +136,8 @@ namespace Repositorch.Data.VersionControl.Git
 				{
 					Path = path,
 					Action = action,
-					SourcePath = sourcePath
+					SourcePath = sourcePath,
+					Type = type,
 				});
 			}
 			else
