@@ -46,6 +46,10 @@ namespace Repositorch.Data.Entities.Mapping
 
 					return SingleExpression(expression.Removed());
 				}
+				else if (touchedFile.Action == TouchedFileAction.ADDED)
+				{
+					return SingleExpression(expression.Modified());
+				}
 
 				return NoExpressions();
 			}
@@ -55,7 +59,7 @@ namespace Repositorch.Data.Entities.Mapping
 				case TouchedFileAction.ADDED:
 					if (touchedFile.SourcePath == null)
 					{
-						return Enumerable.Repeat(expression.Added(), 1);
+						return SingleExpression(expression.Added());
 					}
 					if (touchedFile.SourceRevision == null)
 					{
@@ -64,12 +68,12 @@ namespace Repositorch.Data.Entities.Mapping
 							.Commits().OnBranchBack(branchMask)
 							.OrderByDescending(x => x.OrderedNumber).First().Revision;
 					}
-					return Enumerable.Repeat(expression
-						.CopiedFrom(touchedFile.SourcePath, touchedFile.SourceRevision), 1);
+					return SingleExpression(expression
+						.CopiedFrom(touchedFile.SourcePath, touchedFile.SourceRevision));
 				case TouchedFileAction.MODIFIED:
-					return Enumerable.Repeat(expression.Modified(), 1);
+					return SingleExpression(expression.Modified());
 				case TouchedFileAction.REMOVED:
-					return Enumerable.Repeat(expression.Removed(), 1);
+					return SingleExpression(expression.Removed());
 				default:
 					throw new InvalidOperationException();
 			}
