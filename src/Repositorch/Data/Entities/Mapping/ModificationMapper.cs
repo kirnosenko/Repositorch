@@ -36,8 +36,8 @@ namespace Repositorch.Data.Entities.Mapping
 					 join m in expression.Get<Modification>() on f.Id equals m.FileId
 					 join c in commitsToLookAt on m.CommitId equals c.Id
 					 orderby c.OrderedNumber descending
-					 select m).First();
-				if (touchedFile != null && touchedFile.Action != lastFileModification.Action)
+					 select m).FirstOrDefault();
+				if (lastFileModification == null || touchedFile.Action != lastFileModification.Action)
 				{
 					if (touchedFile.Action == TouchedFileAction.ADDED)
 					{

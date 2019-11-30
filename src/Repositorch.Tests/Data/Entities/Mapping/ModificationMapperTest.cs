@@ -173,6 +173,30 @@ namespace Repositorch.Data.Entities.Mapping
 			Assert.Equal(1, (int)mapper.Map(commitMappingExpression.File("file2")).Count());
 		}
 		[Fact]
+		public void Should_map_fresh_file_as_added_in_merge()
+		{
+			mappingDSL
+				.AddCommit("1").OnBranch("1")
+					.File("file1").Added()
+			.Submit()
+				.AddCommit("2").OnBranch("11")
+					.File("file1").Modified()
+					.File("file2").Added()
+			.Submit()
+				.AddCommit("3").OnBranch("101")
+					.File("file1").Modified()
+					.File("file3").Added()
+			.Submit();
+
+			log.ParentRevisionsAre("2", "3");
+			log.FileAdded("file4");
+
+			var commitMappingExpression = mappingDSL.AddCommit("10").OnBranch("111");
+			var file1Exp = mapper.Map(commitMappingExpression.File("file4"));
+			Assert.Equal(1, (int)file1Exp.Count());
+			Assert.Equal(TouchedFileAction.ADDED, file1Exp.First().CurrentEntity<Modification>().Action);
+		}
+		[Fact]
 		public void Should_map_file_as_added_or_removed_in_merge_when_it_has_different_history_state()
 		{
 			mappingDSL
