@@ -281,6 +281,45 @@ namespace Repositorch.Data.Entities.Mapping
 				.Should().Be(0);
 		}
 		[Fact]
+		public void Should_take_into_account_possible_changes_in_renamed_file_from_original_file_in_merge()
+		{
+			mappingDSL
+				.AddCommit("1").OnBranch("1")
+					.File("file1").Added()
+						.Code(100)
+			.Submit()
+				.AddCommit("2").OnBranch("11")
+					.File("file2").CopiedFrom("file1", "1")
+						.CopyCode()
+			.Submit()
+				.AddCommit("3").OnBranch("101")
+					.File("file1").Modified()
+						.Code(20)
+						.Code(-20).ForCodeAddedInitiallyInRevision("1")
+			.Submit();
+
+			vcsData.Log("10")
+				.Returns(new TestLog("10").ParentRevisionsAre("2", "3"));
+			vcsData.Blame("10", "file2")
+				.Returns(new TestBlame()
+					.AddLinesFromRevision("1", 80)
+					.AddLinesFromRevision("3", 20));
+
+			mapper.Map(
+				mappingDSL.AddCommit("10").OnBranch("111")
+					.File("file2").Modified()
+			);
+			SubmitChanges();
+
+			var blocks = Get<CodeBlock>()
+				.Where(x => x.Modification.File.Path == "file2");
+			blocks.Select(x => x.Size)
+				.Should().BeEquivalentTo(new double[] { 100, -20, 20 });
+			blocks.Select(x => x.AddedInitiallyInCommit != null ?
+				x.AddedInitiallyInCommit.Revision : null)
+				.Should().BeEquivalentTo(new string[] { "1", null, "3" });
+		}
+		[Fact]
 		public void Should_revert_parent_modification_if_no_blocks_were_added()
 		{
 			mappingDSL

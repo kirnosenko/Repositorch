@@ -36,11 +36,9 @@ namespace Repositorch.Data.Entities.Mapping
 					{
 						Revision = g.Key,
 						Size = g.Count(),
-					}).ToArray();
+					}).ToList();
 
-				bool fileCopied = (modification.Action == TouchedFileAction.ADDED) &&
-					(modification.SourceFile != null);
-				if (fileCopied)
+				void CopyCode()
 				{
 					foreach (var linesForRevision in linesByRevision)
 					{
@@ -51,12 +49,19 @@ namespace Repositorch.Data.Entities.Mapping
 						}
 						codeBlockExpressions.Add(newExp);
 					}
+				};
+
+				if ((modification.Action == TouchedFileAction.ADDED) &&
+					(modification.SourceFile != null))
+				{
+					CopyCode();
 				}
 				else
 				{
 					var addedCode = linesByRevision.SingleOrDefault(x => x.Revision == revision);
 					if (addedCode != null)
 					{
+						linesByRevision.Remove(addedCode);
 						codeBlockExpressions.Add(
 							expression.Code(addedCode.Size)
 						);
@@ -66,6 +71,10 @@ namespace Repositorch.Data.Entities.Mapping
 					var updatedCodeExp = expression.UpdateCode((exp, rev, size) =>
 					{
 						var linesForRevision = linesByRevision.SingleOrDefault(x => x.Revision == rev);
+						if (linesForRevision != null)
+						{
+							linesByRevision.Remove(linesForRevision);
+						}
 						double realCodeSize = linesForRevision == null ? 0 : linesForRevision.Size;
 						if ((size > realCodeSize) ||
 							(size < realCodeSize && isMerge))
@@ -77,6 +86,10 @@ namespace Repositorch.Data.Entities.Mapping
 
 						return null;
 					});
+					if (isMerge && linesByRevision.Count > 0)
+					{
+						CopyCode();
+					}
 					if (updatedCodeExp != null)
 					{
 						codeBlockExpressions.Add(updatedCodeExp);
