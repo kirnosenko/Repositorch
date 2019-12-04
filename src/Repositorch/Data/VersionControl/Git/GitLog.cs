@@ -9,6 +9,8 @@ namespace Repositorch.Data.VersionControl.Git
 	/// <summary>
 	/// Simple version of git log to get information about commit 
 	/// and touched files.
+	/// Should not be used on repositories with binary files
+	/// (without path filtering), symbolic links and submodules.
 	/// </summary>
 	public class GitLog : Log
 	{

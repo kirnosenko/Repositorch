@@ -7,8 +7,10 @@ using System.Text.RegularExpressions;
 namespace Repositorch.Data.VersionControl.Git
 {
 	/// <summary>
-	/// Extended version of git log to ignore git-detected
-	/// binary files.
+	/// Extended version of git log.
+	/// Allows to identify and ignore git-detected
+	/// binary files, symbolic links, submodules.
+	/// Use this if you are not sure.
 	/// </summary>
 	public class GitLogExtended : GitLog
 	{
@@ -70,14 +72,24 @@ namespace Repositorch.Data.VersionControl.Git
 						{
 							case TouchedFileGitAction.ADDED:
 							case TouchedFileGitAction.DELETED:
-								MapTouchedFile(
-									action,
-									blocks[3],
-									null,
-									binaryPaths.Contains(blocks[3])
-										? TouchedFile.ContentType.BINARY
-										: TouchedFile.ContentType.TEXT,
-									ModifyTouchedFile);
+								var mode = blocks[2];
+								var path = blocks[3];
+								if (!mode.EndsWith("0000"))
+								{
+									MapTouchedFile(
+										action,
+										path,
+										null,
+										binaryPaths.Contains(path)
+											? TouchedFile.ContentType.BINARY
+											: TouchedFile.ContentType.TEXT,
+										ModifyTouchedFile);
+								}
+								else
+								{
+									// this is not a symbolic link or gitlink
+									RemoveTouchedFile(path);
+								}
 								break;
 							case TouchedFileGitAction.RENAMED:
 							case TouchedFileGitAction.COPIED:
@@ -131,13 +143,20 @@ namespace Repositorch.Data.VersionControl.Git
 			path = GitPathToPath(path);
 			sourcePath = GitPathToPath(sourcePath);
 
-			var touchedFile = TouchedFiles.SingleOrDefault(x => x.Path == path);
+			var touchedFile = touchedFiles.SingleOrDefault(x => x.Path == path);
 			if (touchedFile != null)
 			{
 				touchedFile.Action = action;
 				touchedFile.SourcePath = sourcePath;
 				touchedFile.Type = type;
 			}
+		}
+		protected void RemoveTouchedFile(string path)
+		{
+			path = GitPathToPath(path);
+			
+			var touchedFile = touchedFiles.Single(x => x.Path == path);
+			touchedFiles.Remove(touchedFile);
 		}
 		protected TouchedFileGitAction GetFileGitAction(string action)
 		{

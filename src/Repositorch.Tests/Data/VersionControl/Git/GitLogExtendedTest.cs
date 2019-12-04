@@ -128,6 +128,18 @@ GUI: some failures
  rename x64_dbg_gui/Project/Src/{ => Gui}/TabWidget.h (100%)";
 
 private readonly string log_6 =
+@"63c3101f384075719d5950319a61bcb5498b6249
+mrexodia
+mr.exodia.tpodt@gmail.com
+2016-01-07 17:06:30 +0100
+PROJECT: capstone_wrapper as a submodule
+
+0	44	src/capstone_wrapper/capstone_wrapper.h
+1	0	src/dbg/capstone_wrapper
+ delete mode 100644 src/capstone_wrapper/capstone_wrapper.h
+ create mode 160000 src/dbg/capstone_wrapper";
+
+private readonly string log_7 =
 @"6b32ee2381deb414378a76cae213a4fe633f8fcc
 Junio C Hamano
 junkio@cox.net
@@ -271,9 +283,17 @@ Merge branch 'jc/withraw' into next
 					.SourcePath);
 		}
 		[Fact]
-		public void Should_parse_merge_log()
+		public void Should_ignore_links()
 		{
 			log = new GitLogExtended(log_6.ToStream(), null, null);
+
+			log.TouchedFiles.Select(x => x.Path)
+				.Should().BeEquivalentTo(new string[] { "/src/capstone_wrapper/capstone_wrapper.h" });
+		}
+		[Fact]
+		public void Should_parse_merge_log()
+		{
+			log = new GitLogExtended(log_7.ToStream(), null, null);
 
 			log.TouchedFiles.Count()
 				.Should().Be(11);

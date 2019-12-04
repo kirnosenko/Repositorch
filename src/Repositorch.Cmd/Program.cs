@@ -25,7 +25,7 @@ namespace Repositorch
 			var gitClient = new CommandLineGitClient("D:/src/x64dbg/.git")
 			{
 				Branch = "development",
-				IgnoreBinary = true,
+				ExtendedLog = true,
 			};
 			var vcsData = new VcsDataCached(gitClient, 1000, 1000);
 			var mapper = CreateDataMapper(data, vcsData);

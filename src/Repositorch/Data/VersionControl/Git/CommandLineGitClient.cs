@@ -12,7 +12,7 @@ namespace Repositorch.Data.VersionControl.Git
 			RepositoryPath = repositoryPath;
 			GitCommand = "git";
 			Branch = "master";
-			IgnoreBinary = false;
+			ExtendedLog = false;
 		}
 
 		public string GetRevisionByNumber(int number)
@@ -33,10 +33,10 @@ namespace Repositorch.Data.VersionControl.Git
 				revisions = new GitRevisions(GetRevList());
 			}
 
-			using (var log = GetLog(revision, IgnoreBinary))
+			using (var log = GetLog(revision, ExtendedLog))
 			{
 				var revisionNode = revisions.GetRevisionNode(revision);
-				if (!IgnoreBinary)
+				if (!ExtendedLog)
 				{
 					return new GitLog(log, revisionNode.Parents, revisionNode.Children);
 				}
@@ -63,7 +63,7 @@ namespace Repositorch.Data.VersionControl.Git
 		{
 			get; set;
 		}
-		public bool IgnoreBinary
+		public bool ExtendedLog
 		{
 			get; set;
 		}
