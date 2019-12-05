@@ -29,19 +29,20 @@ namespace Repositorch.Data.Entities.Mapping
 					(x.Action == TouchedFileAction.ADDED && x.Type == TouchedFile.ContentType.TEXT));
 			}
 
-			var filesTouched = log.IsMerge
-				? touchedFiles
-					.Where(x => x.Action == TouchedFileAction.ADDED).Select(x => x.Path)
-					.Union(GetFilesTouchedOnParentBranches(expression, log))
-				: touchedFiles.Select(x => x.Path);
+			var touchedPathes = touchedFiles.Select(x => x.Path);
+			if (log.IsMerge)
+			{
+				touchedPathes = touchedPathes.Union(
+					GetFilesTouchedOnParentBranches(expression, log));
+			}
 
 			if (PathSelectors != null)
 			{
-				filesTouched = filesTouched
+				touchedPathes = touchedPathes
 					.Where(x => PathSelectors.All(ps => ps.IsSelected(x)));
 			}
 
-			return filesTouched.Select(x => expression.File(x)).ToArray();
+			return touchedPathes.Select(x => expression.File(x)).ToArray();
 		}
 		public IPathSelector[] PathSelectors
 		{

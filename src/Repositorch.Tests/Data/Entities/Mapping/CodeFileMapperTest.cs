@@ -167,6 +167,35 @@ namespace Repositorch.Data.Entities.Mapping
 				expressions.Select(x => x.CurrentEntity<CodeFile>().Path));
 		}
 		[Fact]
+		public void Should_map_files_in_merge_that_were_not_touched_on_merged_branches()
+		{
+			mappingDSL
+				.AddCommit("1").OnBranch("1")
+					.File("file1").Added()
+					.File("file2").Added()
+					.File("file3").Added()
+			.Submit()
+				.AddCommit("2").OnBranch("11")
+					.File("file1").Modified()
+			.Submit()
+				.AddCommit("3").OnBranch("101")
+					.File("file1").Modified()
+			.Submit();
+
+			log.ParentRevisionsAre("2", "3");
+			log.FileModified("file1");
+			log.FileModified("file2");
+			log.FileRemoved("file3");
+			log.FileAdded("file4");
+
+			var expressions = mapper.Map(
+				mappingDSL.AddCommit("10").OnBranch("111")
+			);
+
+			Assert.Equal(new string[] { "file1", "file2", "file3", "file4" },
+				expressions.Select(x => x.CurrentEntity<CodeFile>().Path));
+		}
+		[Fact]
 		public void Should_not_duplicate_the_same_file_touched_multiple_times()
 		{
 			mappingDSL
