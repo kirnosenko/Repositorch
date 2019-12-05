@@ -14,7 +14,7 @@ namespace Repositorch.Data.VersionControl.Git
 	/// </summary>
 	public class GitLogExtended : GitLog
 	{
-		private readonly static Regex RenameOrCopyExp = new Regex(
+		private static readonly Regex RenameOrCopyExp = new Regex(
 			@"(rename|copy) (?<fullpath>(((?<prefix>.*?){)?(?<old>.*?) => (?<new>.*?)(}(?<sufix>.*?))?)) \(\d+%\)");
 
 		public GitLogExtended(Stream log,

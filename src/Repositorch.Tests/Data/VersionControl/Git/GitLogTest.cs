@@ -125,6 +125,18 @@ HEAD -> master, tag: qwe, tag: ab,c, tag: 0.99
 A	file1";
 
 private string log_8 =
+@"824100eea88c38c5a8c7f84d17f832bf6611e26d
+Duncan Ogilvie
+mr.exodia.tpodt@gmail.com
+2019-11-13 01:13:06 +0100
+DBG: implement memcpy command
+HEAD -> development, origin/development, origin/HEAD
+M	src/dbg/commands/cmd-memory-operations.cpp
+M	src/dbg/commands/cmd-memory-operations.h
+M	src/dbg/commands/cmd-undocumented.cpp
+M	src/dbg/x64dbg.cpp";
+
+private string log_9 =
 @"e90a4c0ed17b66c302f48ec0a234cac6f27e5eec
 Linus Torvalds
 torvalds@ppc970.osdl.org
@@ -282,9 +294,17 @@ Add 'dotest' and 'applypatch' scripts to actually make things useful.";
 			Assert.Equal(new string[] { "qwe", "ab,c", "0.99" }, log.Tags);
 		}
 		[Fact]
-		public void Should_parse_correctly_log_without_tags_and_empty_file_list()
+		public void Should_get_no_tags_from_log_with_references_only()
 		{
 			log = new GitLog(log_8.ToStream(), null, null);
+
+			Assert.NotNull(log.Tags);
+			Assert.Empty(log.Tags);
+		}
+		[Fact]
+		public void Should_parse_correctly_log_without_tags_and_empty_file_list()
+		{
+			log = new GitLog(log_9.ToStream(), null, null);
 
 			Assert.Equal(new string[] { }, log.Tags);
 			Assert.Equal(new TouchedFile[] { }, log.TouchedFiles);

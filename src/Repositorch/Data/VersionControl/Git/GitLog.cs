@@ -14,6 +14,8 @@ namespace Repositorch.Data.VersionControl.Git
 	/// </summary>
 	public class GitLog : Log
 	{
+		private static readonly Regex TagRegExp = new Regex(@"tag: (.+?)(, |$)");
+
 		public GitLog(Stream log,
 			IEnumerable<string> parentRevisions,
 			IEnumerable<string> childRevisions)
@@ -26,23 +28,19 @@ namespace Repositorch.Data.VersionControl.Git
 			Date = DateTime.Parse(reader.ReadLine()).ToUniversalTime();
 			Message = reader.ReadLine();
 			var tags = reader.ReadLine();
-			if (string.IsNullOrEmpty(tags))
+			var tagMatches = string.IsNullOrEmpty(tags) ? null : TagRegExp.Matches(tags);
+			if (tagMatches != null && tagMatches.Count > 0)
 			{
-				Tags = Enumerable.Empty<string>();
+				var list = new List<string>();
+				foreach (Match match in tagMatches)
+				{
+					list.Add(match.Groups[1].Value);
+				}
+				Tags = list;
 			}
 			else
 			{
-				Regex tagRegExp = new Regex(@"tag: (.+?)(, |$)");
-				var matches = tagRegExp.Matches(tags);
-				if (matches.Count > 0)
-				{
-					var list = new List<string>();
-					foreach (Match m in matches)
-					{
-						list.Add(m.Groups[1].Value);
-					}
-					Tags = list;
-				}
+				Tags = Enumerable.Empty<string>();
 			}
 			ParentRevisions = parentRevisions;
 			ChildRevisions = childRevisions;
