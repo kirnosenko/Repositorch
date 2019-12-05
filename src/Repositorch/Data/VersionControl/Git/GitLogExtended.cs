@@ -166,6 +166,7 @@ namespace Repositorch.Data.VersionControl.Git
 				case "delete": return TouchedFileGitAction.DELETED;
 				case "rename": return TouchedFileGitAction.RENAMED;
 				case "copy": return TouchedFileGitAction.COPIED;
+				case "mode": return TouchedFileGitAction.MODIFIED;
 			}
 			throw new ApplicationException(string.Format("{0} - is invalid path action", action));
 		}

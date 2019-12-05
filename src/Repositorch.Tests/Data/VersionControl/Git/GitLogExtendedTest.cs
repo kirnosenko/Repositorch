@@ -140,6 +140,22 @@ PROJECT: capstone_wrapper as a submodule
  create mode 160000 src/dbg/capstone_wrapper";
 
 private readonly string log_7 =
+@"66c006d7038f2a528cf0f6e811250fabf9f97d80
+Duncan Ogilvie
+mr.exodia.tpodt@gmail.com
+2017-07-04 17:26:01 +0200
+Small code improvement (#1637)
+
+1	1	src/dbg/command.cpp
+6	0	src/dbg/stringutils.cpp
+1	1	src/dbg/value.cpp
+2	2	src/gui/Src/Gui/LocalVarsView.cpp
+ mode change 100644 => 100755 src/dbg/command.cpp
+ mode change 100644 => 100755 src/dbg/stringutils.cpp
+ mode change 100644 => 100755 src/dbg/value.cpp
+ mode change 100644 => 100755 src/gui/Src/Gui/LocalVarsView.cpp";
+
+private readonly string log_8 =
 @"6b32ee2381deb414378a76cae213a4fe633f8fcc
 Junio C Hamano
 junkio@cox.net
@@ -291,9 +307,19 @@ Merge branch 'jc/withraw' into next
 				.Should().BeEquivalentTo(new string[] { "/src/capstone_wrapper/capstone_wrapper.h" });
 		}
 		[Fact]
-		public void Should_parse_merge_log()
+		public void Should_interpret_file_mode_change_as_usual_modification()
 		{
 			log = new GitLogExtended(log_7.ToStream(), null, null);
+
+			log.TouchedFiles.Count()
+				.Should().Be(4);
+			log.TouchedFiles.All(x => x.Action == TouchedFileAction.MODIFIED)
+				.Should().BeTrue();
+		}
+		[Fact]
+		public void Should_parse_merge_log()
+		{
+			log = new GitLogExtended(log_8.ToStream(), null, null);
 
 			log.TouchedFiles.Count()
 				.Should().Be(11);
