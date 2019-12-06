@@ -91,7 +91,7 @@ namespace Repositorch.Data.VersionControl.Git
 		private Stream GetBlame(string revision, string filePath)
 		{
 			return RunCommand(
-				"blame -l -s --root --incremental {0} -- {1}",
+				"blame -l -s --root --incremental {0} -- \"{1}\"",
 				revision, ToGitPath(filePath)
 			);
 		}
@@ -99,7 +99,7 @@ namespace Repositorch.Data.VersionControl.Git
 		{
 			return GetCommandOutput(
 				GitCommand,
-				string.Format("--git-dir={0} ", RepositoryPath) + string.Format(cmd, objects));
+				string.Format("--git-dir=\"{0}\" ", RepositoryPath) + string.Format(cmd, objects));
 		}
 		/// <summary>
 		/// Remove leading slash to get git path.
