@@ -8,7 +8,7 @@ namespace Repositorch.Data.VersionControl.Git
 	public class GitLogTest
 	{
 
-private string log_1 =
+private readonly string log_1 =
 @"4bb04f2190d526f8917663f0be62d8026e1ed100
 Linus Torvalds
 torvalds@ppc970.osdl.org
@@ -22,7 +22,7 @@ M	read-cache.c
 M	read-tree.c
 M	update-cache.c";
 
-private string log_2 =
+private readonly string log_2 =
 @"a3df180138b85a603656582bde6df757095618cf
 Linus Torvalds
 torvalds@ppc970.osdl.org
@@ -34,7 +34,7 @@ R100	show-diff.c	diff-files.c
 R100	git-export.c	export.c
 R100	git-mktag.c	mktag.c";
 
-private string log_3 =
+private readonly string log_3 =
 @"35587ec664abcf6ed79d9d743ab58d0600cf0bc1
 adrian
 ???
@@ -44,7 +44,7 @@ Created django.contrib and moved comments into it
 C100	django/views/comments/__init__.py	django/contrib/__init__.py
 C100	django/views/comments/__init__.py	django/contrib/comments/__init__.py";
 
-private string log_4 =
+private readonly string log_4 =
 @"766c647d9b9cf3e84353536ebb928153c96fdece
 jezdez
 ???
@@ -56,7 +56,7 @@ M	django/contrib/staticfiles/management/commands/findstatic.py
 A	'tests/regressiontests/staticfiles_tests/apps/test/static/test/spec\314\247ial.txt'
 M	tests/regressiontests/staticfiles_tests/tests.py".Replace("'", "\"");
 
-private string log_5 =
+private readonly string log_5 =
 @"b51ad4314078298194d23d46e2b4473ffd32a88a
 Linus Torvalds
 torvalds@ppc970.osdl.org
@@ -94,7 +94,7 @@ M	revision.h
 M	show-diff.c
 M	update-cache.c";
 
-private string log_6 =
+private readonly string log_6 =
 @"10
 alan
 alan@mail
@@ -115,7 +115,7 @@ M	file1
 M	file2
 D	file3";
 
-private string log_7 =
+private readonly string log_7 =
 @"10
 alan
 alan@mail
@@ -124,7 +124,7 @@ message
 HEAD -> master, tag: qwe, tag: ab,c, tag: 0.99
 A	file1";
 
-private string log_8 =
+private readonly string log_8 =
 @"824100eea88c38c5a8c7f84d17f832bf6611e26d
 Duncan Ogilvie
 mr.exodia.tpodt@gmail.com
@@ -136,12 +136,21 @@ M	src/dbg/commands/cmd-memory-operations.h
 M	src/dbg/commands/cmd-undocumented.cpp
 M	src/dbg/x64dbg.cpp";
 
-private string log_9 =
+private readonly string log_9 =
 @"e90a4c0ed17b66c302f48ec0a234cac6f27e5eec
 Linus Torvalds
 torvalds@ppc970.osdl.org
 2005-04-18 16:11:32 -0700
 Add 'dotest' and 'applypatch' scripts to actually make things useful.";
+
+private readonly string log_10 =
+@"d4935bfe2689e9542d33ceb41fb171380158692e
+bob
+bob@mail
+2019-12-07 20:25:37 +0400
+ccc
+HEAD -> master
+R100	aaa bbb.txt	aaa bbb ccc.txt";
 
 		private GitLog log;
 		
@@ -228,6 +237,18 @@ Add 'dotest' and 'applypatch' scripts to actually make things useful.";
 				log.TouchedFiles
 					.Single(x => x.Path == "/export.c")
 					.SourcePath);
+		}
+		[Fact]
+		public void Should_be_ready_for_spaces_in_paths_for_renamed_file()
+		{
+			log = new GitLog(log_10.ToStream(), null, null);
+
+			log.TouchedFiles.Select(x => x.Path)
+				.Should().BeEquivalentTo(
+					new string[] { "/aaa bbb.txt", "/aaa bbb ccc.txt" });
+			log.TouchedFiles.Select(x => x.SourcePath)
+				.Should().BeEquivalentTo(
+					new string[] { null, "/aaa bbb.txt" });
 		}
 		[Fact]
 		public void Should_interpret_copied_file_as_added_and_keep_source_path()

@@ -185,6 +185,16 @@ Merge branch 'jc/withraw' into next
  create mode 100644 log-tree.c
  create mode 100644 log-tree.h";
 
+private readonly string log_9 =
+@"d4935bfe2689e9542d33ceb41fb171380158692e
+bob
+bob@mail
+2019-12-07 20:25:37 +0400
+ccc
+HEAD -> master
+0	0	aaa bbb.txt => aaa bbb ccc.txt
+ rename aaa bbb.txt => aaa bbb ccc.txt (100%)";
+
 		private GitLogExtended log;
 
 		[Fact]
@@ -259,6 +269,18 @@ Merge branch 'jc/withraw' into next
 				log.TouchedFiles
 					.Single(x => x.Path == "/Documentation/git-diff-helper.txt")
 					.SourcePath);
+		}
+		[Fact]
+		public void Should_be_ready_for_spaces_in_paths_for_renamed_file()
+		{
+			log = new GitLogExtended(log_9.ToStream(), null, null);
+
+			log.TouchedFiles.Select(x => x.Path)
+				.Should().BeEquivalentTo(
+					new string[] { "/aaa bbb.txt", "/aaa bbb ccc.txt" });
+			log.TouchedFiles.Select(x => x.SourcePath)
+				.Should().BeEquivalentTo(
+					new string[] { null, "/aaa bbb.txt" });
 		}
 		[Fact]
 		public void Should_interpret_copied_file_as_added_and_keep_source_path()
