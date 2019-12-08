@@ -16,16 +16,16 @@ namespace Repositorch
 	{
 		static void Main(string[] args)
 		{
-			var data = new SqlServerDataStore("x64dbg")
+			var data = new SqlServerDataStore("git")
 			//var data = new PostgreSqlDataStore("git", "postgres", "123")
 			{
 				//Logging = true,
 				//SingletonSession = true,
 			};
-			var gitClient = new CommandLineGitClient("D:/src/x64dbg/.git")
+			var gitClient = new CommandLineGitClient("D:/src/git/.git")
 			{
-				Branch = "development",
-				ExtendedLog = true,
+				//Branch = "development",
+				//ExtendedLog = true,
 			};
 			var vcsData = new VcsDataCached(gitClient, 1000, 1000);
 			var mapper = CreateDataMapper(data, vcsData);
