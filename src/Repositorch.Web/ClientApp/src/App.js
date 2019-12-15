@@ -2,10 +2,10 @@ import React, { Component } from 'react';
 import { Route } from 'react-router';
 import { Layout } from './components/Layout';
 import { Home } from './components/Home';
-import { Summary } from './components/metrics/Summary';
-import { Authors } from './components/metrics/Authors';
-import { Files } from './components/metrics/Files';
-import { Activity } from './components/metrics/Activity';
+import Summary from './components/metrics/Summary';
+import Authors from './components/metrics/Authors';
+import Files from './components/metrics/Files';
+import Activity from './components/metrics/Activity';
 
 import './custom.css'
 
