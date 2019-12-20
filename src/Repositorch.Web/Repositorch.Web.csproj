@@ -11,7 +11,10 @@
 
   <ItemGroup>
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="5.0.1" />
+    <PackageReference Include="LiteDB" Version="4.1.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="3.1.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -25,6 +28,10 @@
     <ProjectReference Include="..\Repositorch.Data.Entities.Persistent.PostgreSql\Repositorch.Data.Entities.Persistent.PostgreSql.csproj" />
     <ProjectReference Include="..\Repositorch.Data.Entities.Persistent.SqlServer\Repositorch.Data.Entities.Persistent.SqlServer.csproj" />
     <ProjectReference Include="..\Repositorch\Repositorch.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Data\" />
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">

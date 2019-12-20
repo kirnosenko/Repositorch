@@ -1,7 +1,7 @@
 ﻿import React, { Component } from 'react';
-import Loading from '../Loading';
+import Loading from './Loading';
 
-export class Metric extends Component {
+export class ContentToLoad extends Component {
 
     constructor(props) {
         super(props);
@@ -9,9 +9,9 @@ export class Metric extends Component {
     }
 
     componentDidMount() {
-        this.populateData();
+        this.loadData();
     }
-    
+
     render() {
         let contents = this.state.data === null
             ? <Loading />
@@ -19,15 +19,19 @@ export class Metric extends Component {
 
         return (
             <div>
-                <h2 id="tabelLabel">{this.props.title}</h2>
                 {contents}
             </div>
         );
     }
 
-    async populateData() {
-        const response = await fetch('api/Metrics/Calculate/'.concat(this.props.metric));
-        const data = await response.json();
-        this.setState({ data: data });
+    async loadData() {
+        fetch(this.props.url)
+            .then((response) => {
+                if (!response.ok) throw new Error(response.status);
+                else return response.json();
+            })
+            .then((data) => {
+                this.setState({ data: data });
+            });
     }
 }

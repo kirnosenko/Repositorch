@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using Microsoft.AspNetCore.Builder;
@@ -7,6 +9,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Autofac;
+using LiteDB;
+using Newtonsoft.Json;
 
 namespace Repositorch.Web
 {
@@ -26,7 +30,7 @@ namespace Repositorch.Web
 
 		public void ConfigureServices(IServiceCollection services)
 		{
-			services.AddControllersWithViews();
+			services.AddControllers().AddNewtonsoftJson();
 
 			// In production, the React files will be served from this directory
 			services.AddSpaStaticFiles(configuration =>
@@ -51,7 +55,6 @@ namespace Repositorch.Web
 			app.UseSpaStaticFiles();
 
 			app.UseRouting();
-
 			app.UseEndpoints(endpoints =>
 			{
 				endpoints.MapControllerRoute(
@@ -75,12 +78,20 @@ namespace Repositorch.Web
 			var metrics = Assembly.GetExecutingAssembly().GetTypes()
 				.Where(t => t.IsClass && t.IsAssignableTo<IMetric>())
 				.ToArray();
-
 			foreach (var metric in metrics)
 			{
 				builder.RegisterType(metric)
 					.Keyed<IMetric>(metric.Name);
 			}
+
+			var homePath = (Environment.OSVersion.Platform == PlatformID.Unix ||
+				Environment.OSVersion.Platform == PlatformID.MacOSX)
+				? Environment.GetEnvironmentVariable("HOME")
+				: Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
+			var dbPath = Path.Combine(homePath, "repositorch.db");
+			builder.Register<LiteDatabase>(c => new LiteDatabase(dbPath))
+				.As<LiteDatabase>()
+				.SingleInstance();
 		}
 	}
 }

@@ -7,29 +7,30 @@ using Repositorch.Data.Entities.Persistent;
 
 namespace Repositorch.Web.Controllers
 {
-	[Route("api/[controller]")]
 	[ApiController]
-	public class DataController : ControllerBase
+	[Route("api/[controller]")]
+	[Produces("application/json")]
+	public class MetricsController : ControllerBase
 	{
 		private IIndex<string, IMetric> metrics;
 		private IDataStore data;
-
-		public DataController(IIndex<string,IMetric> metrics)
+		
+		public MetricsController(IIndex<string,IMetric> metrics)
 		{
 			this.metrics = metrics;
 			data = new SqlServerDataStore("git");
 		}
 
 		[HttpGet]
-		[Route("CalculateMetrics/{name}")]
-		public ActionResult<JObject> CalculateMetrics([FromRoute]string name)
+		[Route("Calculate/{name}")]
+		public ActionResult<JObject> Calculate([FromRoute]string name)
 		{
-			return CalculateMetrics(name, null);
+			return Calculate(name, null);
 		}
 
 		[HttpPost]
-		[Route("CalculateMetrics/{name}")]
-		public ActionResult<JObject> CalculateMetrics([FromRoute]string name, [FromBody]JObject input)
+		[Route("Calculate/{name}")]
+		public ActionResult<JObject> Calculate([FromRoute]string name, [FromBody]JObject input)
 		{
 			var metric = metrics[name];
 			var result = metric.Calculate(data, input);
