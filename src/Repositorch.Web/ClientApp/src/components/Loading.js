@@ -1,6 +1,8 @@
 ﻿import React from 'react';
+import './Loading.css';
 
 var loading = {
+    alignItems: "center",
     textAlign: "center",
     width: "100%"
 }
@@ -8,7 +10,20 @@ var loading = {
 function Loading() {
     return (
         <div style={loading}>
-            <p><em>Loading...</em></p>
+            <div class="ldio-spinner">
+                <div class="ldio-loading">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
         </div>
     )
 }

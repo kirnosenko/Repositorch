@@ -20,7 +20,7 @@ function ProjectItem({ name }) {
             </span>
             <button className='rm'>
                 &times;
-      </button>
+            </button>
         </li>
     )
 }
