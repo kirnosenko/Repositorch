@@ -1,10 +1,10 @@
 ﻿import React from 'react';
-import { Metric } from './Metric';
+import Metric from './Metric';
 
 function renderFiles(data) {
     return (
         <div>
-            <table className='table table-striped' aria-labelledby="tabelLabel">
+            <table className='table table-striped'>
                 <thead>
                     <tr>
                         <th>Extension</th>
@@ -26,7 +26,7 @@ function renderFiles(data) {
                     )}
                 </tbody>
             </table>
-            <table className='table table-striped' aria-labelledby="tabelLabel">
+            <table className='table table-striped'>
                 <thead>
                     <tr>
                         <th>Directory</th>

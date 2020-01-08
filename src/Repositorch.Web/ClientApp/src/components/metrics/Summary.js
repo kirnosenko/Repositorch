@@ -1,5 +1,5 @@
 ﻿import React from 'react';
-import { Metric } from './Metric';
+import Metric from './Metric';
 
 function renderSummary(data) {
     return (

@@ -1,9 +1,9 @@
 ﻿import React from 'react';
-import { Metric } from './Metric';
+import Metric from './Metric';
 
 function renderAuthors(data) {
     return (
-        <table className='table table-striped' aria-labelledby="tabelLabel">
+        <table className='table table-striped'>
             <thead>
                 <tr>
                     <th>Author</th>
