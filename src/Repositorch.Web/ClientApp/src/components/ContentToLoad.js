@@ -28,7 +28,7 @@ export class ContentToLoad extends Component {
         fetch(this.props.url)
             .then((response) => {
                 if (!response.ok) throw new Error(response.status);
-                else return response.json();
+                return response.json();
             })
             .then((data) => {
                 this.setState({ data: data });

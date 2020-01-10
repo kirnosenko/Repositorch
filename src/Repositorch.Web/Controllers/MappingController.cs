@@ -12,5 +12,11 @@ namespace Repositorch.Web.Controllers
     [Produces("application/json")]
     public class MappingController : ControllerBase
     {
-    }
+		[HttpGet]
+		[Route("CheckValidRepository/{path}")]
+		public IActionResult CheckValidRepository([FromRoute] string path)
+		{
+			return Ok(true);
+		}
+	}
 }
