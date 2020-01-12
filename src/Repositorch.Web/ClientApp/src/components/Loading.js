@@ -7,11 +7,11 @@ var loading = {
     width: "100%"
 }
 
-function Loading() {
+export default function Loading() {
     return (
         <div style={loading}>
-            <div class="ldio-spinner">
-                <div class="ldio-loading">
+            <div className="ldio-spinner">
+                <div className="ldio-loading">
                     <div></div>
                     <div></div>
                     <div></div>
@@ -27,5 +27,3 @@ function Loading() {
         </div>
     )
 }
-
-export default Loading

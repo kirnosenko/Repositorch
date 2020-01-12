@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -67,14 +68,14 @@ namespace Repositorch.Web.Controllers
 			{
 				return BadRequest();
 			}
-
-			var data = new SqlServerDataStore(name);
-			using (var session = data.OpenSession())
+			
+			//var data = new SqlServerDataStore(name);
+			//using (var session = data.OpenSession())
 			{
-				var context = session as DbContext;
-				context.Database.EnsureDeleted();
+				//var context = session as DbContext;
+				//context.Database.EnsureDeleted();
 			}
-
+			
 			return Ok();
 		}
 	}

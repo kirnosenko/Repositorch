@@ -1,37 +1,48 @@
-﻿import React, { Component } from 'react';
+﻿import React from 'react';
 import Loading from './Loading';
 
-export class ContentToLoad extends Component {
+export default function ContentToLoad(props) {
 
-    constructor(props) {
-        super(props);
-        this.state = { data: null };
+    const [state, setState] = React.useState(null);
+
+    function getData() {
+        return props.data !== undefined
+            ? props.data
+            : state;
     }
 
-    componentDidMount() {
-        this.loadData();
-    }
+    React.useEffect(() => {
 
-    render() {
-        let contents = this.state.data === null
-            ? <Loading />
-            : this.props.renderData(this.state.data);
+        function setData(data) {
+            props.setData !== undefined
+                ? props.setData(data)
+                : setState(data);
+        }
 
-        return (
-            <div>
-                {contents}
-            </div>
-        );
-    }
+        async function loadData() {
+            fetch(props.url)
+                .then((response) => {
+                    if (!response.ok) throw new Error(response.status);
+                    return response.json();
+                })
+                .then((data) => {
+                    setData(data);
+                });
+        }
 
-    async loadData() {
-        fetch(this.props.url)
-            .then((response) => {
-                if (!response.ok) throw new Error(response.status);
-                return response.json();
-            })
-            .then((data) => {
-                this.setState({ data: data });
-            });
-    }
+        if (getData() === null) {
+            loadData();
+        }
+    }, [props]);
+
+    let data = getData();
+    let contents = data === null
+        ? <Loading />
+        : props.renderData(data);
+
+    return (
+        <div>
+            {contents}
+        </div>
+    );
 }

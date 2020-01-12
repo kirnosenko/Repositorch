@@ -12,13 +12,13 @@ const styles = {
     }
 }
 
-function ProjectItem({ name }) {
+function ProjectItem(props) {
     return (
         <li style={styles.li}>
             <span>
-                {name}
+                {props.name}
             </span>
-            <button className='rm'>
+            <button className='rm' onClick={() => props.removeProject(props.name)}>
                 &times;
             </button>
         </li>

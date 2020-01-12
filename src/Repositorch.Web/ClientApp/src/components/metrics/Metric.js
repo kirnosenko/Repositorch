@@ -1,5 +1,5 @@
 ﻿import React from 'react';
-import { ContentToLoad } from '../ContentToLoad';
+import ContentToLoad from '../ContentToLoad';
 
 export default function Metric(props) {
     return (
