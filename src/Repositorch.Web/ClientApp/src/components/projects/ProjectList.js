@@ -19,7 +19,7 @@ export default function ProjectList() {
         })
         .then((response) => {
             if (!response.ok) throw new Error(response.status);
-            setList(list.filter((x) => x != name));
+            setList(list.filter((x) => x !== name));
         })
         .catch((error) => {
             console.log(error);

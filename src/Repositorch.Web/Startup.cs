@@ -10,7 +10,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Autofac;
 using LiteDB;
-using Newtonsoft.Json;
 
 namespace Repositorch.Web
 {
@@ -30,6 +29,8 @@ namespace Repositorch.Web
 
 		public void ConfigureServices(IServiceCollection services)
 		{
+			services.AddSignalR();
+			services.AddHostedService<MappingService>();
 			services.AddControllers().AddNewtonsoftJson();
 
 			// In production, the React files will be served from this directory
@@ -53,13 +54,14 @@ namespace Repositorch.Web
 
 			app.UseStaticFiles();
 			app.UseSpaStaticFiles();
-
+			
 			app.UseRouting();
 			app.UseEndpoints(endpoints =>
 			{
 				endpoints.MapControllerRoute(
 					name: "default",
 					pattern: "{controller}/{action=Index}/{id?}");
+				endpoints.MapHub<MappingHub>("/Hubs/Mapping");
 			});
 
 			app.UseSpa(spa =>
