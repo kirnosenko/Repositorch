@@ -23,6 +23,11 @@ namespace Repositorch.Web
             this.counters.TryAdd(projectName, 0);
         }
 
+        public void StopMapping(string projectName)
+        {
+            this.counters.TryRemove(projectName, out _);
+        }
+
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             while (!stoppingToken.IsCancellationRequested)

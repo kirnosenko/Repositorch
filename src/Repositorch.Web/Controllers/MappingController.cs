@@ -28,11 +28,19 @@ namespace Repositorch.Web.Controllers
 			return Ok(true);
 		}
 
-		[HttpPost]
+		[HttpPut]
 		[Route("Start/{name}")]
 		public IActionResult Start([FromRoute] string name)
 		{
 			mappingService.StartMapping(name);
+			return Ok(true);
+		}
+
+		[HttpPut]
+		[Route("Stop/{name}")]
+		public IActionResult Stop([FromRoute] string name)
+		{
+			mappingService.StopMapping(name);
 			return Ok(true);
 		}
 	}

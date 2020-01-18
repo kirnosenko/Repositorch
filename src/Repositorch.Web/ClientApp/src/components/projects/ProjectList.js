@@ -1,4 +1,5 @@
 ﻿import React from 'react'
+import { Redirect } from 'react-router-dom'
 import ContentToLoad from '../ContentToLoad'
 import ProjectItem from './ProjectItem'
 
@@ -27,6 +28,10 @@ export default function ProjectList() {
     }
 
     function renderProjectList(data) {
+        if (data.length === 0) {
+            return <Redirect to='/new' />
+        }
+
         return (
             <ul style={styles.ul}>
                 {data.map(projectName => {
