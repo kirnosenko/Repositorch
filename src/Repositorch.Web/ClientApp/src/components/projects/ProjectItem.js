@@ -1,5 +1,7 @@
 ﻿import React from 'react'
 import * as signalR from '@aspnet/signalr';
+import { useSelector, useDispatch } from 'react-redux';
+import { addMapping, removeMapping } from '../../state/actions';
 
 const styles = {
     li: {
@@ -14,37 +16,42 @@ const styles = {
 }
 
 export default function ProjectItem(props) {
-
+    const mapping = useSelector(state => state.mappings
+        .find(x => x === props.name));
+    const dispatch = useDispatch();
     const [connection, setConnection] = React.useState(null);
     const [progress, setProgress] = React.useState('');
     const [mounted, setMounted] = React.useState(false);
-    
-    function startWatching() {
-        var con = new signalR.HubConnectionBuilder()
-            .withUrl('/Hubs/Mapping').build();
-        con.on('Progress', (current, total) => {
-            if (mounted) {
-                setProgress(current.toString() + ' / ' + total.toString());
-            }
-        });
-        con.start()
-            .then(_ => con.invoke('StartWatching', props.name))
-            .catch(e => console.error(e));
-        if (mounted) {
-            setConnection(con);
-        }
-        else {
-            con.stop();
+
+    function startWatching(newMapping) {
+        if (mapping !== undefined) {
+            var newConnection = new signalR.HubConnectionBuilder()
+                .withUrl('/Hubs/Mapping').build();
+            newConnection.start()
+                .then(_ => {
+                    newConnection.on('Progress', (current, total) => {
+                        if (mounted) {
+                            setProgress(current.toString() + ' / ' + total.toString());
+                        }
+                    });
+                    newConnection.invoke('StartWatching', props.name)
+                        .then(_ => setConnection(newConnection));
+                });
+        } else if (newMapping) {
+            dispatch(addMapping(props.name));
         }
     }
 
     function stopWatching() {
-        if (connection !== null) {
-            connection.stop();
-            if (mounted) {
+        if (connection === null) return;
+
+        connection.invoke('StopWatching', props.name)
+            .then(_ => {
+                connection.off('Progress');
+                connection.stop();
                 setConnection(null);
-            }
-        }
+                dispatch(removeMapping(props.name));
+            });
     }
 
     function startMapping() {
@@ -53,7 +60,7 @@ export default function ProjectItem(props) {
         })
         .then((response) => {
             if (!response.ok) throw new Error(response.status);
-            startWatching();
+            startWatching(true);
         })
         .catch((e) => {
             console.error(e);
@@ -66,7 +73,7 @@ export default function ProjectItem(props) {
         })
         .then((response) => {
             if (!response.ok) throw new Error(response.status);
-            stopWatching(false);
+            stopWatching();
         })
         .catch((e) => {
             console.error(e);
@@ -79,24 +86,19 @@ export default function ProjectItem(props) {
             : stopMapping();
     }
 
-    function mappingBtnTxt() {
-        return connection === null
-            ? "Start mapping..."
-            : "Stop mapping";
-    }
-
     function removeProject() {
-        stopWatching();
+        stopWatching(true);
         props.removeProject(props.name);
     }
 
     React.useEffect(() => {
         setMounted(true);
+        startWatching(false);
         return () => {
             setMounted(false);
             stopWatching();
         }
-    }, []);
+    }, [mapping]);
 
     return (
         <li style={styles.li}>
@@ -109,7 +111,9 @@ export default function ProjectItem(props) {
             <button
                 type="button"
                 className="btn btn-primary btn-sm"
-                onClick={() => switchMapping()}>{mappingBtnTxt()}</button>
+                onClick={() => switchMapping()}>
+                {connection === null ? "Start mapping..." : "Stop mapping"}
+            </button>
             <button
                 type="button"
                 className="btn btn-danger btn-sm"

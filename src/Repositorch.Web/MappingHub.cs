@@ -17,5 +17,9 @@ namespace Repositorch.Web
         {
             await Groups.AddToGroupAsync(Context.ConnectionId, projectName);
         }
+        public async Task StopWatching(string projectName)
+        {
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, projectName);
+        }
     }
 }
