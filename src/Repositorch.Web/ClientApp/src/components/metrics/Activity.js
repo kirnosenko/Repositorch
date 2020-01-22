@@ -17,7 +17,7 @@ function renderActivity(data) {
             </thead>
             <tbody>
                 {data.periods.map(period =>
-                    <tr key={period.name}>
+                    <tr key={period.title}>
                         <td>{period.title}</td>
                         <td>{period.commits}</td>
                         <td>{period.authors}</td>

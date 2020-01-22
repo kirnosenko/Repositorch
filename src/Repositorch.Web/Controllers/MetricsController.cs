@@ -22,14 +22,14 @@ namespace Repositorch.Web.Controllers
 		}
 
 		[HttpGet]
-		[Route("Calculate/{name}")]
+		[Route("[action]/{name}")]
 		public ActionResult<JObject> Calculate([FromRoute]string name)
 		{
 			return Calculate(name, null);
 		}
 
 		[HttpPost]
-		[Route("Calculate/{name}")]
+		[Route("[action]/{name}")]
 		public ActionResult<JObject> Calculate([FromRoute]string name, [FromBody]JObject input)
 		{
 			var metric = metrics[name];

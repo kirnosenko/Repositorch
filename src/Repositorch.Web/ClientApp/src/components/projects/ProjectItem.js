@@ -21,8 +21,7 @@ export default function ProjectItem(props) {
     const dispatch = useDispatch();
     const [connection, setConnection] = React.useState(null);
     const [progress, setProgress] = React.useState('');
-    const [mounted, setMounted] = React.useState(false);
-
+    
     function startWatching(newMapping) {
         if (mapping !== undefined) {
             var newConnection = new signalR.HubConnectionBuilder()
@@ -30,11 +29,9 @@ export default function ProjectItem(props) {
             newConnection.start()
                 .then(_ => {
                     newConnection.on('Progress', (current, total) => {
-                        if (mounted) {
-                            setProgress(current.toString() + ' / ' + total.toString());
-                        }
+                        setProgress(current.toString() + ' / ' + total.toString());
                     });
-                    newConnection.invoke('StartWatching', props.name)
+                    newConnection.invoke('WatchProject', props.name)
                         .then(_ => setConnection(newConnection));
                 });
         } else if (newMapping) {
@@ -42,16 +39,15 @@ export default function ProjectItem(props) {
         }
     }
 
-    function stopWatching() {
+    function stopWatching(clearMapping) {
         if (connection === null) return;
 
-        connection.invoke('StopWatching', props.name)
-            .then(_ => {
-                connection.off('Progress');
-                connection.stop();
-                setConnection(null);
-                dispatch(removeMapping(props.name));
-            });
+        connection.off('Progress');
+        connection.stop();
+        setConnection(null);
+        if (clearMapping) {
+            dispatch(removeMapping(props.name));
+        }
     }
 
     function startMapping() {
@@ -73,7 +69,7 @@ export default function ProjectItem(props) {
         })
         .then((response) => {
             if (!response.ok) throw new Error(response.status);
-            stopWatching();
+            stopWatching(true);
         })
         .catch((e) => {
             console.error(e);
@@ -92,13 +88,14 @@ export default function ProjectItem(props) {
     }
 
     React.useEffect(() => {
-        setMounted(true);
         startWatching(false);
-        return () => {
-            setMounted(false);
-            stopWatching();
-        }
     }, [mapping]);
+
+    React.useEffect(() => {
+        return () => {
+            stopWatching(false);
+        }
+    }, [connection]);
 
     return (
         <li style={styles.li}>

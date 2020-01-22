@@ -22,7 +22,7 @@ namespace Repositorch.Web.Controllers
 		}
 
 		[HttpGet]
-		[Route("GetSettings/{name}")]
+		[Route("[action]/{name}")]
 		public IActionResult GetSettings([FromRoute]string name)
 		{
 			var projects = liteDb.GetCollection<ProjectSettings>();
@@ -36,7 +36,7 @@ namespace Repositorch.Web.Controllers
 		}
 
 		[HttpGet]
-		[Route("GetNames")]
+		[Route("[action]")]
 		public IActionResult GetNames()
 		{
 			var projects = liteDb.GetCollection<ProjectSettings>();
@@ -46,7 +46,7 @@ namespace Repositorch.Web.Controllers
 		}
 
 		[HttpPost]
-		[Route("Create")]
+		[Route("[action]")]
 		public IActionResult Create(ProjectSettings settings)
 		{
 			var projects = liteDb.GetCollection<ProjectSettings>();	
@@ -60,7 +60,7 @@ namespace Repositorch.Web.Controllers
 		}
 
 		[HttpDelete]
-		[Route("Remove/{name}")]
+		[Route("[action]/{name}")]
 		public IActionResult Remove([FromRoute]string name)
 		{
 			var projects = liteDb.GetCollection<ProjectSettings>();

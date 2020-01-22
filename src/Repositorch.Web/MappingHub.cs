@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 
@@ -13,13 +12,22 @@ namespace Repositorch.Web
 
     public class MappingHub : Hub<IMappingWatcher>
 	{
-        public async Task StartWatching(string projectName)
+        private readonly ConcurrentDictionary<string, string> connections =
+            new ConcurrentDictionary<string, string>();
+
+        public async Task WatchProject(string projectName)
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, projectName);
+            var id = Context.ConnectionId;
+            await Groups.AddToGroupAsync(id, projectName);
+            connections.TryAdd(id, projectName);
         }
-        public async Task StopWatching(string projectName)
+        
+        public override async Task OnDisconnectedAsync(Exception exception)
         {
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, projectName);
+            var id = Context.ConnectionId;
+            await Groups.RemoveFromGroupAsync(id, connections[id]);
+
+            await base.OnDisconnectedAsync(exception);
         }
     }
 }

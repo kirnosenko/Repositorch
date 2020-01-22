@@ -22,14 +22,14 @@ namespace Repositorch.Web.Controllers
 		}
 
 		[HttpGet]
-		[Route("CheckValidRepository/{path}")]
+		[Route("[action]/{path}")]
 		public IActionResult CheckValidRepository([FromRoute] string path)
 		{
 			return Ok(true);
 		}
 
 		[HttpPut]
-		[Route("Start/{name}")]
+		[Route("[action]/{name}")]
 		public IActionResult Start([FromRoute] string name)
 		{
 			mappingService.StartMapping(name);
@@ -37,7 +37,7 @@ namespace Repositorch.Web.Controllers
 		}
 
 		[HttpPut]
-		[Route("Stop/{name}")]
+		[Route("[action]/{name}")]
 		public IActionResult Stop([FromRoute] string name)
 		{
 			mappingService.StopMapping(name);
