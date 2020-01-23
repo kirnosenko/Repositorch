@@ -38,12 +38,12 @@ namespace Repositorch.Web.Metrics
 					 select new
 					 {
 						 name = ext,
-						 files = string.Format("{0} ({1}%)",
+						 files = string.Format("{0} ({1})",
 								 extFilesCount,
 								 ((double)extFilesCount / filesCount * 100).ToString("F02")),
-						 addedLoc = code.Added().CalculateLOC(),
-						 removedLoc = -code.Removed().CalculateLOC(),
-						 remainLoc = code.Added().CalculateLOC() + code.ModifiedBy().CalculateLOC()
+						 locAdded = code.Added().CalculateLOC(),
+						 locRemoved = -code.Removed().CalculateLOC(),
+						 locRemain = code.Added().CalculateLOC() + code.ModifiedBy().CalculateLOC()
 					 }).ToArray();
 
 				var dirs =
@@ -56,13 +56,13 @@ namespace Repositorch.Web.Metrics
 					 select new
 					 {
 						 name = dir,
-						 files = string.Format("{0} ({1}%)",
+						 files = string.Format("{0} ({1})",
 							 dirFilesCount,
 							 ((double)dirFilesCount / filesCount * 100).ToString("F02")
 						 ),
-						 addedLoc = code.Added().CalculateLOC(),
-						 removedLoc = -code.Removed().CalculateLOC(),
-						 remainLoc = code.Added().CalculateLOC() + code.ModifiedBy().CalculateLOC()
+						 locAdded = code.Added().CalculateLOC(),
+						 locRemoved = -code.Removed().CalculateLOC(),
+						 locRemain = code.Added().CalculateLOC() + code.ModifiedBy().CalculateLOC()
 					 }).ToArray();
 
 				return new { exts, dirs };

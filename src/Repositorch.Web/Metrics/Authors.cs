@@ -60,25 +60,25 @@ namespace Repositorch.Web.Metrics
 					 select new
 					 {
 						 name = a.Name,
-						 commits = string.Format("{0} ({1}%)", authorCommits, (((double)authorCommits / commits) * 100).ToString("F02")),
-						 fixes = string.Format("{0} ({1}%)", authorFixes, (((double)authorFixes / authorCommits) * 100).ToString("F02")),
-						 refactorings = string.Format("{0} ({1}%)", authorRefactorings, (((double)authorRefactorings / authorCommits) * 100).ToString("F02")),
-						 addedLoc = a.AddedCode.CalculateLOC(),
-						 removedLoc = -a.RemovedCode.CalculateLOC(),
-						 remainLoc = authorCurrentLoc,
-						 contribution = ((authorCurrentLoc / totalLoc) * 100).ToString("F02") + "%",
-						 specialization = ((double)authorTouchedFiles / totalFiles * 100).ToString("F02") + "%",
+						 commits = string.Format("{0} ({1})", authorCommits, (((double)authorCommits / commits) * 100).ToString("F02")),
+						 fixes = string.Format("{0} ({1})", authorFixes, (((double)authorFixes / authorCommits) * 100).ToString("F02")),
+						 refactorings = string.Format("{0} ({1})", authorRefactorings, (((double)authorRefactorings / authorCommits) * 100).ToString("F02")),
+						 locAdded = a.AddedCode.CalculateLOC(),
+						 locRemoved = -a.RemovedCode.CalculateLOC(),
+						 locRemain = authorCurrentLoc,
+						 contribution = ((authorCurrentLoc / totalLoc) * 100).ToString("F02"),
+						 specialization = ((double)authorTouchedFiles / totalFiles * 100).ToString("F02"),
 						 uniqueSpecialization = (authorTouchedFiles > 0 ?
 							 ((double)(authorTouchedFiles - authorFilesTouchedByOtherAuthors) / totalFiles * 100)
 							 :
-							 0).ToString("F02") + "%",
+							 0).ToString("F02"),
 						 demandForCode = (authorAddedLoc > 0 ?
 							 ((authorCurrentLoc / authorAddedLoc) * 100)
 							 :
-							 0).ToString("F02") + "%"
+							 0).ToString("F02")
 					 }).OrderBy(x => x.name).ToArray();
 
-				return new { authors };
+				return authors;
 			}
 		}
 	}

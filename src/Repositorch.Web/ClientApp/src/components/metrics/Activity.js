@@ -1,34 +1,24 @@
 ﻿import React from 'react';
 import Metric from './Metric';
+import SortableTable from '../table/sortable-table';
 
 function renderActivity(data) {
+
+    const columns = [
+        { header: 'Period', key: 'period' },
+        { header: 'Commits (total)', key: 'commits' },
+        { header: 'Authors (total)', key: 'authors' },
+        { header: 'Files', key: 'files' },
+        { header: 'Added LOC (total)', key: 'locAdded' },
+        { header: 'Removed LOC (total)', key: 'locRemoved' },
+        { header: 'Remain LOC', key: 'locRemain' }
+    ];
+
     return (
-        <table className='table table-striped'>
-            <thead>
-                <tr>
-                    <th>Period</th>
-                    <th>Commits (total)</th>
-                    <th>Authors (total)</th>
-                    <th>Files</th>
-                    <th>Added LOC (total)</th>
-                    <th>Removed LOC (total)</th>
-                    <th>LOC</th>
-                </tr>
-            </thead>
-            <tbody>
-                {data.periods.map(period =>
-                    <tr key={period.title}>
-                        <td>{period.title}</td>
-                        <td>{period.commits}</td>
-                        <td>{period.authors}</td>
-                        <td>{period.files}</td>
-                        <td>{period.locAdded}</td>
-                        <td>{period.locRemoved}</td>
-                        <td>{period.loc}</td>
-                    </tr>
-                )}
-            </tbody>
-        </table>
+        <SortableTable
+            data={data}
+            columns={columns}
+            className="table table-striped table-sm" />
     );
 }
 

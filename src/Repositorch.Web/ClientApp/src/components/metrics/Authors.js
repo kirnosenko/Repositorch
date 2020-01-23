@@ -1,42 +1,28 @@
 ﻿import React from 'react';
 import Metric from './Metric';
+import SortableTable from '../table/sortable-table';
 
 function renderAuthors(data) {
+
+    const columns = [
+        { header: 'Author', key: 'name' },
+        { header: 'Commits (%)', key: 'commits' },
+        { header: 'Fix commits (%)', key: 'fixes' },
+        { header: 'Refactoring commits (%)', key: 'refactorings' },
+        { header: 'Added LOC', key: 'locAdded' },
+        { header: 'Removed LOC', key: 'locRemoved' },
+        { header: 'Remain LOC', key: 'locRemain' },
+        { header: 'Contribution %', key: 'contribution' },
+        { header: 'Specialization %', key: 'specialization' },
+        { header: 'Unique specialization %', key: 'uniqueSpecialization' },
+        { header: 'Demand for code %', key: 'demandForCode' },
+    ];
+
     return (
-        <table className='table table-striped'>
-            <thead>
-                <tr>
-                    <th>Author</th>
-                    <th>Commits (%)</th>
-                    <th>Fix commits (%)</th>
-                    <th>Refactoring commits (%)</th>
-                    <th>Added LOC</th>
-                    <th>Removed LOC</th>
-                    <th>Remain LOC</th>
-                    <th>Contribution %</th>
-                    <th>Specialization %</th>
-                    <th>Unique specialization %</th>
-                    <th>Demand for code %</th>
-                </tr>
-            </thead>
-            <tbody>
-                {data.authors.map(author =>
-                    <tr key={author.name}>
-                        <td>{author.name}</td>
-                        <td>{author.commits}</td>
-                        <td>{author.fixes}</td>
-                        <td>{author.refactorings}</td>
-                        <td>{author.addedLoc}</td>
-                        <td>{author.removedLoc}</td>
-                        <td>{author.remainLoc}</td>
-                        <td>{author.contribution}</td>
-                        <td>{author.specialization}</td>
-                        <td>{author.uniqueSpecialization}</td>
-                        <td>{author.demandForCode}</td>
-                    </tr>
-                )}
-            </tbody>
-        </table>
+        <SortableTable
+            data={data}
+            columns={columns}
+            className="table table-striped table-sm" />
     );
 }
 

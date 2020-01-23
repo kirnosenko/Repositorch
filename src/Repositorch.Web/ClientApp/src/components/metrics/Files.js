@@ -1,53 +1,35 @@
 ﻿import React from 'react';
 import Metric from './Metric';
+import SortableTable from '../table/sortable-table';
 
 function renderFiles(data) {
+
+    const columnsExts = [
+        { header: 'Extension', key: 'name' },
+        { header: 'Number of files (%)', key: 'files' },
+        { header: 'Added LOC', key: 'locAdded' },
+        { header: 'Removed LOC', key: 'locRemoved' },
+        { header: 'Remain LOC', key: 'locRemain' }
+    ];
+
+    const columnsDirs = [
+        { header: 'Directory', key: 'name' },
+        { header: 'Number of files (%)', key: 'files' },
+        { header: 'Added LOC', key: 'locAdded' },
+        { header: 'Removed LOC', key: 'locRemoved' },
+        { header: 'Remain LOC', key: 'locRemain' }
+    ];
+
     return (
         <div>
-            <table className='table table-striped'>
-                <thead>
-                    <tr>
-                        <th>Extension</th>
-                        <th>Number of files (%)</th>
-                        <th>Added LOC</th>
-                        <th>Removed LOC</th>
-                        <th>Remain LOC</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {data.exts.map(ext =>
-                        <tr key={ext.name}>
-                            <td>{ext.name}</td>
-                            <td>{ext.files}</td>
-                            <td>{ext.addedLoc}</td>
-                            <td>{ext.removedLoc}</td>
-                            <td>{ext.remainLoc}</td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
-            <table className='table table-striped'>
-                <thead>
-                    <tr>
-                        <th>Directory</th>
-                        <th>Number of files (%)</th>
-                        <th>Added LOC</th>
-                        <th>Removed LOC</th>
-                        <th>Remain LOC</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {data.dirs.map(dir =>
-                        <tr key={dir.name}>
-                            <td>{dir.name}</td>
-                            <td>{dir.files}</td>
-                            <td>{dir.addedLoc}</td>
-                            <td>{dir.removedLoc}</td>
-                            <td>{dir.remainLoc}</td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
+            <SortableTable
+                data={data.exts}
+                columns={columnsExts}
+                className="table table-striped table-sm" />
+            <SortableTable
+                data={data.dirs}
+                columns={columnsDirs}
+                className="table table-striped table-sm" />
         </div>
     );
 }

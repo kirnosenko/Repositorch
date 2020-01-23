@@ -47,7 +47,7 @@ namespace Repositorch.Web.Metrics
 						 .SingleOrDefault(c => c.OrderedNumber == commits.Max(x => x.OrderedNumber))?.Revision
 					 select new
 					 {
-						 title = string.Format("{0}-{1:00}", frame.start.Year, frame.start.Month),
+						 period = string.Format("{0}-{1:00}", frame.start.Year, frame.start.Month),
 						 commits = string.Format("{0} ({1})",
 							 commitsCount,
 							 totalCommitsCount
@@ -66,10 +66,10 @@ namespace Repositorch.Web.Metrics
 							 -code.Removed().CalculateLOC(),
 							 -totalCode.Removed().CalculateLOC()
 						 ),
-						 loc = totalCode.CalculateLOC()
-					 }).OrderBy(x => x.title).ToArray();
+						 locRemain = totalCode.CalculateLOC()
+					 }).OrderBy(x => x.period).ToArray();
 
-				return new { periods };
+				return periods;
 			}
 		}
 
