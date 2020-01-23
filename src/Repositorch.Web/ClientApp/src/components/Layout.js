@@ -1,16 +1,16 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import { Container } from 'reactstrap';
 import { NavMenu } from './NavMenu';
 import { Footer } from './Footer';
 
 export function Layout({children}) {
     return (
-        <div>
+        <Fragment>
             <NavMenu />
             <Container>
                 {children}
             </Container>
             <Footer />
-        </div>
+        </Fragment>
     );
 }

@@ -2,6 +2,11 @@ a {
   color: #0366d6;
 }
 
+html, body, #root {
+    min-height: 100vh;
+    position: relative;
+}
+
 table {
     font-size: 12px;
     margin: 0px;
