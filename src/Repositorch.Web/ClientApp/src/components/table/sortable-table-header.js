@@ -20,13 +20,13 @@ class SortableTableHeaderItem extends Component {
       } else {
         sortIcon = <span style={{ float: 'right', color: 'transparent' }}>↓</span>
       }
-      if (this.props.sorting == "desc") {
+      if (this.props.sorting === "desc") {
         if (this.props.iconDesc) {
           sortIcon = this.props.iconDesc;
         } else {
           sortIcon = <span style={{ float: 'right' }}>↓</span>
         }
-      } else if (this.props.sorting == "asc") {
+      } else if (this.props.sorting === "asc") {
         if (this.props.iconAsc) {
           sortIcon = this.props.iconAsc;
         } else {
@@ -54,7 +54,7 @@ export default class SortableTableHeader extends Component {
   }
 
   render() {
-    const headers = this.props.columns.map(((column, index) => {
+    const headers = this.props.columns.map((column, index) => {
       const sorting = this.props.sortings[index];
       return (
         <SortableTableHeaderItem
@@ -70,7 +70,7 @@ export default class SortableTableHeader extends Component {
           iconAsc={this.props.iconAsc}
           iconBoth={this.props.iconBoth} />
       );
-    }).bind(this));
+    });
 
     return (
       <thead>

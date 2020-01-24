@@ -7,7 +7,7 @@ namespace Repositorch.Web
 {
     public interface IMappingWatcher
     {
-        Task Progress(int current, int total);
+        Task Progress(int done, int total, string error, bool working);
     }
 
     public class MappingHub : Hub<IMappingWatcher>

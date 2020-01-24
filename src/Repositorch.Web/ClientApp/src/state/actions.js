@@ -1,7 +1,19 @@
-﻿export const addMapping = (name) => {
+﻿export const addMapping = (name, connection) => {
 	return {
 		type: 'addMapping',
-		name: name
+		name: name,
+		connection: connection
+	};
+}
+
+export const updateMapping = (name, done, total, error, working) => {
+	return {
+		type: 'updateMapping',
+		name: name,
+		done: done,
+		total: total,
+		error: error,
+		working: working
 	};
 }
 

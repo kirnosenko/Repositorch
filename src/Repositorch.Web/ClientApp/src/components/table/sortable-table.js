@@ -18,9 +18,9 @@ export default class SortableTable extends Component {
       if (column.defaultSorting) {
         const defaultSorting = column.defaultSorting.toLowerCase();
 
-        if (defaultSorting == "desc") {
+        if (defaultSorting === "desc") {
           sorting = "desc";
-        } else if (defaultSorting == "asc") {
+        } else if (defaultSorting === "asc") {
           sorting = "asc";
         }
       }
@@ -29,35 +29,35 @@ export default class SortableTable extends Component {
   }
 
   sortData(data, sortings) {
-    let sortedData = this.props.data;
+    let sortedData = data;
     for (var i in sortings) {
       const sorting = sortings[i];
       const column = this.props.columns[i];
       const key = this.props.columns[i].key;
       switch (sorting) {
         case "desc":
-          if (column.descSortFunction &&
-              typeof(column.descSortFunction) == "function") {
-          sortedData = column.descSortFunction(sortedData, key);
-        } else {
-          sortedData = this.descSortData(sortedData, key);
-        }
-        break;
+          if (column.descSortFunction && typeof(column.descSortFunction) == "function") {
+            sortedData = column.descSortFunction(sortedData, key);
+          } else {
+            sortedData = this.descSortData(sortedData, key);
+          }
+           break;
         case "asc":
-          if (column.ascSortFunction &&
-              typeof(column.ascSortFunction) == "function") {
-          sortedData = column.ascSortFunction(sortedData, key);
-        } else {
-          sortedData = this.ascSortData(sortedData, key);
-        }
-        break;
+          if (column.ascSortFunction && typeof(column.ascSortFunction) == "function") {
+            sortedData = column.ascSortFunction(sortedData, key);
+          } else {
+            sortedData = this.ascSortData(sortedData, key);
+          }
+          break;
+        default:
+          break;
       }
     }
     return sortedData;
   }
 
   ascSortData(data, key) {
-    return this.sortDataByKey(data, key, ((a, b) => {
+    return this.sortDataByKey(data, key, (a, b) => {
       if ( this.parseFloatable(a) && this.parseFloatable(b) ) {
         a = this.parseIfFloat(a);
         b = this.parseIfFloat(b);
@@ -67,11 +67,11 @@ export default class SortableTable extends Component {
       } else if ( a < b) {
         return -1;
       }
-    }).bind(this));
+    });
   }
 
   descSortData(data, key) {
-    return this.sortDataByKey(data, key, ((a, b) => {
+    return this.sortDataByKey(data, key, (a, b) => {
       if ( this.parseFloatable(a) && this.parseFloatable(b) ) {
         a = this.parseIfFloat(a);
         b = this.parseIfFloat(b);
@@ -81,7 +81,7 @@ export default class SortableTable extends Component {
       } else if ( a > b) {
         return -1;
       }
-    }).bind(this));
+    });
   }
 
   parseFloatable(value) {
@@ -101,12 +101,12 @@ export default class SortableTable extends Component {
   }
 
   onStateChange(index) {
-    const sortings = this.state.sortings.map(((sorting, i) => {
-      if (i == index)
+    const sortings = this.state.sortings.map((sorting, i) => {
+      if (i === index)
         sorting = this.nextSortingState(sorting);
 
       return sorting;
-    }).bind(this));
+    });
 
     this.setState({
       sortings
@@ -116,15 +116,14 @@ export default class SortableTable extends Component {
   nextSortingState(state) {
     let next;
     switch (state) {
-      case "both":
-        next = "desc";
-      break;
-      case "desc":
-        next = "asc";
-      break;
       case "asc":
-        next= "both"
-      break;
+        next= "desc"
+        break;
+      case "desc":
+        next = "both";
+        break;
+      default:
+        next = "asc";
     }
     return next;
   }

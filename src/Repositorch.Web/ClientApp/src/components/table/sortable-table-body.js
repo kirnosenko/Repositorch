@@ -28,14 +28,14 @@ class SortableTableRow extends Component {
 export default class SortableTableBody extends Component {
 
   render() {
-    var bodies = this.props.data.map(((item, index) => {
+    var bodies = this.props.data.map((item, index) => {
       return (
         <SortableTableRow
           key={index}
           data={item}
           columns={this.props.columns} />
       );
-    }).bind(this));
+    });
 
     return (
       <tbody>

@@ -1,7 +1,7 @@
 ﻿import React from 'react'
 import * as signalR from '@aspnet/signalr';
 import { useSelector, useDispatch } from 'react-redux';
-import { addMapping, removeMapping } from '../../state/actions';
+import { addMapping, updateMapping, removeMapping } from '../../state/actions';
 
 const styles = {
     li: {
@@ -16,38 +16,33 @@ const styles = {
 }
 
 export default function ProjectItem(props) {
-    const mapping = useSelector(state => state.mappings
-        .find(x => x === props.name));
+    const mapping = useSelector(state => state.mappings[props.name]);
+    const progress = mapping !== undefined && mapping.done !== undefined
+        ? mapping.done + '/' + mapping.total
+        : '';
     const dispatch = useDispatch();
-    const [connection, setConnection] = React.useState(null);
-    const [progress, setProgress] = React.useState('');
-    
-    function startWatching(newMapping) {
-        if (mapping !== undefined) {
-            var newConnection = new signalR.HubConnectionBuilder()
-                .withUrl('/Hubs/Mapping').build();
-            newConnection.start()
-                .then(_ => {
-                    newConnection.on('Progress', (current, total) => {
-                        setProgress(current.toString() + ' / ' + total.toString());
-                    });
-                    newConnection.invoke('WatchProject', props.name)
-                        .then(_ => setConnection(newConnection));
+
+    function openConnection() {
+        if (mapping !== undefined) return;
+
+        var connection = new signalR.HubConnectionBuilder()
+            .withUrl('/Hubs/Mapping').build();
+        connection.start()
+            .then(_ => {
+                connection.on('Progress', (done, total, error, working) => {
+                    dispatch(updateMapping(props.name, done, total, error, working));
                 });
-        } else if (newMapping) {
-            dispatch(addMapping(props.name));
-        }
+                connection.invoke('WatchProject', props.name);
+            });
+        dispatch(addMapping(props.name, connection));
     }
 
-    function stopWatching(clearMapping) {
-        if (connection === null) return;
+    function closeConnection() {
+        if (mapping === undefined) return;
 
-        connection.off('Progress');
-        connection.stop();
-        setConnection(null);
-        if (clearMapping) {
-            dispatch(removeMapping(props.name));
-        }
+        mapping.connection.off('Progress');
+        mapping.connection.stop();
+        dispatch(removeMapping(props.name));
     }
 
     function startMapping() {
@@ -56,7 +51,7 @@ export default function ProjectItem(props) {
         })
         .then((response) => {
             if (!response.ok) throw new Error(response.status);
-            startWatching(true);
+            openConnection();
         })
         .catch((e) => {
             console.error(e);
@@ -69,7 +64,7 @@ export default function ProjectItem(props) {
         })
         .then((response) => {
             if (!response.ok) throw new Error(response.status);
-            stopWatching(true);
+            closeConnection();
         })
         .catch((e) => {
             console.error(e);
@@ -77,25 +72,18 @@ export default function ProjectItem(props) {
     }
 
     function switchMapping() {
-        connection === null
+        mapping === undefined
             ? startMapping()
             : stopMapping();
     }
 
     function removeProject() {
-        stopWatching(true);
+        closeConnection();
         props.removeProject(props.name);
     }
 
     React.useEffect(() => {
-        startWatching(false);
     }, [mapping]);
-
-    React.useEffect(() => {
-        return () => {
-            stopWatching(false);
-        }
-    }, [connection]);
 
     return (
         <li style={styles.li}>
@@ -109,7 +97,7 @@ export default function ProjectItem(props) {
                 type="button"
                 className="btn btn-primary btn-sm"
                 onClick={() => switchMapping()}>
-                {connection === null ? "Start mapping..." : "Stop mapping"}
+                {mapping === undefined ? "Start mapping..." : "Stop mapping"}
             </button>
             <button
                 type="button"

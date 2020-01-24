@@ -36,7 +36,7 @@ namespace Repositorch.Web
                 {
                     counters[key] += 1;
                     await mappingHub.Clients.Group(key)
-                        .Progress(counters[key], 60);
+                        .Progress(counters[key], 60, "", true);
                 }
                 await Task.Delay(1000);
             }
