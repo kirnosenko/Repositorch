@@ -2,6 +2,8 @@
 import * as signalR from '@aspnet/signalr';
 import { useSelector, useDispatch } from 'react-redux';
 import { addMapping, updateMapping, removeMapping } from '../../state/actions';
+import { Button } from 'reactstrap';
+import { YesNoButton } from '../YesNoButton';
 
 const styles = {
     li: {
@@ -12,6 +14,10 @@ const styles = {
         border: '1px solid #ccc',
         borderRadius: '4px',
         marginBottom: '.5rem'
+    },
+    span: {
+        display: 'flex',
+        justifyContent: 'flex-end'
     }
 }
 
@@ -93,16 +99,31 @@ export default function ProjectItem(props) {
             <span>
                 {progress}
             </span>
-            <button
-                type="button"
-                className="btn btn-primary btn-sm"
-                onClick={() => switchMapping()}>
-                {mapping === undefined ? "Start mapping..." : "Stop mapping"}
-            </button>
-            <button
-                type="button"
-                className="btn btn-danger btn-sm"
-                onClick={() => removeProject()}>Remove</button>
+            <span style={styles.span}>
+                <Button
+                    color="primary"
+                    size="sm"
+                    onClick={() => switchMapping()}>
+                    {mapping === undefined ? "Start mapping" : "Stop mapping"}</Button>
+                &nbsp;
+                <Button
+                    color="secondary"
+                    size="sm"
+                    onClick={() => switchMapping()}>
+                    Config...</Button>
+                &nbsp;
+                <Button
+                    color="secondary"
+                    size="sm"
+                    onClick={() => switchMapping()}>
+                    Browse...</Button>
+                &nbsp;
+                <YesNoButton
+                    label="Remove"
+                    title="Remove project"
+                    text="Are you sure wanna remove project ?"
+                    yesAction={removeProject} />
+            </span>
         </li>
     )
 }

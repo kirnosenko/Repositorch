@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import SortableTableHeader from './sortable-table-header';
-import SortableTableBody from './sortable-table-body';
+import SortableTableHeader from './SortableTableHeader';
+import SortableTableBody from './SortableTableBody';
 
 export default class SortableTable extends Component {
 

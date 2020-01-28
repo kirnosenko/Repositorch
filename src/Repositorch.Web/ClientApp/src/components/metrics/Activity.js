@@ -1,6 +1,6 @@
 ﻿import React from 'react';
 import Metric from './Metric';
-import SortableTable from '../table/sortable-table';
+import SortableTable from '../table/SortableTable';
 
 function renderActivity(data) {
 
