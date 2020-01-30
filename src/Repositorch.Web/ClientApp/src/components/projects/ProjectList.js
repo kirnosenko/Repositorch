@@ -23,7 +23,7 @@ export default function ProjectList() {
             setList(list.filter((x) => x !== name));
         })
         .catch((error) => {
-            console.log(error);
+            console.error(error);
         });
     }
 

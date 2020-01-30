@@ -1,4 +1,5 @@
 ﻿import React from 'react'
+import { Link } from 'react-router-dom'
 import * as signalR from '@aspnet/signalr';
 import { useSelector, useDispatch } from 'react-redux';
 import { addMapping, updateMapping, removeMapping } from '../../state/actions';
@@ -94,7 +95,7 @@ export default function ProjectItem(props) {
     return (
         <li style={styles.li}>
             <span>
-                {props.name}
+                <Link to={`/${props.name}`}>{props.name}</Link>
             </span>
             <span>
                 {progress}

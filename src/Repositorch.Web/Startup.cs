@@ -85,6 +85,8 @@ namespace Repositorch.Web
 				builder.RegisterType(metric)
 					.Keyed<IMetric>(metric.Name);
 			}
+			builder.RegisterInstance(metrics.Select(x => x.Name).ToArray())
+				.Keyed<string[]>("/");
 
 			var homePath = (Environment.OSVersion.Platform == PlatformID.Unix ||
 				Environment.OSVersion.Platform == PlatformID.MacOSX)
