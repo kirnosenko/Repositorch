@@ -1,7 +1,7 @@
 ﻿import React, { Fragment } from 'react';
 import Metric from './Metric';
 
-function renderSummary(data) {
+function renderData(data) {
 	return (
 		<Fragment>
 			Statistics period: from {data.periodFrom} to {data.periodTo} ({data.periodDays} days, {data.periodYears} years)
@@ -20,6 +20,6 @@ export default function Summary(props) {
 		<Metric
 			title="Summary"
 			path={`${props.project}/Summary`}
-			renderData={renderSummary} />
+			renderData={renderData} />
 	);
 }

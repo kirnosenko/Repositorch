@@ -2,7 +2,7 @@
 import Metric from './Metric';
 import SortableTable from '../table/SortableTable';
 
-function renderActivity(data) {
+function renderData(data) {
 
 	const columns = [
 		{ header: 'Period', key: 'period' },
@@ -27,6 +27,6 @@ export default function Activity(props) {
 		<Metric
 			title="Activity"
 			path={`${props.project}/Activity`}
-			renderData={renderActivity} />
+			renderData={renderData} />
 	);
 }

@@ -14,8 +14,7 @@ export default class App extends Component {
 			<Layout>
 				<Route exact path='/' component={ProjectList} />
 				<Route exact path='/new' component={CreateProject} />
-				<Route exact path='/:project' component={ProjectBrowse} />
-				<Route exact path='/:project/:metric' component={ProjectBrowse} />
+				<Route exact path='/:project/*' component={ProjectBrowse} />
 			</Layout>
 		);
 	}

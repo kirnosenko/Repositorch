@@ -2,7 +2,7 @@
 import { Link } from 'react-router-dom'
 import * as signalR from '@aspnet/signalr';
 import { useSelector, useDispatch } from 'react-redux';
-import { addMapping, updateMapping, removeMapping } from '../../state/actions';
+import { addMapping, updateMapping, removeMapping } from '../../state/mappingActions';
 import { Button } from 'reactstrap';
 import { YesNoButton } from '../YesNoButton';
 
@@ -95,7 +95,7 @@ export default function ProjectItem(props) {
     return (
         <li style={styles.li}>
             <span>
-                <Link to={`/${props.name}`}>{props.name}</Link>
+                <Link to={`/${props.name}/Summary`}>{props.name}</Link>
             </span>
             <span>
                 {progress}

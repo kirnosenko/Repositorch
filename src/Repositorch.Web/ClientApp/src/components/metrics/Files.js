@@ -2,7 +2,7 @@
 import Metric from './Metric';
 import SortableTable from '../table/SortableTable';
 
-function renderFiles(data) {
+function renderData(data) {
 
 	const columnsExts = [
 		{ header: 'Extension', key: 'name' },
@@ -39,6 +39,6 @@ export default function Files(props) {
 		<Metric
 			title="Files"
 			path={`${props.project}/Files`}
-			renderData={renderFiles} />
+			renderData={renderData} />
 	);
 }

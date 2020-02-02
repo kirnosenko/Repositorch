@@ -1,12 +1,15 @@
 ﻿import React from 'react';
 import { NavItem, NavLink } from 'reactstrap';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import ContentToLoad from './ContentToLoad';
 
 export default function NavMenuLinks() {
 
+	const metricPath = useSelector(state => state.metric);
+
 	function renderMenu(names) {
-		if (names.lenght === 0) {
+		if (names.length === 0) {
 			return (
 				<NavItem>
 					<NavLink tag={Link} className="text-dark" to="/new">New project</NavLink>
@@ -28,9 +31,16 @@ export default function NavMenuLinks() {
 		);
 	}
 
+	React.useEffect(() => {
+	}, [metricPath]);
+
+	if (metricPath === null) {
+		return renderMenu([]);
+	}
+
 	return (
 		<ContentToLoad
-			url={`api/Metrics/GetNames`}
+			url={`api/Metrics/GetMenu/${encodeURIComponent(metricPath)}`}
 			renderData={renderMenu} />
 	);
 }

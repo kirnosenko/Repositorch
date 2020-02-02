@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -77,17 +78,12 @@ namespace Repositorch.Web
 
 		public void ConfigureContainer(ContainerBuilder builder)
 		{
-			var metrics = Assembly.GetExecutingAssembly().GetTypes()
-				.Where(t => t.IsClass && t.IsAssignableTo<IMetric>())
-				.ToArray();
-			foreach (var metric in metrics)
-			{
-				builder.RegisterType(metric)
-					.Keyed<IMetric>(metric.Name);
-			}
-			builder.RegisterInstance(metrics.Select(x => x.Name).ToArray())
-				.Keyed<string[]>("/");
+			RegisterLiteDB(builder);
+			RegisterMetricsAndMenusForThem(builder);
+		}
 
+		private void RegisterLiteDB(ContainerBuilder builder)
+		{
 			var homePath = (Environment.OSVersion.Platform == PlatformID.Unix ||
 				Environment.OSVersion.Platform == PlatformID.MacOSX)
 				? Environment.GetEnvironmentVariable("HOME")
@@ -96,6 +92,34 @@ namespace Repositorch.Web
 			builder.Register<LiteDatabase>(c => new LiteDatabase(dbPath))
 				.As<LiteDatabase>()
 				.SingleInstance();
+		}
+		private void RegisterMetricsAndMenusForThem(ContainerBuilder builder)
+		{
+			var metrics = Assembly.GetExecutingAssembly().GetTypes()
+				.Where(t => t.IsClass && t.IsAssignableTo<IMetric>())
+				.ToArray();
+			Dictionary<string, List<Type>> menus = new Dictionary<string, List<Type>>();
+			var menuRootNamespace = "Repositorch.Web.Metrics";
+
+			foreach (var metric in metrics)
+			{
+				builder.RegisterType(metric)
+					.Keyed<IMetric>(metric.Name);
+
+				var metricPath = metric.FullName.Replace(menuRootNamespace + '.', "");
+				builder.Register(x =>
+				{
+					Console.WriteLine(x);
+					return new string[] { };
+				})
+				.Keyed<string[]>(metricPath);
+
+				//if (!menus.ContainsKey(metricNamespace))
+				//{
+				//	menus.Add(metricNamespace, new List<Type>());
+				//}
+				//menus[metricNamespace].Add(metric);
+			}
 		}
 	}
 }

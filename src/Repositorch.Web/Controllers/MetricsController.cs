@@ -24,14 +24,15 @@ namespace Repositorch.Web.Controllers
 		}
 
 		[HttpGet]
-		[Route("[action]")]
-		public ActionResult<JObject> GetNames()
+		[Route("[action]/{metricPath}")]
+		public ActionResult<JObject> GetMenu([FromRoute]string metricPath)
 		{
-			if (metricsMenu.TryGetValue("/", out var menu))
+			metricPath = Uri.UnescapeDataString(metricPath);
+			if (metricsMenu.TryGetValue(metricPath, out var menu))
 			{
 				return Ok(menu);
 			}
-
+			
 			return Ok(Enumerable.Empty<string>());
 		}
 
