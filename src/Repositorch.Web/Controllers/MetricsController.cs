@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Autofac.Features.Indexed;
 using Microsoft.AspNetCore.Mvc;
@@ -13,11 +14,11 @@ namespace Repositorch.Web.Controllers
 	public class MetricsController : ControllerBase
 	{
 		private IIndex<string,IMetric> metrics;
-		private IIndex<string,string[]> metricsMenu;
+		private IIndex<string,IEnumerable<object>> metricsMenu;
 		
 		public MetricsController(
 			IIndex<string,IMetric> metrics,
-			IIndex<string,string[]> metricsMenu)
+			IIndex<string,IEnumerable<object>> metricsMenu)
 		{
 			this.metrics = metrics;
 			this.metricsMenu = metricsMenu;
@@ -28,35 +29,46 @@ namespace Repositorch.Web.Controllers
 		public ActionResult<JObject> GetMenu([FromRoute]string metricPath)
 		{
 			metricPath = Uri.UnescapeDataString(metricPath);
-			if (metricsMenu.TryGetValue(metricPath, out var menu))
+
+			if (metrics.TryGetValue(metricPath, out var metric))
 			{
-				return Ok(menu);
+				var metricRootPath = metric.GetType().GetMetricRootPath();
+				if (metricsMenu.TryGetValue(metricRootPath, out var menu))
+				{
+					return Ok(menu);
+				}
 			}
-			
+
 			return Ok(Enumerable.Empty<string>());
 		}
 
 		[HttpGet]
-		[Route("{project}/{metric}")]
+		[Route("{project}/{metricPath}")]
 		public ActionResult<JObject> Calculate(
 			[FromRoute]string project,
-			[FromRoute]string metric)
+			[FromRoute]string metricPath)
 		{
-			return Calculate(project, metric, null);
+			return Calculate(project, metricPath, null);
 		}
 
 		[HttpPost]
-		[Route("{project}/{metric}")]
+		[Route("{project}/{metricPath}")]
 		public ActionResult<JObject> Calculate(
 			[FromRoute]string project, 
-			[FromRoute]string metric,
+			[FromRoute]string metricPath,
 			[FromBody]JObject input)
 		{
-			var data = new SqlServerDataStore(project);
-			var metricToCalculate = metrics[metric];
-			var result = metricToCalculate.Calculate(data, input);
+			metricPath = Uri.UnescapeDataString(metricPath);
 
-			return Ok(result);
+			if (metrics.TryGetValue(metricPath, out var metric))
+			{
+				var data = new SqlServerDataStore(project);
+				var result = metric.Calculate(data, input);
+
+				return Ok(result);
+			}
+
+			return BadRequest();
 		}
 	}
 }

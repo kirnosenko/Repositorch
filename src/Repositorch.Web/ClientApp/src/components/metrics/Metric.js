@@ -6,7 +6,7 @@ export default function Metric(props) {
 		<Fragment>
 			<h2>{props.title}</h2>
 			<ContentToLoad
-				url={`api/Metrics/${props.path}`}
+				url={`api/Metrics/${props.projectMetricPath}`}
 				renderData={props.renderData} />
 		</Fragment>
 	);

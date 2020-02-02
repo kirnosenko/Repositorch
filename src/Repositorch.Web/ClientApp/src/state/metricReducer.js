@@ -1,10 +1,13 @@
-﻿export const metricReducer = (state = null, action) => {
+﻿export const metricReducer = (state = {}, action) => {
 	switch (action.type) {
-		case 'setMetricPath':
-			return action.path;
-			break;
+		case 'setMetric':
+			return {
+				project: action.project,
+				path: action.path
+			}
+		case 'clearMetric':
+			return {}
 		default:
 			return state;
 	}
-	return state;
 }

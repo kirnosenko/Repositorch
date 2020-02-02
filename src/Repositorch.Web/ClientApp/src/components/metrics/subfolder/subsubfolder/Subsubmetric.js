@@ -13,7 +13,7 @@ export default function Subsubmetric(props) {
 	return (
 		<Metric
 			title="Submetric"
-			path={`${props.project}/${Subsubmetric.name}`}
+			projectMetricPath={props.projectMetricPath}
 			renderData={renderMetricData} />
 	);
 }

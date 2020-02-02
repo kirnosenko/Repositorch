@@ -1,19 +1,27 @@
 ﻿import React, { Suspense } from 'react'
 import { useDispatch } from 'react-redux';
-import { setMetricPath } from '../../state/metricActions';
+import { clearMetric, setMetric } from '../../state/metricActions';
 import Loading from '../Loading';
 
 export default function ProjectBrowse({ match }) {
 
+	const project = match.params.project;
 	const metricPath = match.params[0];
-	const MetricComponent = React.lazy(() => import(`../metrics/${metricPath}`));
 
+	const MetricComponent = React.lazy(() => import(`../metrics/${metricPath}`));
 	const dispatch = useDispatch();
-	dispatch(setMetricPath(metricPath));
+	dispatch(setMetric(project, metricPath));
+
+	React.useEffect(() => {
+		return () => {
+			dispatch(clearMetric());
+		}
+	}, [dispatch]);
 
 	return (
 		<Suspense fallback={<Loading />}>
-			<MetricComponent project={match.params.project} />
+			<MetricComponent
+				projectMetricPath={`${project}/${encodeURIComponent(metricPath)}`} />
 		</Suspense>
 	);
 }

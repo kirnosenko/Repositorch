@@ -6,10 +6,10 @@ import ContentToLoad from './ContentToLoad';
 
 export default function NavMenuLinks() {
 
-	const metricPath = useSelector(state => state.metric);
+	const metric = useSelector(state => state.metric);
 
-	function renderMenu(names) {
-		if (names.length === 0) {
+	function renderMenu(menu) {
+		if (menu.length === 0) {
 			return (
 				<NavItem>
 					<NavLink tag={Link} className="text-dark" to="/new">New project</NavLink>
@@ -18,13 +18,13 @@ export default function NavMenuLinks() {
 		}
 
 		return (
-			names.map(name => {
+			menu.map(item => {
 				return (
-					<NavItem key={name}>
+					<NavItem key={item.name}>
 						<NavLink
 							tag={Link}
 							className="text-dark"
-							to={`/${name}`}>{name}</NavLink>
+							to={`/${metric.project}/${item.path}`}>{item.name}</NavLink>
 					</NavItem>
 				)
 			})
@@ -32,15 +32,15 @@ export default function NavMenuLinks() {
 	}
 
 	React.useEffect(() => {
-	}, [metricPath]);
+	}, [metric]);
 
-	if (metricPath === null) {
+	if (metric.path === undefined) {
 		return renderMenu([]);
 	}
 
 	return (
 		<ContentToLoad
-			url={`api/Metrics/GetMenu/${encodeURIComponent(metricPath)}`}
+			url={`api/Metrics/GetMenu/${encodeURIComponent(metric.path)}`}
 			renderData={renderMenu} />
 	);
 }

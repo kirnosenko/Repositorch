@@ -48,12 +48,10 @@ export default function ProjectList() {
     }
 
     return (
-        <div>
         <ContentToLoad
                 url="api/Projects/GetNames"
                 renderData={renderProjectList}
                 data={list}
                 setData={setList} />
-        </div>
     );
 }

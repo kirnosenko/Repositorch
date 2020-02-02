@@ -19,7 +19,7 @@ export default function Summary(props) {
 	return (
 		<Metric
 			title="Summary"
-			path={`${props.project}/Summary`}
+			projectMetricPath={props.projectMetricPath}
 			renderData={renderData} />
 	);
 }

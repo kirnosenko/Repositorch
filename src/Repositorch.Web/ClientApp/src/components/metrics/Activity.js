@@ -26,7 +26,7 @@ export default function Activity(props) {
 	return (
 		<Metric
 			title="Activity"
-			path={`${props.project}/Activity`}
+			projectMetricPath={props.projectMetricPath}
 			renderData={renderData} />
 	);
 }

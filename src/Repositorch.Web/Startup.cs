@@ -98,27 +98,30 @@ namespace Repositorch.Web
 			var metrics = Assembly.GetExecutingAssembly().GetTypes()
 				.Where(t => t.IsClass && t.IsAssignableTo<IMetric>())
 				.ToArray();
-			Dictionary<string, List<Type>> menus = new Dictionary<string, List<Type>>();
-			var menuRootNamespace = "Repositorch.Web.Metrics";
-
+			Dictionary<string, List<object>> menus = new Dictionary<string, List<object>>();
+			
 			foreach (var metric in metrics)
 			{
+				var metricPath = metric.GetMetricPath();
 				builder.RegisterType(metric)
-					.Keyed<IMetric>(metric.Name);
+					.Keyed<IMetric>(metricPath);
 
-				var metricPath = metric.FullName.Replace(menuRootNamespace + '.', "");
-				builder.Register(x =>
+				var metricRootPath = metric.GetMetricRootPath();
+				if (!menus.ContainsKey(metricRootPath))
 				{
-					Console.WriteLine(x);
-					return new string[] { };
-				})
-				.Keyed<string[]>(metricPath);
+					menus.Add(metricRootPath, new List<object>());
+				}
+				menus[metricRootPath].Add(new
+				{
+					name = metric.Name,
+					path = metricPath
+				});
+			}
 
-				//if (!menus.ContainsKey(metricNamespace))
-				//{
-				//	menus.Add(metricNamespace, new List<Type>());
-				//}
-				//menus[metricNamespace].Add(metric);
+			foreach (var m in menus)
+			{
+				builder.RegisterInstance(m.Value)
+					.Keyed<IEnumerable<object>>(m.Key);
 			}
 		}
 	}

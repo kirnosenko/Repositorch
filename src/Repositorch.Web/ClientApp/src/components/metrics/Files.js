@@ -38,7 +38,7 @@ export default function Files(props) {
 	return (
 		<Metric
 			title="Files"
-			path={`${props.project}/Files`}
+			projectMetricPath={props.projectMetricPath}
 			renderData={renderData} />
 	);
 }

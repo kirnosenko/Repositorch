@@ -30,7 +30,7 @@ export default function Authors(props) {
 	return (
 		<Metric
 			title="Authors"
-			path={`${props.project}/Authors`}
+			projectMetricPath={props.projectMetricPath}
 			renderData={renderData} />
 	);
 }

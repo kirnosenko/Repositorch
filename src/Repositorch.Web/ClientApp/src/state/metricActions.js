@@ -1,6 +1,13 @@
-﻿export const setMetricPath = (path) => {
+﻿export const setMetric = (project, path) => {
 	return {
-		type: 'setMetricPath',
+		type: 'setMetric',
+		project: project,
 		path: path
+	};
+}
+
+export const clearMetric = () => {
+	return {
+		type: 'clearMetric'
 	};
 }
