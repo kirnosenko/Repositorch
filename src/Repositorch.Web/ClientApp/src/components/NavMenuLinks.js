@@ -7,6 +7,13 @@ import ContentToLoad from './ContentToLoad';
 export default function NavMenuLinks() {
 
 	const metric = useSelector(state => state.metric);
+	const [path, setPath] = React.useState(metric.path);
+	const [data, setData] = React.useState(null);
+	
+	function updateMenu(e, newPath) {
+		e.preventDefault();
+		setPath(newPath);
+	}
 
 	function renderMenu(menu) {
 		if (menu.length === 0) {
@@ -19,6 +26,20 @@ export default function NavMenuLinks() {
 
 		return (
 			menu.map(item => {
+				if (!item.isMetric) {
+					return (
+						<NavItem key={item.path}>
+							<NavLink
+								tag={Link}
+								className="text-dark"
+								onClick={e => updateMenu(e, item.path)}
+								to={`/${metric.project}/${item.path}`}>
+								<b>{item.name !== undefined ? item.name : "↑"}</b>
+							</NavLink>
+						</NavItem>
+					)
+				}
+
 				return (
 					<NavItem key={item.name}>
 						<NavLink
@@ -32,15 +53,23 @@ export default function NavMenuLinks() {
 	}
 
 	React.useEffect(() => {
+		setPath(metric.path);
 	}, [metric]);
 
-	if (metric.path === undefined) {
+	React.useEffect(() => {
+		setData(null);
+	}, [path]);
+
+	if (path === undefined) {
 		return renderMenu([]);
 	}
 
 	return (
 		<ContentToLoad
-			url={`api/Metrics/GetMenu/${encodeURIComponent(metric.path)}`}
-			renderData={renderMenu} />
+			url={`api/Metrics/GetMenu/${encodeURIComponent(path)}`}
+			renderData={renderMenu}
+			noloading={true}
+			data={data}
+			setData={setData} />
 	);
 }

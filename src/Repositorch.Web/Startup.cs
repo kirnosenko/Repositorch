@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -113,15 +113,43 @@ namespace Repositorch.Web
 				}
 				menus[metricRootPath].Add(new
 				{
-					name = metric.Name,
-					path = metricPath
+					Name = metric.Name,
+					Path = metricPath,
+					IsMetric = true
 				});
+			}
+
+			var rootPaths = new Stack<string>(menus.Keys
+				.OrderBy(x => x.Length));
+			while (rootPaths.Count > 1)
+			{
+				var path = rootPaths.Pop();
+				var root = rootPaths
+					.Where(x => path.StartsWith(x))
+					.OrderByDescending(x => x.Length)
+					.FirstOrDefault();
+				if (root != null)
+				{
+					menus[root].Add(new
+					{
+						Name = root != string.Empty
+							? path.Replace(root + '/', "")
+							: path,
+						Path = path,
+						IsMetric = false
+					});
+					menus[path].Add(new
+					{
+						Path = root,
+						IsMetric = false
+					});
+				}
 			}
 
 			foreach (var m in menus)
 			{
 				builder.RegisterInstance(m.Value)
-					.Keyed<IEnumerable<object>>(m.Key);
+					.Keyed<List<object>>(m.Key);
 			}
 		}
 	}

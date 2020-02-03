@@ -4,7 +4,7 @@ import ContentToLoad from '../ContentToLoad';
 export default function Metric(props) {
 	return (
 		<Fragment>
-			<h2>{props.title}</h2>
+			<p><b>{props.title}</b></p>
 			<ContentToLoad
 				url={`api/Metrics/${props.projectMetricPath}`}
 				renderData={props.renderData} />

@@ -6,7 +6,9 @@ import Loading from '../Loading';
 export default function ProjectBrowse({ match }) {
 
 	const project = match.params.project;
-	const metricPath = match.params[0];
+	const metricPath = match.params[0] !== undefined
+		? match.params[0]
+		: 'Summary';
 
 	const MetricComponent = React.lazy(() => import(`../metrics/${metricPath}`));
 	const dispatch = useDispatch();

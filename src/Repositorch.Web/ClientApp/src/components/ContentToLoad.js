@@ -20,6 +20,7 @@ export default function ContentToLoad(props) {
 		}
 
 		async function loadData() {
+			console.log(props.url);
 			fetch(props.url)
 				.then((response) => {
 					if (!response.ok) throw new Error(response.status);
@@ -36,7 +37,11 @@ export default function ContentToLoad(props) {
 	}, [props]);
 
 	let data = getData();
-	return data === null
+	let loading = props.noloading === undefined
 		? <Loading />
+		: '';
+
+	return data === null
+		? loading
 		: props.renderData(data);
 }

@@ -95,7 +95,7 @@ export default function ProjectItem(props) {
     return (
         <li style={styles.li}>
             <span>
-                <Link to={`/${props.name}/Summary`}>{props.name}</Link>
+                <Link to={`/${props.name}`}>{props.name}</Link>
             </span>
             <span>
                 {progress}

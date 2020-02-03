@@ -14,26 +14,29 @@ namespace Repositorch.Web.Controllers
 	public class MetricsController : ControllerBase
 	{
 		private IIndex<string,IMetric> metrics;
-		private IIndex<string,IEnumerable<object>> metricsMenu;
+		private IIndex<string,List<object>> metricsMenu;
 		
 		public MetricsController(
 			IIndex<string,IMetric> metrics,
-			IIndex<string,IEnumerable<object>> metricsMenu)
+			IIndex<string,List<object>> metricsMenu)
 		{
 			this.metrics = metrics;
 			this.metricsMenu = metricsMenu;
 		}
 
 		[HttpGet]
-		[Route("[action]/{metricPath}")]
-		public ActionResult<JObject> GetMenu([FromRoute]string metricPath)
+		[Route("[action]/{path}")]
+		public ActionResult<JObject> GetMenu([FromRoute]string path)
 		{
-			metricPath = Uri.UnescapeDataString(metricPath);
-
-			if (metrics.TryGetValue(metricPath, out var metric))
+			path = Uri.UnescapeDataString(path);
+			if (metricsMenu.TryGetValue(path, out var menu))
+			{
+				return Ok(menu);
+			}
+			else if (metrics.TryGetValue(path, out var metric))
 			{
 				var metricRootPath = metric.GetType().GetMetricRootPath();
-				if (metricsMenu.TryGetValue(metricRootPath, out var menu))
+				if (metricsMenu.TryGetValue(metricRootPath, out menu))
 				{
 					return Ok(menu);
 				}
