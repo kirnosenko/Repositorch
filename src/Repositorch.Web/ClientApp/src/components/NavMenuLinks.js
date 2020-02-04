@@ -26,26 +26,16 @@ export default function NavMenuLinks() {
 
 		return (
 			menu.map(item => {
-				if (!item.isMetric) {
-					return (
-						<NavItem key={item.path}>
-							<NavLink
-								tag={Link}
-								className="text-dark"
-								onClick={e => updateMenu(e, item.path)}
-								to={`/${metric.project}/${item.path}`}>
-								<b>{item.name !== undefined ? item.name : "↑"}</b>
-							</NavLink>
-						</NavItem>
-					)
-				}
-
+				var name = item.isMetric
+					? item.name
+					: <b>{item.name !== undefined ? item.name : "↑"}</b>;
 				return (
-					<NavItem key={item.name}>
+					<NavItem key={item.path}>
 						<NavLink
 							tag={Link}
 							className="text-dark"
-							to={`/${metric.project}/${item.path}`}>{item.name}</NavLink>
+							onClick={e => !item.isMetric ? updateMenu(e, item.path) : {}}
+							to={`/${metric.project}${item.path}`}>{name}</NavLink>
 					</NavItem>
 				)
 			})

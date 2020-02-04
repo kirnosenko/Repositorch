@@ -7,18 +7,18 @@ export default function ProjectBrowse({ match }) {
 
 	const project = match.params.project;
 	const metricPath = match.params[0] !== undefined
-		? match.params[0]
-		: 'Summary';
+		? `/${match.params[0]}`
+		: '/Summary';
 
-	const MetricComponent = React.lazy(() => import(`../metrics/${metricPath}`));
+	const MetricComponent = React.lazy(() => import(`../metrics${metricPath}`));
 	const dispatch = useDispatch();
-	dispatch(setMetric(project, metricPath));
 
 	React.useEffect(() => {
+		dispatch(setMetric(project, metricPath));
 		return () => {
 			dispatch(clearMetric());
 		}
-	}, [dispatch]);
+	});
 
 	return (
 		<Suspense fallback={<Loading />}>

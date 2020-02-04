@@ -132,9 +132,9 @@ namespace Repositorch.Web
 				{
 					menus[root].Add(new
 					{
-						Name = root != string.Empty
-							? path.Replace(root + '/', "")
-							: path,
+						Name = root != "/"
+							? path.Replace(root + '/', string.Empty)
+							: path.Replace("/", string.Empty),
 						Path = path,
 						IsMetric = false
 					});

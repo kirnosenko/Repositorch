@@ -16,19 +16,18 @@ namespace Repositorch.Web
 		public static string GetMetricPath(this Type metric)
 		{
 			var rootPath = metric.GetMetricRootPath();
-			if (rootPath != string.Empty)
+			if (rootPath != "/")
 			{
 				return $"{rootPath}/{metric.Name}";
 			}
-			return metric.Name;
+			return $"/{metric.Name}";
 		}
 		public static string GetMetricRootPath(this Type metric)
 		{
 			return metric.Namespace == MetricsRoot
-				? string.Empty
+				? "/"
 				: metric.Namespace
 					.Replace(MetricsRoot, "")
-					.TrimStart('.')
 					.Replace(".", "/")
 					.ToLower();
 		}

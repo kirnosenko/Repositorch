@@ -11,16 +11,15 @@ export default function ContentToLoad(props) {
 			: state;
 	}
 
+	function setData(data) {
+		props.setData !== undefined
+			? props.setData(data)
+			: setState(data);
+	}
+
 	React.useEffect(() => {
 
-		function setData(data) {
-			props.setData !== undefined
-				? props.setData(data)
-				: setState(data);
-		}
-
 		async function loadData() {
-			console.log(props.url);
 			fetch(props.url)
 				.then((response) => {
 					if (!response.ok) throw new Error(response.status);
