@@ -14,18 +14,17 @@ namespace Repositorch.Web.Controllers
 	[Produces("application/json")]
 	public class ProjectsController : ControllerBase
     {
-		private LiteDatabase liteDb;
+		private readonly LiteCollection<ProjectSettings> projects;
 
 		public ProjectsController(LiteDatabase liteDb)
 		{
-			this.liteDb = liteDb;
+			projects = liteDb.GetCollection<ProjectSettings>();
 		}
 
 		[HttpGet]
 		[Route("[action]/{name}")]
 		public IActionResult GetSettings([FromRoute]string name)
 		{
-			var projects = liteDb.GetCollection<ProjectSettings>();
 			var project = projects.FindOne(x => x.Name == name);
 			if (project == null)
 			{
@@ -39,7 +38,6 @@ namespace Repositorch.Web.Controllers
 		[Route("[action]")]
 		public IActionResult GetNames()
 		{
-			var projects = liteDb.GetCollection<ProjectSettings>();
 			var names = projects.FindAll().Select(x => x.Name);
 
 			return Ok(names);
@@ -49,8 +47,8 @@ namespace Repositorch.Web.Controllers
 		[Route("[action]")]
 		public IActionResult Create(ProjectSettings settings)
 		{
-			var projects = liteDb.GetCollection<ProjectSettings>();	
-			if (projects.FindOne(x => x.Name == settings.Name) != null)
+			var project = projects.FindOne(x => x.Name == settings.Name);
+			if (project != null)
 			{
 				return BadRequest();
 			}
@@ -59,11 +57,24 @@ namespace Repositorch.Web.Controllers
 			return Ok();
 		}
 
+		[HttpPost]
+		[Route("[action]")]
+		public IActionResult Update(ProjectSettings settings)
+		{
+			var project = projects.FindOne(x => x.Name == settings.Name);
+			if (project == null)
+			{
+				return BadRequest();
+			}
+
+			projects.Update(settings);
+			return Ok();
+		}
+
 		[HttpDelete]
 		[Route("[action]/{name}")]
 		public IActionResult Remove([FromRoute]string name)
 		{
-			var projects = liteDb.GetCollection<ProjectSettings>();
 			if (projects.Delete(x => x.Name == name) == 0)
 			{
 				return BadRequest();

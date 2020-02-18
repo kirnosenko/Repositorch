@@ -89,9 +89,11 @@ namespace Repositorch.Web
 				? Environment.GetEnvironmentVariable("HOME")
 				: Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
 			var dbPath = Path.Combine(homePath, "repositorch.db");
-			builder.Register<LiteDatabase>(c => new LiteDatabase(dbPath))
-				.As<LiteDatabase>()
-				.SingleInstance();
+			builder.Register<LiteDatabase>(c => {
+				var db = new LiteDatabase(dbPath);
+				db.Mapper.EmptyStringToNull = false;
+				return db;
+			}).As<LiteDatabase>().SingleInstance();
 		}
 		private void RegisterMetricsAndMenusForThem(ContainerBuilder builder)
 		{
