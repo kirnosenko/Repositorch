@@ -19,13 +19,16 @@ const styles = {
 	span: {
 		display: 'flex',
 		justifyContent: 'flex-end'
+	},
+	revision: {
+		fontFamily: 'monospace'
 	}
 }
 
 export default function ProjectItem(props) {
 	const mapping = useSelector(state => state.mappings[props.name]);
-	const progress = mapping !== undefined && mapping.done !== undefined
-		? mapping.done + '/' + mapping.total
+	const progress = mapping !== undefined && mapping.progress !== undefined
+		? mapping.progress
 		: '';
 	const dispatch = useDispatch();
 
@@ -35,8 +38,8 @@ export default function ProjectItem(props) {
 		var connection = new signalR.HubConnectionBuilder()
 			.withUrl('/Hubs/Mapping').build();
 		connection.start().then(_ => {
-			connection.on('Progress', (done, total, error, working) => {
-				dispatch(updateMapping(props.name, done, total, error, working));
+			connection.on('Progress', (progress, error, working) => {
+				dispatch(updateMapping(props.name, progress, error, working));
 			});
 			connection.invoke('WatchProject', props.name);
 		});
@@ -96,7 +99,7 @@ export default function ProjectItem(props) {
 			<span>
 				<Link to={`/${props.name}`}>{props.name}</Link>
 			</span>
-			<span>
+			<span style={styles.revision}>
 				{progress}
 			</span>
 			<span style={styles.span}>

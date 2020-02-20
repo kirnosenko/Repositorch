@@ -6,12 +6,11 @@
 	};
 }
 
-export const updateMapping = (name, done, total, error, working) => {
+export const updateMapping = (name, progress, error, working) => {
 	return {
 		type: 'updateMapping',
 		name: name,
-		done: done,
-		total: total,
+		progress: progress,
 		error: error,
 		working: working
 	};

@@ -8,8 +8,7 @@
 		case 'updateMapping':
 			state[action.name] = {
 				connection: state[action.name].connection,
-				done: action.done,
-				total: action.total,
+				progress: action.progress,
 				error: action.error,
 				working: action.working
 			};
