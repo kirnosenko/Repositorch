@@ -83,36 +83,6 @@ namespace Repositorch.Data.Entities.Mapping
 				.Single().Path);
 		}
 		[Fact]
-		public void Should_map_ranamed_file_during_partial_mapping()
-		{
-			mappingDSL
-				.AddCommit("9")
-					.File("file1.c").Added()
-			.Submit()
-				.AddCommit("10")
-					.File("file1.c").Removed()
-			.Submit()
-				.AddCommit("11")
-					.File("file3.c").Added()
-			.Submit();
-			
-			log.FileRenamed("file1.cpp", "file1.c");
-
-			var selector = Substitute.For<IPathSelector>();
-			selector
-				.IsSelected(Arg.Any<string>())
-				.Returns(x => (x[0] as string).EndsWith(".cpp"));
-			mapper.PathSelectors = new IPathSelector[] { selector };
-
-			mapper.Map(
-				mappingDSL.Commit("10")
-			);
-			SubmitChanges();
-
-			Assert.Equal(1, Get<CodeFile>()
-				.Where(x => x.Path == "file1.cpp").Count());
-		}
-		[Fact]
 		public void Should_map_all_files_touched_on_merged_branches()
 		{
 			mappingDSL

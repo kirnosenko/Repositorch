@@ -32,12 +32,12 @@ namespace Repositorch
 			
 			using (ConsoleTimeLogger.Start("time"))
 			{
-				Func<VcsDataMapper.MappingSettings> settings = () => new VcsDataMapper.MappingSettings()
+				var settings = new VcsDataMapper.MappingSettings()
 				{
-					StopRevision = vcsData.GetRevisionByNumber(2000),
+					RevisionLimit = 2000,
 					Check = VcsDataMapper.CheckMode.TOUCHED,
 				};
-				mapper.MapRevisions(settings());
+				mapper.MapRevisions(settings);
 				//mapper.Truncate(1000);
 				//mapper.Check(2309, DataMapper.CheckMode.ALL);
 				//mapper.CheckAndTruncate("/test-delta.c");

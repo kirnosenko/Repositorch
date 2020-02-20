@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Xunit;
+using FluentAssertions;
 using NSubstitute;
 using Repositorch.Data.VersionControl;
 using Repositorch.Data.Entities.DSL.Mapping;
@@ -171,7 +173,7 @@ namespace Repositorch.Data.Entities.Mapping
 				.Map(Arg.Any<RepositoryMappingExpression>());
 		}
 		[Fact]
-		public void Should_map_until_last_revision()
+		public void Should_map_until_revision_limit()
 		{
 			List<string> revisions = new List<string>();
 
@@ -180,7 +182,7 @@ namespace Repositorch.Data.Entities.Mapping
 				.Returns(x => x[0].ToString());
 				
 			mapper.OnMapRevision += (r) => revisions.Add(r);
-			settings.StopRevision = "5";
+			settings.RevisionLimit = 5;
 			mapper.MapRevisions(settings);
 
 			Assert.Equal(new string[] { "1", "2", "3", "4", "5" }, revisions);
@@ -200,30 +202,24 @@ namespace Repositorch.Data.Entities.Mapping
 			Assert.Equal(new string[] { "1", "2", "3", "4", "5" }, revisions);
 		}
 		[Fact]
-		public void Should_execute_partial_mapping_for_all_mapped_revisions_from_specified()
+		public void Should_stop_for_canceled_token()
 		{
 			List<string> revisions = new List<string>();
 
-			data.UsingSession(s =>
-				s.MappingDSL()
-					.AddCommit("1")
-						.File("file1").Added()
-				.Submit()
-					.AddCommit("2")
-						.File("file2").Added()
-				.Submit()
-					.AddCommit("3")
-						.File("file3").Added()
-				.Submit());
 			vcsData
 				.GetRevisionByNumber(Arg.Any<int>())
-				.Returns(x => x[0].ToString());
-				
-			mapper.OnMapRevision += (r) => revisions.Add(r);
-			settings.StartRevision = "2";
-			mapper.MapRevisions(settings);
+				.Returns(x => (int)x[0] == 6 ? null : x[0].ToString());
 
-			Assert.Equal(new string[] { "2", "3" }, revisions);
+			using (var cts = new CancellationTokenSource())
+			{
+				cts.Cancel();
+
+				mapper.OnMapRevision += (r) => revisions.Add(r);
+				mapper.MapRevisions(settings, cts.Token);
+			}
+
+			revisions.Count
+				.Should().Be(0);
 		}
 		[Fact]
 		public void Should_truncate_last_mapped_commits()
@@ -351,18 +347,28 @@ namespace Repositorch.Data.Entities.Mapping
 		[Fact]
 		public void Should_truncate_unsuccessfully_mapped_revision()
 		{
-			data.UsingSession(s =>
-				s.MappingDSL()
-					.AddCommit("1").OnBranch("1").AuthorIs("alan")
-						.File("file1").Added()
-							.Code(100)
-				.Submit());
+			commitMapper
+				.Map(Arg.Any<RepositoryMappingExpression>())
+				.Returns(x =>
+				{
+					data.UsingSession(s =>
+						s.MappingDSL()
+							.AddCommit("1").OnBranch("1").AuthorIs("alan")
+								.File("file1").Added()
+									.Code(100)
+						.Submit());
+
+					return Enumerable.Empty<CommitMappingExpression>();
+				});
+			mapper.RegisterMapper(commitMapper);
 
 			vcsData.Blame("1", "file1")
 				.Returns(new TestBlame().AddLinesFromRevision("1", 99));
+			vcsData
+				.GetRevisionByNumber(Arg.Any<int>())
+				.Returns(x => x[0].ToString());
 
-			settings.StartRevision = "1";
-			settings.StopRevision = "1";
+			settings.RevisionLimit = 1;
 			settings.Check = VcsDataMapper.CheckMode.ALL;
 			mapper.MapRevisions(settings);
 

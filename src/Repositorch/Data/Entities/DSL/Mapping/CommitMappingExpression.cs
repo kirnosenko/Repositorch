@@ -9,15 +9,6 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		{
 			return new CommitMappingExpression(exp, revision);
 		}
-		public static CommitMappingExpression Commit(this IRepositoryMappingExpression exp, string revision)
-		{
-			return new CommitMappingExpression(
-				exp,
-				exp.Get<Commit>().Single(x =>
-					x.Revision == revision
-				)
-			);
-		}
 	}
 
 	public interface ICommitMappingExpression : IRepositoryMappingExpression
@@ -32,11 +23,6 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			entity.OrderedNumber = Get<Commit>().Count() + 1;
 			entity.Revision = revision;
 			Add(entity);
-		}
-		public CommitMappingExpression(IRepositoryMappingExpression parentExp, Commit commit)
-			: base(parentExp)
-		{
-			entity = commit;
 		}
 		public CommitMappingExpression WithMessage(string message)
 		{

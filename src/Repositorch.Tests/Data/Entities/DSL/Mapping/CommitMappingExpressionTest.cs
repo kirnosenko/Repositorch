@@ -22,20 +22,6 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			Assert.Equal("log", c.Message);
 		}
 		[Fact]
-		public void Can_use_existent_commit()
-		{
-			mappingDSL
-				.AddCommit("1")
-			.Submit()
-				.Commit("1").WithMessage("message")
-			.Submit();
-
-			Assert.Equal(1, Get<Commit>().Count());
-			var c = Get<Commit>().Single();
-			Assert.Equal("1", c.Revision);
-			Assert.Equal("message", c.Message);
-		}
-		[Fact]
 		public void Should_add_commit_with_incremental_order_number()
 		{
 			mappingDSL

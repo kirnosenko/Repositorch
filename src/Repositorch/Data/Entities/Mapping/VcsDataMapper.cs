@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Repositorch.Data.Entities.DSL.Mapping;
 using Repositorch.Data.Entities.DSL.Selection;
@@ -10,31 +11,6 @@ using Repositorch.Data.VersionControl;
 
 namespace Repositorch.Data.Entities.Mapping
 {
-	static class DataMapperSessionExtension
-	{
-		public static bool RevisionExists(this ISession s, string revision)
-		{
-			return s.Get<Commit>()
-				.SingleOrDefault(c => c.Revision == revision) != null;
-		}
-		public static int MappingStartRevision(this ISession s)
-		{
-			return s.Get<Commit>().Count() + 1;
-		}
-		public static int NumberOfRevision(this ISession s, string revision)
-		{
-			return s.Get<Commit>()
-				.Single(x => x.Revision == revision)
-				.OrderedNumber;
-		}
-		public static string LastMappedRevision(this ISession s)
-		{
-			return s.Get<Commit>()
-				.Single(x => x.OrderedNumber == s.Get<Commit>().Max(y => y.OrderedNumber))
-				.Revision;
-		}
-	}
-
 	public class VcsDataMapper
 	{
 		public enum CheckMode
@@ -45,8 +21,7 @@ namespace Repositorch.Data.Entities.Mapping
 		}
 		public struct MappingSettings
 		{
-			public string StartRevision { get; set; }
-			public string StopRevision { get; set; }
+			public int? RevisionLimit { get; set; }
 			public CheckMode Check { get; set; }
 		}
 
@@ -112,32 +87,19 @@ namespace Repositorch.Data.Entities.Mapping
 				}
 			});
 		}
-		public void MapRevisions(MappingSettings settings)
+		public void MapRevisions(MappingSettings settings, CancellationToken stopToken = default)
 		{
-			int nextRevisionNumber;
-			string nextRevision;
-
-			using (var s = data.OpenSession())
-			{
-				if (settings.StartRevision == null)
-				{
-					if (s.RevisionExists(settings.StopRevision))
-					{
-						return;
-					}
-					nextRevisionNumber = s.MappingStartRevision();
-					nextRevision = vcsData.GetRevisionByNumber(nextRevisionNumber);
-				}
-				else // partial mapping
-				{
-					settings.StopRevision = s.LastMappedRevision();
-					nextRevision = settings.StartRevision;
-					nextRevisionNumber = s.NumberOfRevision(settings.StartRevision);
-				}
-			}
+			int nextRevisionNumber = data.UsingSession(s =>
+				s.Get<Commit>().Count() + 1);
+			string nextRevision = vcsData.GetRevisionByNumber(nextRevisionNumber);
 
 			do
 			{
+				if (stopToken.IsCancellationRequested)
+				{
+					return;
+				}
+
 				OnMapRevision?.Invoke(GetRevisionName(nextRevision, nextRevisionNumber));
 				MapRevision(nextRevision);
 				if (!CheckRevision(nextRevision, settings.Check, true))
@@ -145,10 +107,10 @@ namespace Repositorch.Data.Entities.Mapping
 					Truncate(nextRevisionNumber - 1);
 					break;
 				}
-				nextRevision = nextRevision == settings.StopRevision ?
+				nextRevision = ++nextRevisionNumber > (settings.RevisionLimit ?? int.MaxValue) ?
 					null
 					:
-					vcsData.GetRevisionByNumber(++nextRevisionNumber);
+					vcsData.GetRevisionByNumber(nextRevisionNumber);
 			} while (nextRevision != null);
 		}
 		public void MapRevision(string revision)
@@ -257,7 +219,10 @@ namespace Repositorch.Data.Entities.Mapping
 			{
 				if (!mute)
 				{
-					OnCheckRevision?.Invoke(GetRevisionName(revision, s.NumberOfRevision(revision)));
+					var revisionNumber = s.Get<Commit>()
+						.Single(x => x.Revision == revision)
+						.OrderedNumber;
+					OnCheckRevision?.Invoke(GetRevisionName(revision, revisionNumber));
 				}
 				var filesToCheck = s.SelectionDSL()
 					.Commits().RevisionIs(revision)
@@ -381,6 +346,7 @@ namespace Repositorch.Data.Entities.Mapping
 
 			foreach (var error in incorrectCode)
 			{
+				var xxx = s.Get<Commit>().ToArray();
 				var sourceCommit = s.Get<Commit>()
 					.Where(x => x.Revision == error.SourceRevision)
 					.SingleOrDefault();
