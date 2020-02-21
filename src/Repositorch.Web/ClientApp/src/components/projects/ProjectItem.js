@@ -7,29 +7,21 @@ import { Button } from 'reactstrap';
 import { YesNoButton } from '../YesNoButton';
 
 const styles = {
-	li: {
-		display: 'flex',
-		justifyContent: 'space-between',
-		alignItems: 'center',
-		padding: '.5rem 1rem',
+	item: {
 		border: '1px solid #ccc',
 		borderRadius: '4px',
 		marginBottom: '.5rem'
 	},
-	span: {
-		display: 'flex',
-		justifyContent: 'flex-end'
-	},
-	revision: {
+	progress: {
 		fontFamily: 'monospace'
+	},
+	result: {
+		color: 'white'
 	}
 }
 
 export default function ProjectItem(props) {
 	const mapping = useSelector(state => state.mappings[props.name]);
-	const progress = mapping !== undefined && mapping.progress !== undefined
-		? mapping.progress
-		: '';
 	const dispatch = useDispatch();
 
 	function openConnection() {
@@ -94,39 +86,69 @@ export default function ProjectItem(props) {
 	React.useEffect(() => {
 	}, [mapping]);
 
-	return (
-		<li style={styles.li}>
-			<span>
-				<Link to={`/${props.name}`}>{props.name}</Link>
-			</span>
-			<span style={styles.revision}>
+	var progress = '';
+	var bg = '';
+	var style = styles.progress;
+	if (mapping !== undefined) {
+		if (mapping.working === undefined) {
+			progress = "Preparing for mapping..."
+		}
+		else {
+			progress = mapping.progress || mapping.error || "Mapping is finished.";
+			if (!mapping.working) {
+				bg = mapping.error === null
+					? 'bg-success'
+					: 'bg-danger';
+				style = styles.result;
+			}
+		}
+	}
+	if (progress != '') {
+		progress =
+			<div className={`card-footer ${bg}`} style={style}>
 				{progress}
-			</span>
-			<span style={styles.span}>
-				<Button
-					color="primary"
-					size="sm"
-					onClick={() => switchMapping()}>
-					{mapping === undefined ? "Start mapping" : "Stop mapping"}</Button>
-				&nbsp;
-				<Link to={`/edit/${props.name}`}>
-					<Button
-						color="secondary"
-						size="sm">Config...</Button>
-				</Link>
-				&nbsp;
-				<Link to={`/${props.name}`}>
-					<Button
-						color="secondary"
-						size="sm">Browse...</Button>
-				</Link>
-				&nbsp;
-				<YesNoButton
-					label="Remove"
-					title="Remove project"
-					text="Are you sure wanna remove project ?"
-					yesAction={removeProject} />
-			</span>
+			</div>;
+	}
+	
+	return (
+		<li>
+			<div className="card" style={styles.item}>
+				<div className="row no-gutters">
+					<div className="col-md-4 text-left">
+						<div className="card-body">
+							<Link to={`/${props.name}`}>{props.name}</Link>
+						</div>
+					</div>
+					<div className="col-md-8 text-right">
+						<div className="card-body">
+							<Button
+								color="primary"
+								size="sm"
+								onClick={() => switchMapping()}>
+								{mapping === undefined ? "Start mapping" : "Stop mapping"}</Button>
+							&nbsp;
+							<Link to={`/edit/${props.name}`}>
+								<Button
+									color="secondary"
+									size="sm">Config...</Button>
+							</Link>
+							&nbsp;
+							<Link to={`/${props.name}`}>
+								<Button
+									color="secondary"
+									size="sm">Browse...</Button>
+							</Link>
+							&nbsp;
+							<YesNoButton
+								label="Remove"
+								title="Remove project"
+								text="Are you sure wanna remove project ?"
+								yesAction={removeProject} />
+						</div>
+					</div>
+				</div>
+				{progress}
+			</div>
 		</li>
 	)
 }

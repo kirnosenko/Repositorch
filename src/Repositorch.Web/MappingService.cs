@@ -5,12 +5,10 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.SignalR;
 using LiteDB;
-using Repositorch.Data;
-using Repositorch.Data.Entities;
+using Newtonsoft.Json;
 using Repositorch.Data.Entities.Mapping;
 using Repositorch.Data.VersionControl;
 using Repositorch.Data.VersionControl.Git;
-using Repositorch.Data.Entities.DSL.Selection;
 using Repositorch.Data.Entities.Persistent;
 
 namespace Repositorch.Web
@@ -63,7 +61,7 @@ namespace Repositorch.Web
 
         private Task StartMappingTask(ProjectSettings settings, CancellationToken stopToken)
         {
-            return Task.Run(() => {
+            return Task.Run(async () => {
                 try
                 {
                     var mapper = CreateDataMapper(settings);
@@ -72,11 +70,13 @@ namespace Repositorch.Web
                         Check = VcsDataMapper.CheckMode.TOUCHED,
                     };
                     mapper.MapRevisions(mappingSettings);
+                    await mappingHub.Clients.Group(settings.Name)
+                        .Progress(null, null, false);
                 }
                 catch (Exception e)
                 {
-                    mappingHub.Clients.Group(settings.Name)
-                        .Progress($"Error: {e.Message}", "", true);
+                    await mappingHub.Clients.Group(settings.Name)
+                        .Progress(null, JsonConvert.SerializeObject(e, Formatting.Indented), false);
                 }
             }, stopToken);
         }
@@ -110,25 +110,25 @@ namespace Repositorch.Web
                 new BlamePreLoader(vcsData), true);
             dataMapper.RegisterMapper(
                 new CodeBlockMapper(vcsData));
-            dataMapper.OnMapRevision += revision =>
+            dataMapper.OnMapRevision += async revision =>
             {
-                mappingHub.Clients.Group(settings.Name)
-                    .Progress($"Mapping: {revision}", "", true);
+                await mappingHub.Clients.Group(settings.Name)
+                    .Progress($"Mapping: {revision}", null, true);
             };
-            dataMapper.OnTruncateRevision += revision =>
+            dataMapper.OnTruncateRevision += async revision =>
             {
-                mappingHub.Clients.Group(settings.Name)
-                    .Progress($"Truncating: {revision}", "", true);
+                await mappingHub.Clients.Group(settings.Name)
+                    .Progress($"Truncating: {revision}", null, true);
             };
-            dataMapper.OnCheckRevision += revision =>
+            dataMapper.OnCheckRevision += async revision =>
             {
-                mappingHub.Clients.Group(settings.Name)
-                    .Progress($"Checking: {revision}", "", true);
+                await mappingHub.Clients.Group(settings.Name)
+                    .Progress($"Checking: {revision}", null, true);
             };
-            dataMapper.OnError += message =>
+            dataMapper.OnError += async message =>
             {
-                mappingHub.Clients.Group(settings.Name)
-                    .Progress($"Error: {message}", "", false);
+                await mappingHub.Clients.Group(settings.Name)
+                    .Progress(null, $"Error: {message}", false);
             };
             return dataMapper;
         }

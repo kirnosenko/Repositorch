@@ -95,7 +95,7 @@ namespace Repositorch.Data.Entities.Mapping
 
 			do
 			{
-				if (stopToken.IsCancellationRequested)
+				if (nextRevision == null || stopToken.IsCancellationRequested)
 				{
 					return;
 				}

@@ -202,6 +202,21 @@ namespace Repositorch.Data.Entities.Mapping
 			Assert.Equal(new string[] { "1", "2", "3", "4", "5" }, revisions);
 		}
 		[Fact]
+		public void Should_stop_if_all_revisions_already_mapped()
+		{
+			List<string> revisions = new List<string>();
+
+			vcsData
+				.GetRevisionByNumber(Arg.Any<int>())
+				.Returns(x => null);
+
+			mapper.OnMapRevision += (r) => revisions.Add(r);
+			mapper.MapRevisions(settings);
+
+			revisions.Count
+				.Should().Be(0);
+		}
+		[Fact]
 		public void Should_stop_for_canceled_token()
 		{
 			List<string> revisions = new List<string>();
