@@ -87,31 +87,28 @@ namespace Repositorch.Data.Entities.Mapping
 				}
 			});
 		}
-		public void MapRevisions(MappingSettings settings, CancellationToken stopToken = default)
+		public bool MapRevisions(MappingSettings settings, CancellationToken stopToken = default)
 		{
 			int nextRevisionNumber = data.UsingSession(s =>
 				s.Get<Commit>().Count() + 1);
 			string nextRevision = vcsData.GetRevisionByNumber(nextRevisionNumber);
 
-			do
+			while (nextRevision != null && !stopToken.IsCancellationRequested)
 			{
-				if (nextRevision == null || stopToken.IsCancellationRequested)
-				{
-					return;
-				}
-
 				OnMapRevision?.Invoke(GetRevisionName(nextRevision, nextRevisionNumber));
 				MapRevision(nextRevision);
 				if (!CheckRevision(nextRevision, settings.Check, true))
 				{
 					Truncate(nextRevisionNumber - 1);
-					break;
+					return false;
 				}
 				nextRevision = ++nextRevisionNumber > (settings.RevisionLimit ?? int.MaxValue) ?
 					null
 					:
 					vcsData.GetRevisionByNumber(nextRevisionNumber);
-			} while (nextRevision != null);
+			}
+
+			return true;
 		}
 		public void MapRevision(string revision)
 		{

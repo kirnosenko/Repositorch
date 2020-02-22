@@ -183,8 +183,9 @@ namespace Repositorch.Data.Entities.Mapping
 				
 			mapper.OnMapRevision += (r) => revisions.Add(r);
 			settings.RevisionLimit = 5;
-			mapper.MapRevisions(settings);
+			var result = mapper.MapRevisions(settings);
 
+			Assert.True(result);
 			Assert.Equal(new string[] { "1", "2", "3", "4", "5" }, revisions);
 		}
 		[Fact]
@@ -197,8 +198,9 @@ namespace Repositorch.Data.Entities.Mapping
 				.Returns(x => (int)x[0] == 6 ? null : x[0].ToString());
 			
 			mapper.OnMapRevision += (r) => revisions.Add(r);
-			mapper.MapRevisions(settings);
+			var result = mapper.MapRevisions(settings);
 
+			Assert.True(result);
 			Assert.Equal(new string[] { "1", "2", "3", "4", "5" }, revisions);
 		}
 		[Fact]
@@ -211,10 +213,10 @@ namespace Repositorch.Data.Entities.Mapping
 				.Returns(x => null);
 
 			mapper.OnMapRevision += (r) => revisions.Add(r);
-			mapper.MapRevisions(settings);
+			var result = mapper.MapRevisions(settings);
 
-			revisions.Count
-				.Should().Be(0);
+			result.Should().BeTrue();
+			revisions.Count.Should().Be(0);
 		}
 		[Fact]
 		public void Should_stop_for_canceled_token()
@@ -230,11 +232,11 @@ namespace Repositorch.Data.Entities.Mapping
 				cts.Cancel();
 
 				mapper.OnMapRevision += (r) => revisions.Add(r);
-				mapper.MapRevisions(settings, cts.Token);
-			}
+				var result = mapper.MapRevisions(settings, cts.Token);
 
-			revisions.Count
-				.Should().Be(0);
+				result.Should().BeTrue();
+				revisions.Count.Should().Be(0);
+			}
 		}
 		[Fact]
 		public void Should_truncate_last_mapped_commits()
@@ -385,8 +387,9 @@ namespace Repositorch.Data.Entities.Mapping
 
 			settings.RevisionLimit = 1;
 			settings.Check = VcsDataMapper.CheckMode.ALL;
-			mapper.MapRevisions(settings);
+			var result = mapper.MapRevisions(settings);
 
+			result.Should().BeFalse();
 			data.UsingSession(s =>
 			{
 				Assert.Equal(0, s.Get<Commit>().Count());
