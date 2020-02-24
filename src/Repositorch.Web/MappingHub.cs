@@ -7,32 +7,24 @@ namespace Repositorch.Web
 {
 	public interface IMappingWatcher
 	{
-		Task Progress(string progress, string error, bool working);
+		Task Progress(string project, string progress, string error, bool working);
 	}
 
 	public class MappingHub : Hub<IMappingWatcher>
 	{
+		private readonly IMappingNotifier mappingNotifier;
 		private readonly ConcurrentDictionary<string, string> connections =
 			new ConcurrentDictionary<string, string>();
 
-		public async Task WatchProject(string projectName)
+		public MappingHub(IMappingNotifier mappingNotifier)
 		{
-			var id = Context.ConnectionId;
-			await Groups.AddToGroupAsync(id, projectName);
-			connections.TryAdd(id, projectName);
+			this.mappingNotifier = mappingNotifier;
 		}
 
 		public override async Task OnConnectedAsync()
 		{
 			await base.OnConnectedAsync();
-		}
-
-		public override async Task OnDisconnectedAsync(Exception exception)
-		{
-			var id = Context.ConnectionId;
-			await Groups.RemoveFromGroupAsync(id, connections[id]);
-
-			await base.OnDisconnectedAsync(exception);
+			await mappingNotifier.NotifyOnConnect(Context.ConnectionId);
 		}
 	}
 }

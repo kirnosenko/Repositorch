@@ -28,7 +28,7 @@ namespace Repositorch.Web.Controllers
 			return Ok(true);
 		}
 
-		[HttpPut]
+		[HttpPost]
 		[Route("[action]/{name}")]
 		public IActionResult Start([FromRoute] string name)
 		{
@@ -36,7 +36,7 @@ namespace Repositorch.Web.Controllers
 			return Ok(true);
 		}
 
-		[HttpPut]
+		[HttpPost]
 		[Route("[action]/{name}")]
 		public IActionResult Stop([FromRoute] string name)
 		{

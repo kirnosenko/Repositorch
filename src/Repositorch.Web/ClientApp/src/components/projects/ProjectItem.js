@@ -1,8 +1,6 @@
 ﻿import React from 'react'
 import { Link } from 'react-router-dom'
-import * as signalR from '@aspnet/signalr';
-import { useSelector, useDispatch } from 'react-redux';
-import { addMapping, updateMapping, removeMapping } from '../../state/mappingActions';
+import { useSelector } from 'react-redux';
 import { Button } from 'reactstrap';
 import { YesNoButton } from '../YesNoButton';
 
@@ -22,37 +20,13 @@ const styles = {
 
 export default function ProjectItem(props) {
 	const mapping = useSelector(state => state.mappings[props.name]);
-	const dispatch = useDispatch();
-
-	function openConnection() {
-		if (mapping !== undefined) return;
-
-		var connection = new signalR.HubConnectionBuilder()
-			.withUrl('/Hubs/Mapping').build();
-		connection.start().then(_ => {
-			connection.on('Progress', (progress, error, working) => {
-				dispatch(updateMapping(props.name, progress, error, working));
-			});
-			connection.invoke('WatchProject', props.name);
-		});
-		dispatch(addMapping(props.name, connection));
-	}
-
-	function closeConnection() {
-		if (mapping === undefined) return;
-
-		mapping.connection.off('Progress');
-		mapping.connection.stop();
-		dispatch(removeMapping(props.name));
-	}
 
 	function startMapping() {
 		fetch('api/Mapping/Start/' + props.name, {
-			method: 'PUT'
+			method: 'POST'
 		})
 		.then((response) => {
 			if (!response.ok) throw new Error(response.status);
-			openConnection();
 		})
 		.catch((e) => {
 			console.error(e);
@@ -61,11 +35,10 @@ export default function ProjectItem(props) {
 
 	function stopMapping() {
 		fetch('api/Mapping/Stop/' + props.name, {
-			method: 'PUT'
+			method: 'POST'
 		})
 		.then((response) => {
 			if (!response.ok) throw new Error(response.status);
-			closeConnection();
 		})
 		.catch((e) => {
 			console.error(e);
@@ -79,7 +52,6 @@ export default function ProjectItem(props) {
 	}
 
 	function removeProject() {
-		closeConnection();
 		props.removeProject(props.name);
 	}
 
@@ -103,7 +75,7 @@ export default function ProjectItem(props) {
 			}
 		}
 	}
-	if (progress != '') {
+	if (progress !== '') {
 		progress =
 			<div className={`card-footer ${bg}`} style={style}>
 				{progress}

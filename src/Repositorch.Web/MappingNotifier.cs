@@ -28,16 +28,16 @@ namespace Repositorch.Web
 				project,
 				(progress, error, working),
 				(k,v) => (progress,error,working));
-			await mappingHub.Clients.Group(project)
-				.Progress(progress, error, working);
+			await mappingHub.Clients.All
+				.Progress(project, progress, error, working);
 		}
 
 		public async Task NotifyOnConnect(string connectionId)
 		{
 			foreach (var n in notifications)
 			{
-				await mappingHub.Clients.Group(n.Key)
-					.Progress(n.Value.progress, n.Value.error, n.Value.working);
+				await mappingHub.Clients.Client(connectionId)
+					.Progress(n.Key, n.Value.progress, n.Value.error, n.Value.working);
 			}
 		}
 	}

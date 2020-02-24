@@ -1,19 +1,13 @@
 ﻿export const mappingReducer = (state = {}, action) => {
 	switch (action.type) {
-		case 'addMapping':
-			state[action.name] = {
-				connection: action.connection
-			};
-			break;
 		case 'updateMapping':
 			state[action.name] = {
-				connection: state[action.name].connection,
 				progress: action.progress,
 				error: action.error,
 				working: action.working
 			};
 			break;
-		case 'removeMapping':
+		case 'clearMapping':
 			delete state[action.name];
 			break;
 		default:

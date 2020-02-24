@@ -1,12 +1,4 @@
-﻿export const addMapping = (name, connection) => {
-	return {
-		type: 'addMapping',
-		name: name,
-		connection: connection
-	};
-}
-
-export const updateMapping = (name, progress, error, working) => {
+﻿export const updateMapping = (name, progress, error, working) => {
 	return {
 		type: 'updateMapping',
 		name: name,
@@ -16,9 +8,9 @@ export const updateMapping = (name, progress, error, working) => {
 	};
 }
 
-export const removeMapping = (name) => {
+export const clearMapping = (name) => {
 	return {
-		type: 'removeMapping',
+		type: 'clearMapping',
 		name: name
 	};
 }
