@@ -135,7 +135,9 @@ export default function ProjectEdit({ match }) {
 						Mapped data checking mode. Don't touch if you are not sure.
 					</small>
 				</div>
-				<button type='submit' className="btn btn-primary">
+				<button
+					type="button"
+					className="btn btn-outline-dark btn-sm">
 					{project === undefined ? "Create project..." : "Update project..."}
 				</button>
 			</form>

@@ -1,7 +1,6 @@
 ﻿import React from 'react'
 import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux';
-import { Button } from 'reactstrap';
 import { YesNoButton } from '../YesNoButton';
 
 const styles = {
@@ -93,28 +92,28 @@ export default function ProjectItem(props) {
 					</div>
 					<div className="col-md-8 text-right">
 						<div className="card-body">
-							<Button
-								color="primary"
-								size="sm"
+							<button
+								type="button"
+								className="btn btn-outline-dark btn-sm"
 								onClick={() => switchMapping()}>
-								{mapping === undefined ? "Start mapping" : "Stop mapping"}</Button>
+								{mapping === undefined ? "Start mapping" : "Stop mapping"}</button>
 							&nbsp;
 							<Link to={`/edit/${props.name}`}>
-								<Button
-									color="secondary"
-									size="sm">Config...</Button>
+								<button
+									type="button"
+									className="btn btn-outline-dark btn-sm">Config...</button>
 							</Link>
 							&nbsp;
 							<Link to={`/${props.name}`}>
-								<Button
-									color="secondary"
-									size="sm">Browse...</Button>
+								<button
+									type="button"
+									className="btn btn-outline-dark btn-sm">Browse...</button>
 							</Link>
 							&nbsp;
 							<YesNoButton
 								label="Remove"
 								title="Remove project"
-								text="Are you sure wanna remove project ?"
+								text={`Are you sure wanna remove project ${props.name}?`}
 								yesAction={removeProject} />
 						</div>
 					</div>

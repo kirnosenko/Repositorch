@@ -12,3 +12,9 @@ table {
     margin: 0px;
     width: 100%;
 }
+
+.btn {
+    border: 1px solid;
+    color: #505050;
+    transition: color .25s ease-in-out,background-color .25s ease-in-out,border-color .25s ease-in-out,box-shadow .25s ease-in-out;
+}
