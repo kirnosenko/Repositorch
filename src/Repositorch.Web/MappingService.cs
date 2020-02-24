@@ -15,7 +15,7 @@ namespace Repositorch.Web
 {
 	public class MappingService : BackgroundService
 	{
-		private readonly IHubContext<MappingHub, IMappingWatcher> mappingHub;
+		private readonly IMappingNotifier mappingNotifier;
 		private readonly LiteDatabase liteDb;
 
 		private readonly ConcurrentDictionary<string, CancellationTokenSource> mappingTokens;
@@ -23,10 +23,10 @@ namespace Repositorch.Web
 		private readonly ConcurrentQueue<string> projectsToStop;
 
 		public MappingService(
-			IHubContext<MappingHub, IMappingWatcher> mappingHub,
+			IMappingNotifier mappingNotifier,
 			LiteDatabase liteDb)
 		{
-			this.mappingHub = mappingHub;
+			this.mappingNotifier = mappingNotifier;
 			this.liteDb = liteDb;
 			this.mappingTokens = new ConcurrentDictionary<string, CancellationTokenSource>();
 			this.projectsToStart = new ConcurrentQueue<string>();
@@ -80,14 +80,17 @@ namespace Repositorch.Web
 						};
 						if (mapper.MapRevisions(mappingSettings, cts.Token))
 						{
-							await mappingHub.Clients.Group(settings.Name)
-								.Progress(null, null, false);
+							await mappingNotifier.Notify(
+								settings.Name, null, null, false);
 						}
 					}
 					catch (Exception e)
 					{
-						await mappingHub.Clients.Group(settings.Name)
-							.Progress(null, JsonConvert.SerializeObject(e, Formatting.Indented), false);
+						await mappingNotifier.Notify(
+							settings.Name,
+							null,
+							JsonConvert.SerializeObject(e, Formatting.Indented),
+							false);
 					}
 					finally
 					{
@@ -120,23 +123,23 @@ namespace Repositorch.Web
 			dataMapper.RegisterMapper(new CodeBlockMapper(vcsData));
 			dataMapper.OnMapRevision += async revision =>
 			{
-				await mappingHub.Clients.Group(settings.Name)
-					.Progress($"Mapping: {revision}", null, true);
+				await mappingNotifier.Notify(
+					settings.Name, $"Mapping: {revision}", null, true);
 			};
 			dataMapper.OnTruncateRevision += async revision =>
 			{
-				await mappingHub.Clients.Group(settings.Name)
-					.Progress($"Truncating: {revision}", null, true);
+				await mappingNotifier.Notify(
+					settings.Name, $"Truncating: {revision}", null, true);
 			};
 			dataMapper.OnCheckRevision += async revision =>
 			{
-				await mappingHub.Clients.Group(settings.Name)
-					.Progress($"Checking: {revision}", null, true);
+				await mappingNotifier.Notify(
+					settings.Name, $"Checking: {revision}", null, true);
 			};
 			dataMapper.OnError += async message =>
 			{
-				await mappingHub.Clients.Group(settings.Name)
-					.Progress(null, $"Error: {message}", false);
+				await mappingNotifier.Notify(
+					settings.Name, null, $"Error: {message}", false);
 			};
 
 			return dataMapper;
