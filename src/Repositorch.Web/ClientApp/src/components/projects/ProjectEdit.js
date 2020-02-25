@@ -11,6 +11,8 @@ export default function ProjectEdit({ match }) {
 		useExtendedLog: true,
 		checkResult: "1"
 	});
+	const [validation, setValidation] = React.useState({
+	});
 
 	function loadSettings() {
 		if (project === undefined || settings === null || project === settings.name) {
@@ -40,22 +42,31 @@ export default function ProjectEdit({ match }) {
 		});
 	}
 
-	function handleSubmit(event) {
+	async function handleSubmit(event) {
 		event.preventDefault();
 
 		var action = project === undefined ? "Create" : "Update"
-		fetch(`api/Projects/${action}`, {
+		var response = await fetch(`api/Projects/${action}`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify(settings)
-		})
-		.then((response) => {
-			if (!response.ok) throw new Error(response.status);
-			setSettings(null);
-		})
-		.catch((error) => {
-			console.error(error);
 		});
+		if (!response.ok) throw new Error(response.status);
+		var errors = await response.json();
+		if (Object.keys(errors).length === 0) {
+			setSettings(null);
+		}
+		else {
+			setValidation(errors);
+		}
+	}
+
+	function validatedClass(name) {
+		return validation[name] !== undefined ? 'error' : '';
+	}
+
+	function validatedTitle(name) {
+		return validation[name] !== undefined ? validation[name] : '';
 	}
 
 	React.useEffect(() => {
@@ -72,38 +83,43 @@ export default function ProjectEdit({ match }) {
 				<div className="form-group">
 					<div className="heading">Project name</div>
 					<input
-						className="form-control"
+						className={`form-control ${validatedClass('Name')}`}
+						title={validatedTitle('Name')}
 						type="text"
 						name="name"
 						disabled={project !== undefined}
 						value={settings.name}
 						onChange={handleChange} />
 					<small className="form-text text-muted">
-						May consist of letters(A-Z, a-z), digits (0-9) and special characters '-', '.', '_', '~'.
+						Name of the project to identify it inside Repositorch.
 					</small>
 				</div>
 				<div className="form-group">
 					<div className="heading">Repository path</div>
 					<input
-						className="form-control"
+						className={`form-control ${validatedClass('RepositoryPath')}`}
+						title={validatedTitle('RepositoryPath')}
 						type="text"
 						name="repositoryPath"
 						value={settings.repositoryPath}
 						onChange={handleChange} />
 					<small className="form-text text-muted">
-						Path to the repository to work with. Only git repositories are supported at the moment.
+						Path to the repository assosiated with the project.
+						Only git repositories are supported at the moment.
 					</small>
 				</div>
 				<div className="form-group">
 					<div className="heading">Repository branch</div>
 					<input
-						className="form-control"
+						className={`form-control ${validatedClass('Branch')}`}
+						title={validatedTitle('Branch')}
 						type="text"
 						name="branch"
 						value={settings.branch}
 						onChange={handleChange} />
 					<small className="form-text text-muted">
-						Branch in the repository to work with. 'master' for git in most cases.
+						Branch in the repository to work with.
+						'master' for git in most cases.
 					</small>
 				</div>
 				<div className="form-group form-check">
@@ -132,11 +148,12 @@ export default function ProjectEdit({ match }) {
 						<option value="2">Everything</option>
 					</select>
 					<small className="form-text text-muted">
-						Mapped data checking mode. Don't touch if you are not sure.
+						Mapped data checking mode.
+						Don't touch if you are not sure.
 					</small>
 				</div>
 				<button
-					type="button"
+					type="submit"
 					className="btn btn-outline-dark btn-sm">
 					{project === undefined ? "Create project..." : "Update project..."}
 				</button>

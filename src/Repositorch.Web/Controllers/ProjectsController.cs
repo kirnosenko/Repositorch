@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
@@ -14,6 +16,7 @@ namespace Repositorch.Web.Controllers
 	[Produces("application/json")]
 	public class ProjectsController : ControllerBase
     {
+		private static readonly Regex ProjectNameRegExp = new Regex(@"^[a-zA-Z0-9\-\._\~]*$");
 		private readonly LiteCollection<ProjectSettings> projects;
 
 		public ProjectsController(LiteDatabase liteDb)
@@ -47,14 +50,13 @@ namespace Repositorch.Web.Controllers
 		[Route("[action]")]
 		public IActionResult Create(ProjectSettings settings)
 		{
-			var project = projects.FindOne(x => x.Name == settings.Name);
-			if (project != null)
+			var errors = Validate(settings);
+			if (errors.Count == 0)
 			{
-				return BadRequest();
+				projects.Insert(settings);
 			}
 
-			projects.Insert(settings);
-			return Ok();
+			return Ok(errors);
 		}
 
 		[HttpPost]
@@ -88,6 +90,41 @@ namespace Repositorch.Web.Controllers
 			}
 			
 			return Ok();
+		}
+
+		private Dictionary<string, string> Validate(ProjectSettings settings)
+		{
+			var errors = new Dictionary<string, string>();
+
+			if (string.IsNullOrEmpty(settings.Name))
+			{
+				errors.Add(nameof(settings.Name),
+					"Project name may not be empty");
+			}
+			else if (!ProjectNameRegExp.IsMatch(settings.Name))
+			{
+				errors.Add(nameof(settings.Name),
+					"Project name may consist of letters(A-Z, a-z), digits (0-9) and special characters '-', '.', '_', '~'.");
+			}
+			else if (projects.FindOne(x => x.Name == settings.Name) != null)
+			{
+				errors.Add(nameof(settings.Name),
+					$"Project {settings.Name} already exists.");
+			}
+
+			if (string.IsNullOrEmpty(settings.RepositoryPath))
+			{
+				errors.Add(nameof(settings.RepositoryPath),
+					"Invalid repository path.");
+			}
+
+			if (string.IsNullOrEmpty(settings.Branch))
+			{
+				errors.Add(nameof(settings.Branch),
+					"Invalid branch.");
+			}
+
+			return errors;
 		}
 	}
 }
