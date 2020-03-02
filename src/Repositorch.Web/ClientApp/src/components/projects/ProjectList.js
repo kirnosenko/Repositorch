@@ -52,7 +52,7 @@ export default function ProjectList() {
 	}
 
 	React.useEffect(() => {
-		if (list !== null && connection === null) {
+		if (connection === null) {
 			var nc = new signalR.HubConnectionBuilder()
 				.withUrl('/Hubs/Mapping').build();
 			nc.start().then(_ => {
@@ -68,7 +68,7 @@ export default function ProjectList() {
 				connection.stop();
 			}
 		}
-	}, [list, connection]);
+	}, [connection]);
 
 	return (
 		<ContentToLoad
