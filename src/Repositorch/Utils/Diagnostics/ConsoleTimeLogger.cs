@@ -8,10 +8,8 @@
 		}
 
 		public ConsoleTimeLogger(string taskTitle)
-			: base(
-				taskTitle,
-				x => Console.WriteLine(x.FormatedTime)
-			)
+			: base(time => Console.WriteLine(string.Format(
+				"{0}: {1}", taskTitle, time)))
 		{
 		}
 	}

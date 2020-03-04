@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using Newtonsoft.Json.Linq;
 using Repositorch.Data;
 using Repositorch.Data.Entities;
@@ -8,32 +7,29 @@ using Repositorch.Data.Entities.DSL.Selection.Metrics;
 
 namespace Repositorch.Web.Metrics.Charts
 {
-	public class Loc : IMetric
+	public class Loc : Metric
 	{
-		public object Calculate(IDataStore data, JObject input)
+		protected override object Calculate(ISession s, JObject input)
 		{
-			using (var s = data.OpenSession())
-			{
-				var commits = s.GetReadOnly<Commit>()
-					.OrderBy(x => x.OrderedNumber)
-					.Select(x => new
-					{
-						Date = x.Date,
-						Number = x.OrderedNumber
-					})
-					.ToArray();
-				var locs = commits.Select(c => new
+			var commits = s.GetReadOnly<Commit>()
+				.OrderBy(x => x.OrderedNumber)
+				.Select(x => new
 				{
-					date = c.Date,
-					loc = s.SelectionDSL()
-						.Commits().TillNumber(c.Number)
-						.Modifications().InCommits()
-						.CodeBlocks().InModifications()
-						.CalculateLOC()
-				}).ToArray();
+					Date = x.Date,
+					Number = x.OrderedNumber
+				})
+				.ToArray();
+			var loc = commits.Select(c => new
+			{
+				date = c.Date,
+				loc = s.SelectionDSL()
+					.Commits().TillNumber(c.Number)
+					.Modifications().InCommits()
+					.CodeBlocks().InModifications()
+					.CalculateLOC()
+			}).ToArray();
 
-				return locs;
-			}
+			return loc;
 		}
 	}
 }

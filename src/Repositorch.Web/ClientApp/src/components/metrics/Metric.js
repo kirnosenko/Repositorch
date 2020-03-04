@@ -2,12 +2,34 @@
 import ContentToLoad from '../ContentToLoad';
 
 export default function Metric(props) {
+
+	function renderMetric(metric) {
+
+		var time = 'unknown';
+		if (metric.time !== undefined) {
+			if (metric.time === null) {
+				time = 'from cache';
+			}
+			else {
+				time = metric.time;
+			}
+		}
+
+		return (
+			<Fragment>
+				<p>
+					<b>{props.title}</b>
+					&nbsp;
+					<small>(generation time: {time})</small>
+				</p>
+				{props.renderData(metric.data)}
+			</Fragment>
+		);
+	}
+
 	return (
-		<Fragment>
-			<p><b>{props.title}</b></p>
-			<ContentToLoad
-				url={`api/Metrics/${props.projectMetricPath}`}
-				renderData={props.renderData} />
-		</Fragment>
+		<ContentToLoad
+			url={`api/Metrics/${props.projectMetricPath}`}
+			renderData={renderMetric} />
 	);
 }
