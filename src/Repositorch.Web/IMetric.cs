@@ -28,8 +28,7 @@ namespace Repositorch.Web
 				? "/"
 				: metric.Namespace
 					.Replace(MetricsRoot, "")
-					.Replace(".", "/")
-					.ToLower();
+					.Replace(".", "/");
 		}
 	}
 }
