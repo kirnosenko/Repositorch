@@ -2,8 +2,6 @@
 using Newtonsoft.Json.Linq;
 using Repositorch.Data;
 using Repositorch.Data.Entities;
-using Repositorch.Data.Entities.DSL.Selection;
-using Repositorch.Data.Entities.DSL.Selection.Metrics;
 
 namespace Repositorch.Web.Metrics.Charts
 {
@@ -11,23 +9,24 @@ namespace Repositorch.Web.Metrics.Charts
 	{
 		protected override object Calculate(ISession s, JObject input)
 		{
-			var commits = s.GetReadOnly<Commit>()
-				.OrderBy(x => x.OrderedNumber)
-				.Select(x => new
+			var codeByDate = (
+				from c in s.GetReadOnly<Commit>()
+				join m in s.GetReadOnly<Modification>() on c.Id equals m.CommitId
+				join cb in s.GetReadOnly<CodeBlock>() on m.Id equals cb.ModificationId
+				group cb.Size by c.Date into cbc
+				select new
 				{
-					Date = x.Date,
-					Number = x.OrderedNumber
-				})
-				.ToArray();
-			var loc = commits.Select(c => new
+					date = cbc.Key,
+					loc = cbc.Sum()
+				}).ToArray();
+
+			var loc = codeByDate.Select(c => new
 			{
-				date = c.Date,
-				loc = s.SelectionDSL()
-					.Commits().TillNumber(c.Number)
-					.Modifications().InCommits()
-					.CodeBlocks().InModifications()
-					.CalculateLOC()
-			}).ToArray();
+				date = c.date,
+				loc = codeByDate
+					.Where(x => x.date <= c.date)
+					.Sum(x => x.loc)
+			}).OrderBy(x => x.date).ToArray();
 
 			return loc;
 		}
