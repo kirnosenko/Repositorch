@@ -19,6 +19,13 @@ export default function ProjectList() {
 		}
 	}
 
+	async function loadProjectList() {
+		var response = await fetch("api/Projects/GetNames");
+		if (!response.ok) throw new Error(response.status);
+		var json = await response.json();
+		setList(json);
+	}
+
 	function removeProject(name) {
 		fetch("api/Projects/Remove/".concat(name), {
 			method: 'DELETE'
@@ -72,9 +79,8 @@ export default function ProjectList() {
 
 	return (
 		<ContentToLoad
-			url="api/Projects/GetNames"
-			renderData={renderProjectList}
-			data={list}
-			setData={setList} />
+			getData={() => list}
+			loadData={loadProjectList}
+			renderData={renderProjectList} />
 	);
 }

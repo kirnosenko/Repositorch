@@ -9,7 +9,14 @@ export default function NavMenuLinks() {
 	const metric = useSelector(state => state.metric);
 	const [path, setPath] = React.useState(metric.path);
 	const [data, setData] = React.useState(null);
-	
+
+	async function loadMenu() {
+		var response = await fetch(`api/Metrics/GetMenu/${encodeURIComponent(path)}`);
+		if (!response.ok) throw new Error(response.status);
+		var json = await response.json();
+		setData(json);
+	}
+
 	function updateMenu(e, newPath) {
 		e.preventDefault();
 		setPath(newPath);
@@ -56,10 +63,9 @@ export default function NavMenuLinks() {
 
 	return (
 		<ContentToLoad
-			url={`api/Metrics/GetMenu/${encodeURIComponent(path)}`}
+			getData={() => data}
+			loadData={loadMenu}
 			renderData={renderMenu}
-			noloading={true}
-			data={data}
-			setData={setData} />
+			noloading={true} />
 	);
 }

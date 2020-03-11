@@ -1,5 +1,5 @@
 ﻿import React, { Fragment } from 'react';
-import ContentToLoad from '../ContentToLoad';
+import ContentToLoadClosed from '../ContentToLoadClosed';
 
 export default function Metric(props) {
 
@@ -28,7 +28,7 @@ export default function Metric(props) {
 	}
 
 	return (
-		<ContentToLoad
+		<ContentToLoadClosed
 			url={`api/Metrics/${props.projectMetricPath}`}
 			renderData={renderMetric} />
 	);

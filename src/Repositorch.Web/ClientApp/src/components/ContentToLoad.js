@@ -1,41 +1,16 @@
 ﻿import React from 'react';
+import propTypes from 'prop-types';
 import Loading from './Loading';
 
 export default function ContentToLoad(props) {
 
-	const [state, setState] = React.useState(null);
-
-	function getData() {
-		return props.data !== undefined
-			? props.data
-			: state;
-	}
-
-	function setData(data) {
-		props.setData !== undefined
-			? props.setData(data)
-			: setState(data);
-	}
-
 	React.useEffect(() => {
-
-		async function loadData() {
-			fetch(props.url)
-				.then((response) => {
-					if (!response.ok) throw new Error(response.status);
-					return response.json();
-				})
-				.then((data) => {
-					setData(data);
-				});
-		}
-
-		if (getData() === null) {
-			loadData();
+		if (props.getData() === null) {
+			props.loadData();
 		}
 	}, [props]);
 
-	let data = getData();
+	let data = props.getData();
 	let loading = props.noloading === undefined
 		? <Loading />
 		: '';
@@ -44,3 +19,10 @@ export default function ContentToLoad(props) {
 		? loading
 		: props.renderData(data);
 }
+
+ContentToLoad.propTypes = {
+	getData: propTypes.func.isRequired,
+	loadData: propTypes.func.isRequired,
+	renderData: propTypes.func.isRequired,
+	noloading: propTypes.bool,
+};
