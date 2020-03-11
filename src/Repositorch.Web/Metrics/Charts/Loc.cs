@@ -17,15 +17,23 @@ namespace Repositorch.Web.Metrics.Charts
 				select new
 				{
 					date = cbc.Key,
-					loc = cbc.Sum()
+					loc_total = cbc.Sum(),
+					loc_added = cbc.Sum(x => x > 0 ? x : 0),
+					loc_removed = cbc.Sum(x => x < 0 ? -x : 0),
 				}).ToArray();
 
 			var loc = codeByDate.Select(c => new
 			{
 				date = c.date,
-				loc = codeByDate
+				locTotal = codeByDate
 					.Where(x => x.date <= c.date)
-					.Sum(x => x.loc)
+					.Sum(x => x.loc_total),
+				locAdded = codeByDate
+					.Where(x => x.date <= c.date)
+					.Sum(x => x.loc_added),
+				locRemoved = codeByDate
+					.Where(x => x.date <= c.date)
+					.Sum(x => x.loc_removed),
 			}).OrderBy(x => x.date).ToArray();
 
 			return loc;
