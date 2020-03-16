@@ -3,9 +3,9 @@ import {
 	LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import Moment from 'moment';
-import Metric from '../Metric';
+import Metric from '../../Metric';
 
-export default function Loc(props) {
+export default function Summary(props) {
 
 	const [settings, setSettings] = React.useState({
 		locTotal: true,
@@ -84,7 +84,7 @@ export default function Loc(props) {
 
 	return (
 		<Metric
-			title="Lines Of Code"
+			title="Lines Of Code Summary"
 			projectMetricPath={props.projectMetricPath}
 			renderData={renderData} />
 	);

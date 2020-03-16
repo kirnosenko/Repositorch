@@ -35,7 +35,7 @@ export default function NavMenuLinks() {
 			menu.map(item => {
 				var name = item.isMetric
 					? item.name
-					: <b>{item.name !== undefined ? item.name : "↑"}</b>;
+					: <b>{item.name !== null ? item.name : "↑"}</b>;
 				return (
 					<NavItem key={item.path}>
 						<NavLink

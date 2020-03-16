@@ -3,9 +3,9 @@ using Newtonsoft.Json.Linq;
 using Repositorch.Data;
 using Repositorch.Data.Entities;
 
-namespace Repositorch.Web.Metrics.Charts
+namespace Repositorch.Web.Metrics.Charts.LOC
 {
-	public class Loc : Metric
+	public class Summary : Metric
 	{
 		protected override object Calculate(ISession s, JObject input)
 		{

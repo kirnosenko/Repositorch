@@ -14,11 +14,11 @@ namespace Repositorch.Web.Controllers
 	public class MetricsController : ControllerBase
 	{
 		private IIndex<string,IMetric> metrics;
-		private IIndex<string,List<object>> metricsMenu;
+		private IIndex<string,List<MetricMenu.MetricMenuItem>> metricsMenu;
 		
 		public MetricsController(
 			IIndex<string,IMetric> metrics,
-			IIndex<string,List<object>> metricsMenu)
+			IIndex<string,List<MetricMenu.MetricMenuItem>> metricsMenu)
 		{
 			this.metrics = metrics;
 			this.metricsMenu = metricsMenu;
@@ -35,7 +35,7 @@ namespace Repositorch.Web.Controllers
 			}
 			else if (metrics.TryGetValue(path, out var metric))
 			{
-				var metricRootPath = metric.GetType().GetMetricRootPath();
+				var metricRootPath = MetricMenu.GetMetricRootPath(metric.GetType());
 				if (metricsMenu.TryGetValue(metricRootPath, out menu))
 				{
 					return Ok(menu);

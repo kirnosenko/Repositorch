@@ -103,60 +103,21 @@ namespace Repositorch.Web
 		private void RegisterMetricsAndMenusForThem(ContainerBuilder builder)
 		{
 			var metrics = Assembly.GetExecutingAssembly().GetTypes()
-				.Where(t => t.IsClass && t.IsAssignableTo<IMetric>())
+				.Where(t => t.IsClass && !t.IsAbstract && t.IsAssignableTo<IMetric>())
 				.ToArray();
-			Dictionary<string, List<object>> menus = new Dictionary<string, List<object>>();
 			
 			foreach (var metric in metrics)
 			{
-				var metricPath = metric.GetMetricPath();
+				var metricPath = MetricMenu.GetMetricPath(metric);
 				builder.RegisterType(metric)
 					.Keyed<IMetric>(metricPath);
-
-				var metricRootPath = metric.GetMetricRootPath();
-				if (!menus.ContainsKey(metricRootPath))
-				{
-					menus.Add(metricRootPath, new List<object>());
-				}
-				menus[metricRootPath].Add(new
-				{
-					Name = metric.Name,
-					Path = metricPath,
-					IsMetric = true
-				});
 			}
 
-			var rootPaths = new Stack<string>(menus.Keys
-				.OrderBy(x => x.Length));
-			while (rootPaths.Count > 1)
-			{
-				var path = rootPaths.Pop();
-				var root = rootPaths
-					.Where(x => path.StartsWith(x))
-					.OrderByDescending(x => x.Length)
-					.FirstOrDefault();
-				if (root != null)
-				{
-					menus[root].Add(new
-					{
-						Name = root != "/"
-							? path.Replace(root + '/', string.Empty)
-							: path.Replace("/", string.Empty),
-						Path = path,
-						IsMetric = false
-					});
-					menus[path].Add(new
-					{
-						Path = root,
-						IsMetric = false
-					});
-				}
-			}
-
+			var menus = MetricMenu.GetLinkedMetricMenu(metrics);
 			foreach (var m in menus)
 			{
 				builder.RegisterInstance(m.Value)
-					.Keyed<List<object>>(m.Key);
+					.Keyed<List<MetricMenu.MetricMenuItem>>(m.Key);
 			}
 		}
 	}
