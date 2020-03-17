@@ -17,9 +17,9 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 				select new
 				{
 					date = cbc.Key,
-					loc_total = cbc.Sum(),
-					loc_added = cbc.Sum(x => x > 0 ? x : 0),
-					loc_removed = cbc.Sum(x => x < 0 ? -x : 0),
+					locTotal = cbc.Sum(),
+					locAdded = cbc.Sum(x => x > 0 ? x : 0),
+					locRemoved = cbc.Sum(x => x < 0 ? -x : 0),
 				}).ToArray();
 
 			var loc = codeByDate.Select(c => new
@@ -27,13 +27,13 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 				date = c.date,
 				locTotal = codeByDate
 					.Where(x => x.date <= c.date)
-					.Sum(x => x.loc_total),
+					.Sum(x => x.locTotal),
 				locAdded = codeByDate
 					.Where(x => x.date <= c.date)
-					.Sum(x => x.loc_added),
+					.Sum(x => x.locAdded),
 				locRemoved = codeByDate
 					.Where(x => x.date <= c.date)
-					.Sum(x => x.loc_removed),
+					.Sum(x => x.locRemoved),
 			}).OrderBy(x => x.date).ToArray();
 
 			return loc;
