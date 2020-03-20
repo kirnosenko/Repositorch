@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using Autofac.Features.Indexed;
 using Microsoft.AspNetCore.Mvc;
@@ -46,29 +47,50 @@ namespace Repositorch.Web.Controllers
 		}
 
 		[HttpGet]
-		[Route("{project}/{metricPath}")]
-		public ActionResult<JObject> Calculate(
+		[Route("[action]/{project}/{metricPath}")]
+		public ActionResult<JObject> GetSettings(
 			[FromRoute]string project,
 			[FromRoute]string metricPath)
-		{
-			return Calculate(project, metricPath, null);
-		}
-
-		[HttpPost]
-		[Route("{project}/{metricPath}")]
-		public ActionResult<JObject> Calculate(
-			[FromRoute]string project, 
-			[FromRoute]string metricPath,
-			[FromBody]JObject input)
 		{
 			metricPath = Uri.UnescapeDataString(metricPath);
 
 			if (metrics.TryGetValue(metricPath, out var metric))
 			{
 				var data = new SqlServerDataStore(project);
-				var result = metric.Calculate(data, input);
+				using (var repository = data.OpenSession())
+				{
+					var result = metric.GetSettings(repository);
 
-				return Ok(result);
+					return Ok(result);
+				}
+			}
+
+			return BadRequest();
+		}
+
+		[HttpGet]
+		[Route("[action]/{project}/{metricPath}/{input?}")]
+		public ActionResult<JObject> Calculate(
+			[FromRoute]string project, 
+			[FromRoute]string metricPath,
+			[FromQuery]JObject input)
+		{
+			metricPath = Uri.UnescapeDataString(metricPath);
+
+			if (metrics.TryGetValue(metricPath, out var metric))
+			{
+				var data = new SqlServerDataStore(project);
+				using (var repository = data.OpenSession())
+				using (var time = TimeLogger.Start())
+				{
+					var result = metric.Calculate(repository, input);
+
+					return Ok(new
+					{
+						time = time.FormatedTime,
+						data = result
+					});
+				}
 			}
 
 			return BadRequest();

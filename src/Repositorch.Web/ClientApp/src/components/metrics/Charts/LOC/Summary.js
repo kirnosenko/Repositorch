@@ -3,25 +3,36 @@ import {
 	LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import Moment from 'moment';
-import Metric from '../../Metric';
+import MultiMetric from '../../MultiMetric';
 
 export default function Summary(props) {
 
-	const [settings, setSettings] = React.useState({
-		locTotal: true,
-		locAdded: false,
-		locRemoved: false
-	});
+	const [data, setData] = React.useState(null);
+	const [settings, setSettings] = React.useState(null);
+	const [authors, setAuthors] = React.useState(null);
 
 	function formatDate(date) {
 		return Moment(date).format('YYYY-MM-DD');
 	}
 
+	function setFormData(data) {
+		setSettings(data.settings);
+		setAuthors(data.authors);
+	}
+
 	function handleChange(evt) {
+		const value = evt.target.type === "checkbox"
+			? evt.target.checked
+			: evt.target.value;
 		setSettings({
 			...settings,
-			[evt.target.name]: evt.target.checked
+			[evt.target.name]: value
 		});
+	}
+
+	async function handleSubmit(event) {
+		event.preventDefault();
+		setData(null);
 	}
 
 	function renderSettings() {
@@ -41,10 +52,38 @@ export default function Summary(props) {
 		}
 
 		return (
-			<form className="form-inline" style={{ marginBottom: '1.5rem' }}>
-				{LocCheckBox("LOC total", "locTotal")}
-				{LocCheckBox("LOC added", "locAdded")}
-				{LocCheckBox("LOC removed", "locRemoved")}
+			<form onSubmit={handleSubmit}>
+				<div className="form-inline" style={{ marginBottom: '1.5rem' }}>
+					{LocCheckBox("LOC total", "locTotal")}
+					{LocCheckBox("LOC added", "locAdded")}
+					{LocCheckBox("LOC removed", "locRemoved")}
+				</div>
+				<div className="form-group">
+					<div className="heading">Author</div>
+					<select
+						className="custom-select"
+						name="author"
+						value={settings.author ?? ""}
+						onChange={handleChange} >
+						<option value="">Not selected</option>
+						<option value="Alan">Alan</option>
+						<option value="Bob">Bob</option>
+						<option value="Cris">Cris</option>
+					</select>
+				</div>
+				<div className="form-group">
+					<div className="heading">Path contains</div>
+					<input
+						type="text"
+						name="path"
+						value={settings.path}
+						onChange={handleChange} />
+				</div>
+				<button
+					type="submit"
+					className="btn btn-outline-dark btn-sm">
+					Update...
+				</button>
 			</form>
 		);
 	}
@@ -83,9 +122,13 @@ export default function Summary(props) {
 	}
 
 	return (
-		<Metric
+		<MultiMetric
 			title="Lines Of Code Summary"
 			projectMetricPath={props.projectMetricPath}
-			renderData={renderData} />
+			renderData={renderData}
+			getData={() => data}
+			setData={setData}
+			getSettings={() => settings}
+			setFormData={setFormData} />
 	);
 }

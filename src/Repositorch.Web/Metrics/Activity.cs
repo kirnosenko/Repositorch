@@ -11,25 +11,25 @@ namespace Repositorch.Web.Metrics
 {
 	public class Activity : Metric
 	{
-		protected override object Calculate(ISession s, JObject input)
+		public override object Calculate(IRepository repository, JObject input)
 		{
-			double totalLoc = s.SelectionDSL()
+			double totalLoc = repository.SelectionDSL()
 				.CodeBlocks().CalculateLOC();
 
 			var periodFrames = SplitPeriod(
-				s.GetReadOnly<Commit>().Min(x => x.Date),
-				s.GetReadOnly<Commit>().Max(x => x.Date));
+				repository.GetReadOnly<Commit>().Min(x => x.Date),
+				repository.GetReadOnly<Commit>().Max(x => x.Date));
 
 			var periods =
 				(from frame in periodFrames
-				 let commits = s.SelectionDSL().Commits()
+				 let commits = repository.SelectionDSL().Commits()
 					 .FromDate(frame.start)
 					 .BeforeDate(frame.end)
 					 .Fixed()
 				 let code = commits
 					 .Modifications().InCommits()
 					 .CodeBlocks().InModifications().Fixed()
-				 let totalCommits = s.SelectionDSL().Commits()
+				 let totalCommits = repository.SelectionDSL().Commits()
 					 .BeforeDate(frame.end)
 					 .Fixed()
 				 let totalCode = totalCommits
@@ -54,7 +54,7 @@ namespace Repositorch.Web.Metrics
 						 authorsCount,
 						 totalAuthorsCount
 					 ),
-					 files = lastRevision == null ? 0 : s.SelectionDSL()
+					 files = lastRevision == null ? 0 : repository.SelectionDSL()
 						 .Files().ExistInRevision(lastRevision).Count(),
 					 locAdded = string.Format("{0} ({1})",
 						 code.Added().CalculateLOC(),

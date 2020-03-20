@@ -9,21 +9,21 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 {
 	public class Remains : Metric
 	{
-		protected override object Calculate(ISession s, JObject input)
+		public override object Calculate(IRepository repository, JObject input)
 		{
-			var yearMin = s.Get<Commit>().Min(x => x.Date).Year;
-			var yearMax = s.Get<Commit>().Max(x => x.Date).Year;
+			var yearMin = repository.Get<Commit>().Min(x => x.Date).Year;
+			var yearMax = repository.Get<Commit>().Max(x => x.Date).Year;
 			var years = Enumerable.Range(yearMin, yearMax - yearMin + 1).ToArray();
 
 			var remainingСodeByDate = years.Select(year => new
 			{
 				year = year,
 				code = (
-					from c in s.GetReadOnly<Commit>()
-					join m in s.GetReadOnly<Modification>() on c.Id equals m.CommitId
-					join cb in s.GetReadOnly<CodeBlock>() on m.Id equals cb.ModificationId
-					join tcb in s.GetReadOnly<CodeBlock>() on cb.TargetCodeBlockId ?? cb.Id equals tcb.Id
-					join tcbc in s.GetReadOnly<Commit>() on tcb.AddedInitiallyInCommitId equals tcbc.Id
+					from c in repository.GetReadOnly<Commit>()
+					join m in repository.GetReadOnly<Modification>() on c.Id equals m.CommitId
+					join cb in repository.GetReadOnly<CodeBlock>() on m.Id equals cb.ModificationId
+					join tcb in repository.GetReadOnly<CodeBlock>() on cb.TargetCodeBlockId ?? cb.Id equals tcb.Id
+					join tcbc in repository.GetReadOnly<Commit>() on tcb.AddedInitiallyInCommitId equals tcbc.Id
 					where tcbc.Date.Year == year
 					group cb.Size by c.Date into cbc
 					select new

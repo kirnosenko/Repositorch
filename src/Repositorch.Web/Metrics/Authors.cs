@@ -10,34 +10,35 @@ namespace Repositorch.Web.Metrics
 {
 	public class Authors : Metric
 	{
-		protected override object Calculate(ISession s, JObject input)
+		public override object Calculate(IRepository repository, JObject input)
 		{
-			string revision = s.GetReadOnly<Commit>()
-				.OrderByDescending(x => x.OrderedNumber).First().Revision;
-			int commits = s.GetReadOnly<Commit>().Count();
-			var authorNames = s.GetReadOnly<Author>()
+			string revision = repository.GetReadOnly<Commit>()
+				.OrderByDescending(x => x.OrderedNumber)
+				.First().Revision;
+			int commits = repository.GetReadOnly<Commit>().Count();
+			var authorNames = repository.GetReadOnly<Author>()
 				.Select(x => x.Name).ToArray();
-			double totalLoc = s.SelectionDSL()
+			double totalLoc = repository.SelectionDSL()
 				.CodeBlocks().CalculateLOC();
-			int totalFiles = s.SelectionDSL()
+			int totalFiles = repository.SelectionDSL()
 				.Files().ExistInRevision(revision)
 				.Count();
 
 			var codeByAuthor = (from authorName in authorNames select new
 			{
 				Name = authorName,
-				AddedCode = s.SelectionDSL()
+				AddedCode = repository.SelectionDSL()
 					.Authors().NameIs(authorName)
 					.Commits().ByAuthors()
 					.CodeBlocks().AddedInitiallyInCommits()
 					.Fixed(),
-				RemovedCode = s.SelectionDSL()
+				RemovedCode = repository.SelectionDSL()
 					.Authors().NameIs(authorName)
 					.Commits().ByAuthors()
 					.Modifications().InCommits()
 					.CodeBlocks().InModifications().Removed()
 					.Fixed(),
-				TouchedFiles = s.SelectionDSL()
+				TouchedFiles = repository.SelectionDSL()
 					.Authors().NameIs(authorName)
 					.Commits().ByAuthors()
 					.Files().ExistInRevision(revision).TouchedInCommits()

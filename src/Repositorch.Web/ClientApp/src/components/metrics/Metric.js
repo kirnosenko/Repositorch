@@ -29,7 +29,7 @@ export default function Metric(props) {
 
 	return (
 		<ContentToLoadClosed
-			url={`api/Metrics/${props.projectMetricPath}`}
+			url={`api/Metrics/Calculate/${props.projectMetricPath}`}
 			renderData={renderMetric} />
 	);
 }

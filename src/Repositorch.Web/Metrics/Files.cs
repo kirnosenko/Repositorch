@@ -10,11 +10,12 @@ namespace Repositorch.Web.Metrics
 {
 	public class Files : Metric
 	{
-		protected override object Calculate(ISession s, JObject input)
+		public override object Calculate(IRepository repository, JObject input)
 		{
-			var revision = s.GetReadOnly<Commit>()
-				.OrderByDescending(x => x.OrderedNumber).First().Revision;
-			var files = s.SelectionDSL()
+			var revision = repository.GetReadOnly<Commit>()
+				.OrderByDescending(x => x.OrderedNumber)
+				.First().Revision;
+			var files = repository.SelectionDSL()
 				.Files().ExistInRevision(revision)
 				.Select(f => f.Path).ToArray();
 			var filesCount = files.Count();
@@ -28,7 +29,7 @@ namespace Repositorch.Web.Metrics
 
 			var exts =
 				(from ext in extensions
-				 let code = s.SelectionDSL()
+				 let code = repository.SelectionDSL()
 						 .Files().ExistInRevision(revision).PathEndsWith(ext)
 						 .Modifications().InFiles()
 						 .CodeBlocks().InModifications().Fixed()
@@ -46,7 +47,7 @@ namespace Repositorch.Web.Metrics
 
 			var dirs =
 				(from dir in directories
-				 let code = s.SelectionDSL()
+				 let code = repository.SelectionDSL()
 					 .Files().InDirectory(dir).ExistInRevision(revision)
 					 .Modifications().InFiles()
 					 .CodeBlocks().InModifications().Fixed()
