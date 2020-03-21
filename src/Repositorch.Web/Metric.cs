@@ -7,7 +7,7 @@ namespace Repositorch.Web
 	public interface IMetric
 	{
 		object GetSettings(IRepository repository);
-		object Calculate(IRepository repository, JObject input);
+		object Calculate(IRepository repository, JObject settings);
 	}
 
 	public abstract class Metric : IMetric
@@ -16,6 +16,6 @@ namespace Repositorch.Web
 		{
 			return null;
 		}
-		public abstract object Calculate(IRepository repository, JObject input);
+		public abstract object Calculate(IRepository repository, JObject settings);
 	}
 }

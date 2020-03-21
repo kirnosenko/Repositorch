@@ -22,6 +22,7 @@ export default function Summary(props) {
 				<Area
 					type="monotone"
 					name={title}
+					key={dataKey}
 					dataKey={dataKey}
 					stackId="1"
 					stroke={color}

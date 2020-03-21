@@ -45,7 +45,7 @@ namespace Repositorch.Web.Controllers
 
 			return Ok(Enumerable.Empty<string>());
 		}
-
+		
 		[HttpGet]
 		[Route("[action]/{project}/{metricPath}")]
 		public ActionResult<JObject> GetSettings(
@@ -69,11 +69,11 @@ namespace Repositorch.Web.Controllers
 		}
 
 		[HttpGet]
-		[Route("[action]/{project}/{metricPath}/{input?}")]
+		[Route("[action]/{project}/{metricPath}")]
 		public ActionResult<JObject> Calculate(
 			[FromRoute]string project, 
 			[FromRoute]string metricPath,
-			[FromQuery]JObject input)
+			[FromQuery]IDictionary<string, string> settings)
 		{
 			metricPath = Uri.UnescapeDataString(metricPath);
 
@@ -83,7 +83,7 @@ namespace Repositorch.Web.Controllers
 				using (var repository = data.OpenSession())
 				using (var time = TimeLogger.Start())
 				{
-					var result = metric.Calculate(repository, input);
+					var result = metric.Calculate(repository, JObject.FromObject(settings));
 
 					return Ok(new
 					{

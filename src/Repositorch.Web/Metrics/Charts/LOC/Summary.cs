@@ -2,6 +2,7 @@
 using Newtonsoft.Json.Linq;
 using Repositorch.Data;
 using Repositorch.Data.Entities;
+using Repositorch.Data.Entities.DSL.Selection;
 
 namespace Repositorch.Web.Metrics.Charts.LOC
 {
@@ -25,8 +26,8 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 					LocTotal = true,
 					LocAdded = false,
 					LocRemoved = false,
-					Author = null,
-					Path = null,
+					Author = string.Empty,
+					Path = string.Empty,
 				},
 				authors = repository.GetReadOnly<Author>()
 					.Select(x => x.Name)
@@ -37,9 +38,20 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 		{
 			var settings = input.ToObject<Settings>();
 
+			var commits = string.IsNullOrEmpty(settings.Author)
+				? repository.GetReadOnly<Commit>()
+				: repository.SelectionDSL()
+					.Authors().NameIs(settings.Author)
+					.Commits().ByAuthors();
+			var modifications = string.IsNullOrEmpty(settings.Path)
+				? repository.GetReadOnly<Modification>()
+				: repository.SelectionDSL()
+					.Files().PathContains(settings.Path)
+					.Modifications().InFiles();
+
 			var codeByDate = (
-				from c in repository.GetReadOnly<Commit>()
-				join m in repository.GetReadOnly<Modification>() on c.Id equals m.CommitId
+				from c in commits
+				join m in modifications on c.Id equals m.CommitId
 				join cb in repository.GetReadOnly<CodeBlock>() on m.Id equals cb.ModificationId
 				group cb.Size by c.Date into cbc
 				select new

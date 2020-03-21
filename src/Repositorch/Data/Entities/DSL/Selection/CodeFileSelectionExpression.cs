@@ -68,6 +68,12 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				s.Where(x => x.Path == filePath)
 			);
 		}
+		public CodeFileSelectionExpression PathContains(string path)
+		{
+			return Reselect(s =>
+				s.Where(x => x.Path.Contains(path))
+			);
+		}
 		public CodeFileSelectionExpression InDirectory(string dirPath)
 		{
 			if (! dirPath.EndsWith("/"))

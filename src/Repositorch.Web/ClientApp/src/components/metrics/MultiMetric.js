@@ -12,11 +12,16 @@ export default function Metric(props) {
 		var settings = props.getSettings();
 		if (settings !== null) {
 			url = metricUrl;
-			if (Object.keys(settings).length > 0) {
-				var params = Object.keys(settings)
-					.map(k => encodeURIComponent(k) + '=' + encodeURIComponent(settings[k]))
+			var keys = Object.keys(settings).filter(k => {
+				var value = settings[k];
+				return value !== null && value !== '' && value !== false && value !== 0
+			});
+			if (keys.length > 0) {
+				var params = keys
+					.map(k =>
+						encodeURIComponent(k) + '=' + encodeURIComponent(settings[k]))
 					.join('&');
-				url = url.concat('/', params)
+				url = url.concat('?', params)
 			}
 		}
 		var response = await fetch(url);

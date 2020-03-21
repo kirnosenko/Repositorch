@@ -4,95 +4,30 @@ import {
 } from 'recharts';
 import Moment from 'moment';
 import MultiMetric from '../../MultiMetric';
+import SummaryForm from './SummaryForm';
 
 export default function Summary(props) {
 
 	const [data, setData] = React.useState(null);
-	const [settings, setSettings] = React.useState(null);
-	const [authors, setAuthors] = React.useState(null);
-
+	const [formData, setFormData] = React.useState(null);
+	
 	function formatDate(date) {
 		return Moment(date).format('YYYY-MM-DD');
 	}
 
-	function setFormData(data) {
-		setSettings(data.settings);
-		setAuthors(data.authors);
-	}
-
-	function handleChange(evt) {
-		const value = evt.target.type === "checkbox"
-			? evt.target.checked
-			: evt.target.value;
-		setSettings({
-			...settings,
-			[evt.target.name]: value
+	function updateSettings(settings) {
+		setFormData({
+			...formData,
+			settings: settings
 		});
-	}
-
-	async function handleSubmit(event) {
-		event.preventDefault();
 		setData(null);
-	}
-
-	function renderSettings() {
-
-		function LocCheckBox(title, dataKey) {
-			return (
-				<div className="form-group form-check" style={{ marginRight: '.5rem' }}>
-					<input
-						type="checkbox"
-						className="form-check-input"
-						name={dataKey}
-						checked={settings[dataKey]}
-						onChange={handleChange} />
-					<label className="form-check-label">{title}</label>
-				</div>
-			);
-		}
-
-		return (
-			<form onSubmit={handleSubmit}>
-				<div className="form-inline" style={{ marginBottom: '1.5rem' }}>
-					{LocCheckBox("LOC total", "locTotal")}
-					{LocCheckBox("LOC added", "locAdded")}
-					{LocCheckBox("LOC removed", "locRemoved")}
-				</div>
-				<div className="form-group">
-					<div className="heading">Author</div>
-					<select
-						className="custom-select"
-						name="author"
-						value={settings.author ?? ""}
-						onChange={handleChange} >
-						<option value="">Not selected</option>
-						<option value="Alan">Alan</option>
-						<option value="Bob">Bob</option>
-						<option value="Cris">Cris</option>
-					</select>
-				</div>
-				<div className="form-group">
-					<div className="heading">Path contains</div>
-					<input
-						type="text"
-						name="path"
-						value={settings.path}
-						onChange={handleChange} />
-				</div>
-				<button
-					type="submit"
-					className="btn btn-outline-dark btn-sm">
-					Update...
-				</button>
-			</form>
-		);
 	}
 
 	function renderData(data) {
 
 		function LocLine(title, dataKey, color) {
 			return (
-				settings[dataKey] ?
+				formData.settings[dataKey] ?
 					<Line
 						type="monotone"
 						name={title}
@@ -104,7 +39,9 @@ export default function Summary(props) {
 
 		return (
 			<Fragment>
-				{renderSettings()}
+				<SummaryForm
+					data={formData}
+					useData={s => updateSettings(s)} />
 				<ResponsiveContainer aspect={2} >
 					<LineChart data={data}>
 						<CartesianGrid strokeDasharray="3 3" />
@@ -128,7 +65,7 @@ export default function Summary(props) {
 			renderData={renderData}
 			getData={() => data}
 			setData={setData}
-			getSettings={() => settings}
+			getSettings={() => formData !== null ? formData.settings : null}
 			setFormData={setFormData} />
 	);
 }
