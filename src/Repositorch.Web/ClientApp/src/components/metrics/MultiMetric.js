@@ -1,5 +1,6 @@
-﻿import React, { Fragment } from 'react';
+﻿import React from 'react';
 import propTypes from 'prop-types';
+import { metricLayout } from './functions';
 import ContentToLoad from '../ContentToLoad';
 
 export default function MultiMetric(props) {
@@ -36,37 +37,14 @@ export default function MultiMetric(props) {
 		props.setData(json);
 	}
 
-	function getMetricTime(metric) {
-		if (metric.time !== undefined) {
-			if (metric.time === null) {
-				return 'from cache';
-			}
-			else {
-				return metric.time;
-			}
-		}
-
-		return 'unknown';
-	}
-
-	function renderMetric(metric) {
-		return (
-			<Fragment>
-				<p>
-					<b>{props.title}</b>
-					&nbsp;
-					<small>(generation time: {getMetricTime(metric)})</small>
-				</p>
-				{props.renderMetric(metric)}
-			</Fragment>
-		);
-	}
-
 	return (
 		<ContentToLoad
 			getData={getData}
 			loadData={loadMetric}
-			renderData={renderMetric} />
+			renderData={(metric) => metricLayout(
+				props.title,
+				metric.time,
+				props.renderMetric(metric))} />
 	);
 }
 
