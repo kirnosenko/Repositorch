@@ -1,16 +1,16 @@
 ﻿import React, { Fragment } from 'react';
 import Metric from './Metric';
 
-function renderData(data) {
+function renderResult(result) {
 	return (
 		<Fragment>
-			Statistics period: from {data.periodFrom} to {data.periodTo} ({data.periodDays} days, {data.periodYears} years)
-			<br />Number of authors: {data.authors}
-			<br />Number of commits: {data.commits}
-			<br />Number of fix commits: {data.commitsFix} ({data.commitsFixPercent} %)
-			<br />Number of refactoring commits: {data.commitsRefactoring} ({data.commitsRefactoringPercent} %)
-			<br />Number of files: {data.files} ({data.filesAdded} added, {data.filesRemoved} removed)
-			<br />Number of LOC: {data.loc} ({data.locAdded} added, {data.locRemoved} removed)
+			Statistics period: from {result.periodFrom} to {result.periodTo} ({result.periodDays} days, {result.periodYears} years)
+			<br />Number of authors: {result.authors}
+			<br />Number of commits: {result.commits}
+			<br />Number of fix commits: {result.commitsFix} ({result.commitsFixPercent} %)
+			<br />Number of refactoring commits: {result.commitsRefactoring} ({result.commitsRefactoringPercent} %)
+			<br />Number of files: {result.files} ({result.filesAdded} added, {result.filesRemoved} removed)
+			<br />Number of LOC: {result.loc} ({result.locAdded} added, {result.locRemoved} removed)
 		</Fragment>
 	);
 }
@@ -20,6 +20,6 @@ export default function Summary(props) {
 		<Metric
 			title="Summary"
 			projectMetricPath={props.projectMetricPath}
-			renderData={renderData} />
+			renderResult={renderResult} />
 	);
 }

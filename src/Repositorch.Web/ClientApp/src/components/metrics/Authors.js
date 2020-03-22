@@ -2,7 +2,7 @@
 import Metric from './Metric';
 import SortableTable from '../table/SortableTable';
 
-function renderData(data) {
+function renderResult(result) {
 
 	const columns = [
 		{ header: 'Author', key: 'name' },
@@ -20,7 +20,7 @@ function renderData(data) {
 
 	return (
 		<SortableTable
-			data={data}
+			data={result}
 			columns={columns}
 			className="table table-striped table-sm" />
 	);
@@ -31,6 +31,6 @@ export default function Authors(props) {
 		<Metric
 			title="Authors"
 			projectMetricPath={props.projectMetricPath}
-			renderData={renderData} />
+			renderResult={renderResult} />
 	);
 }

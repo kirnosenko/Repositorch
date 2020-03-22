@@ -1,4 +1,5 @@
 ﻿import React, { Fragment } from 'react';
+import propTypes from 'prop-types';
 import ContentToLoadClosed from '../ContentToLoadClosed';
 
 export default function Metric(props) {
@@ -22,14 +23,20 @@ export default function Metric(props) {
 					&nbsp;
 					<small>(generation time: {time})</small>
 				</p>
-				{props.renderData(metric.data)}
+				{props.renderResult(metric.result)}
 			</Fragment>
 		);
 	}
 
 	return (
 		<ContentToLoadClosed
-			url={`api/Metrics/Calculate/${props.projectMetricPath}`}
+			url={`api/Metrics/${props.projectMetricPath}`}
 			renderData={renderMetric} />
 	);
 }
+
+Metric.propTypes = {
+	title: propTypes.string.isRequired,
+	projectMetricPath: propTypes.string.isRequired,
+	renderResult: propTypes.func.isRequired
+};

@@ -9,25 +9,28 @@ import SummaryForm from './SummaryForm';
 export default function Summary(props) {
 
 	const [data, setData] = React.useState(null);
-	const [formData, setFormData] = React.useState(null);
 	
 	function formatDate(date) {
 		return Moment(date).format('YYYY-MM-DD');
 	}
 
-	function updateSettings(settings) {
-		setFormData({
-			...formData,
-			settings: settings
+	function updateData(data) {
+		setData((prevState, props) => {
+			if (prevState === null) {
+				return data;
+			}
+			return {
+				...prevState,
+				...data
+			};
 		});
-		setData(null);
 	}
 
-	function renderData(data) {
+	function renderMetric(data) {
 
 		function LocLine(title, dataKey, color) {
 			return (
-				formData.settings[dataKey] ?
+				data.settings[dataKey] ?
 					<Line
 						type="monotone"
 						name={title}
@@ -40,10 +43,10 @@ export default function Summary(props) {
 		return (
 			<Fragment>
 				<SummaryForm
-					data={formData}
-					useData={s => updateSettings(s)} />
+					data={data}
+					updateData={updateData} />
 				<ResponsiveContainer aspect={2} >
-					<LineChart data={data}>
+					<LineChart data={data.result}>
 						<CartesianGrid strokeDasharray="3 3" />
 						<XAxis dataKey="date" tickFormatter={formatDate} />
 						<YAxis />
@@ -62,10 +65,8 @@ export default function Summary(props) {
 		<MultiMetric
 			title="Lines Of Code Summary"
 			projectMetricPath={props.projectMetricPath}
-			renderData={renderData}
+			renderMetric={renderMetric}
 			getData={() => data}
-			setData={setData}
-			getSettings={() => formData !== null ? formData.settings : null}
-			setFormData={setFormData} />
+			setData={updateData} />
 	);
 }

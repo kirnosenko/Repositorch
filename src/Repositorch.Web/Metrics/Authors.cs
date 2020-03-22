@@ -10,7 +10,7 @@ namespace Repositorch.Web.Metrics
 {
 	public class Authors : Metric
 	{
-		public override object Calculate(IRepository repository, JObject input)
+		public override object Calculate(IRepository repository, JObject settings)
 		{
 			string revision = repository.GetReadOnly<Commit>()
 				.OrderByDescending(x => x.OrderedNumber)

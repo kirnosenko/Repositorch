@@ -2,7 +2,7 @@
 import Metric from './Metric';
 import SortableTable from '../table/SortableTable';
 
-function renderData(data) {
+function renderResult(result) {
 
 	const columnsExts = [
 		{ header: 'Extension', key: 'name' },
@@ -23,11 +23,11 @@ function renderData(data) {
 	return (
 		<Fragment>
 			<SortableTable
-				data={data.exts}
+				data={result.exts}
 				columns={columnsExts}
 				className="table table-striped table-sm" />
 			<SortableTable
-				data={data.dirs}
+				data={result.dirs}
 				columns={columnsDirs}
 				className="table table-striped table-sm" />
 		</Fragment>
@@ -39,6 +39,6 @@ export default function Files(props) {
 		<Metric
 			title="Files"
 			projectMetricPath={props.projectMetricPath}
-			renderData={renderData} />
+			renderResult={renderResult} />
 	);
 }

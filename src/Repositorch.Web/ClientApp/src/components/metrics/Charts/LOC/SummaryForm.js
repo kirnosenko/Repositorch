@@ -4,7 +4,7 @@ import propTypes from 'prop-types';
 export default function SummaryForm(props) {
 
 	const [settings, setSettings] = React.useState(props.data.settings);
-	const authors = props.data.authors;
+	const authors = props.data.formData.authors;
 
 	function handleChange(evt) {
 		const value = evt.target.type === "checkbox"
@@ -18,7 +18,10 @@ export default function SummaryForm(props) {
 
 	async function handleSubmit(event) {
 		event.preventDefault();
-		props.useData(settings);
+		props.updateData({
+			settings: settings,
+			result: null
+		});
 	}
 
 	function LocCheckBox(title, dataKey) {
@@ -74,5 +77,5 @@ export default function SummaryForm(props) {
 
 SummaryForm.propTypes = {
 	data: propTypes.object.isRequired,
-	useData: propTypes.func.isRequired
+	updateData: propTypes.func.isRequired
 };

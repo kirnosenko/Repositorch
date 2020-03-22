@@ -15,7 +15,7 @@ export default function Summary(props) {
 		return Moment(date).format('YYYY-MM-DD');
 	}
 
-	function renderData(data) {
+	function renderResult(result) {
 
 		function LocLine(title, dataKey, color) {
 			return (
@@ -33,13 +33,13 @@ export default function Summary(props) {
 		return (
 			<Fragment>
 				<ResponsiveContainer aspect={2} >
-					<AreaChart data={data.values}>
+					<AreaChart data={result.values}>
 						<CartesianGrid strokeDasharray="3 3" />
 						<XAxis dataKey="date" tickFormatter={formatDate} />
 						<YAxis />
 						<Tooltip />
 						<Legend />
-						{data.keys.map((key, index) => {
+						{result.keys.map((key, index) => {
 							return LocLine(key, key, colors[index]);
 						})}
 					</AreaChart>
@@ -52,6 +52,6 @@ export default function Summary(props) {
 		<Metric
 			title="Lines Of Code Remains (Burn Down)"
 			projectMetricPath={props.projectMetricPath}
-			renderData={renderData} />
+			renderResult={renderResult} />
 	);
 }

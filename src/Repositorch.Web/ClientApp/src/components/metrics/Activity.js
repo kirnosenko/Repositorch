@@ -2,7 +2,7 @@
 import Metric from './Metric';
 import SortableTable from '../table/SortableTable';
 
-function renderData(data) {
+function renderResult(result) {
 
 	const columns = [
 		{ header: 'Period', key: 'period' },
@@ -16,7 +16,7 @@ function renderData(data) {
 
 	return (
 		<SortableTable
-			data={data}
+			data={result}
 			columns={columns}
 			className="table table-striped table-sm" />
 	);
@@ -27,6 +27,6 @@ export default function Activity(props) {
 		<Metric
 			title="Activity"
 			projectMetricPath={props.projectMetricPath}
-			renderData={renderData} />
+			renderResult={renderResult} />
 	);
 }

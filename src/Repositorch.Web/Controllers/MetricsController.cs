@@ -45,51 +45,51 @@ namespace Repositorch.Web.Controllers
 
 			return Ok(Enumerable.Empty<string>());
 		}
-		
-		[HttpGet]
-		[Route("[action]/{project}/{metricPath}")]
-		public ActionResult<JObject> GetSettings(
-			[FromRoute]string project,
-			[FromRoute]string metricPath)
-		{
-			metricPath = Uri.UnescapeDataString(metricPath);
-
-			if (metrics.TryGetValue(metricPath, out var metric))
-			{
-				var data = new SqlServerDataStore(project);
-				using (var repository = data.OpenSession())
-				{
-					var result = metric.GetSettings(repository);
-
-					return Ok(result);
-				}
-			}
-
-			return BadRequest();
-		}
 
 		[HttpGet]
-		[Route("[action]/{project}/{metricPath}")]
+		[Route("{project}/{metricPath}")]
 		public ActionResult<JObject> Calculate(
 			[FromRoute]string project, 
 			[FromRoute]string metricPath,
-			[FromQuery]IDictionary<string, string> settings)
+			[FromQuery]IDictionary<string, string> parameters)
 		{
 			metricPath = Uri.UnescapeDataString(metricPath);
-
+			
 			if (metrics.TryGetValue(metricPath, out var metric))
 			{
 				var data = new SqlServerDataStore(project);
 				using (var repository = data.OpenSession())
 				using (var time = TimeLogger.Start())
 				{
-					var result = metric.Calculate(repository, JObject.FromObject(settings));
+					var settingsObject = parameters.Count > 0
+						? parameters.ToDictionary(
+							x => x.Key,
+							x => Uri.UnescapeDataString(x.Value))
+						: metric.GetDefaultSettings(repository);
+					var settings = settingsObject != null
+						? JObject.FromObject(settingsObject)
+						: null;
+					var result = metric.Calculate(repository, settings);
 
-					return Ok(new
+					Dictionary<string, object> metricData = new Dictionary<string, object>()
 					{
-						time = time.FormatedTime,
-						data = result
-					});
+						{ nameof(result), result }
+					};
+					if (parameters.Count == 0 && settings != null)
+					{
+						metricData.Add(nameof(settings), settings);
+					}
+					if (parameters.Count == 0)
+					{
+						var formData = metric.GetFormData(repository);
+						if (formData != null)
+						{
+							metricData.Add(nameof(formData), formData);
+						}
+					}
+					metricData.Add(nameof(time), time.FormatedTime);
+
+					return Ok(metricData);
 				}
 			}
 

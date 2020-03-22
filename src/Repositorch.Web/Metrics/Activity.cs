@@ -11,7 +11,7 @@ namespace Repositorch.Web.Metrics
 {
 	public class Activity : Metric
 	{
-		public override object Calculate(IRepository repository, JObject input)
+		public override object Calculate(IRepository repository, JObject settings)
 		{
 			double totalLoc = repository.SelectionDSL()
 				.CodeBlocks().CalculateLOC();

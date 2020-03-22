@@ -10,43 +10,46 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 	{
 		private class Settings
 		{
-			public bool LocTotal { get; set; }
-			public bool LocAdded { get; set; }
-			public bool LocRemoved { get; set; }
-			public string Author { get; set; }
-			public string Path { get; set; }
+			public bool locTotal { get; set; }
+			public bool locAdded { get; set; }
+			public bool locRemoved { get; set; }
+			public string author { get; set; }
+			public string path { get; set; }
 		}
 
-		public override object GetSettings(IRepository repository)
+		public override object GetDefaultSettings(IRepository repository)
+		{
+			return new Settings()
+			{
+				locTotal = true,
+				locAdded = false,
+				locRemoved = false,
+				author = string.Empty,
+				path = string.Empty,
+			};
+		}
+		public override object GetFormData(IRepository repository)
 		{
 			return new
 			{
-				settings = new Settings()
-				{
-					LocTotal = true,
-					LocAdded = false,
-					LocRemoved = false,
-					Author = string.Empty,
-					Path = string.Empty,
-				},
 				authors = repository.GetReadOnly<Author>()
 					.Select(x => x.Name)
 					.ToArray(),
 			};
 		}
-		public override object Calculate(IRepository repository, JObject input)
+		public override object Calculate(IRepository repository, JObject jsettings)
 		{
-			var settings = input.ToObject<Settings>();
+			var settings = jsettings.ToObject<Settings>();
 
-			var commits = string.IsNullOrEmpty(settings.Author)
+			var commits = string.IsNullOrEmpty(settings.author)
 				? repository.GetReadOnly<Commit>()
 				: repository.SelectionDSL()
-					.Authors().NameIs(settings.Author)
+					.Authors().NameIs(settings.author)
 					.Commits().ByAuthors();
-			var modifications = string.IsNullOrEmpty(settings.Path)
+			var modifications = string.IsNullOrEmpty(settings.path)
 				? repository.GetReadOnly<Modification>()
 				: repository.SelectionDSL()
-					.Files().PathContains(settings.Path)
+					.Files().PathContains(settings.path)
 					.Modifications().InFiles();
 
 			var codeByDate = (

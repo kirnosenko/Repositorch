@@ -9,7 +9,7 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 {
 	public class Remains : Metric
 	{
-		public override object Calculate(IRepository repository, JObject input)
+		public override object Calculate(IRepository repository, JObject settings)
 		{
 			var yearMin = repository.Get<Commit>().Min(x => x.Date).Year;
 			var yearMax = repository.Get<Commit>().Max(x => x.Date).Year;
