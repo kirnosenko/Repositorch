@@ -2,7 +2,7 @@
 import {
 	LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
-import Moment from 'moment';
+import { getColors, formatDate } from '../functions';
 import MultiMetric from '../../MultiMetric';
 import SummaryForm from './SummaryForm';
 
@@ -10,10 +10,6 @@ export default function Summary(props) {
 
 	const [data, setData] = React.useState(null);
 	
-	function formatDate(date) {
-		return Moment(date).format('YYYY-MM-DD');
-	}
-
 	function updateData(data) {
 		setData((prevState, props) => {
 			if (prevState === null) {
@@ -40,6 +36,8 @@ export default function Summary(props) {
 			);
 		}
 
+		var colors = getColors(3);
+
 		return (
 			<Fragment>
 				<SummaryForm
@@ -52,9 +50,9 @@ export default function Summary(props) {
 						<YAxis />
 						<Tooltip />
 						<Legend />
-						{LocLine("LOC total", "locTotal", "#0000FF")}
-						{LocLine("LOC added", "locAdded", "#00FF00")}
-						{LocLine("LOC removed", "locRemoved", "#FF0000")}
+						{LocLine("LOC total", "locTotal", colors[0])}
+						{LocLine("LOC added", "locAdded", colors[1])}
+						{LocLine("LOC removed", "locRemoved", colors[2])}
 					</LineChart>
 				</ResponsiveContainer>
 			</Fragment>

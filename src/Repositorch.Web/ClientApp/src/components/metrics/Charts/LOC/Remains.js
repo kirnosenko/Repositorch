@@ -2,18 +2,10 @@
 import {
 	AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
-import Moment from 'moment';
+import { getColors, formatDate } from '../functions';
 import Metric from '../../Metric';
 
 export default function Summary(props) {
-
-	const colors = [
-		"#0000FF", "#00FF00", "#FF0000"
-	];
-
-	function formatDate(date) {
-		return Moment(date).format('YYYY-MM-DD');
-	}
 
 	function renderResult(result) {
 
@@ -29,6 +21,8 @@ export default function Summary(props) {
 					fill={color} />
 			);
 		}
+
+		var colors = getColors(result.keys.lenght);
 
 		return (
 			<Fragment>

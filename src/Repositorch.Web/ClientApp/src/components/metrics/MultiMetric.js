@@ -72,8 +72,8 @@ export default function MultiMetric(props) {
 
 MultiMetric.propTypes = {
 	title: propTypes.string.isRequired,
-	renderMetric: propTypes.func.isRequired,
 	projectMetricPath: propTypes.string.isRequired,
+	renderMetric: propTypes.func.isRequired,
 	getData: propTypes.func.isRequired,
 	setData: propTypes.func.isRequired
 };
