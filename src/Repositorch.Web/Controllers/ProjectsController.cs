@@ -17,7 +17,7 @@ namespace Repositorch.Web.Controllers
 	public class ProjectsController : ControllerBase
     {
 		private static readonly Regex ProjectNameRegExp = new Regex(@"^[a-zA-Z0-9\-\._\~]*$");
-		private readonly LiteCollection<ProjectSettings> projects;
+		private readonly ILiteCollection<ProjectSettings> projects;
 
 		public ProjectsController(LiteDatabase liteDb)
 		{
@@ -77,7 +77,7 @@ namespace Repositorch.Web.Controllers
 		[Route("[action]/{name}")]
 		public IActionResult Remove([FromRoute]string name)
 		{
-			if (projects.Delete(x => x.Name == name) == 0)
+			if (projects.Delete(new BsonValue(name)))
 			{
 				return BadRequest();
 			}
