@@ -59,17 +59,29 @@ export default function ProjectList() {
 	}
 
 	React.useEffect(() => {
-		if (connection === null) {
-			var nc = new signalR.HubConnectionBuilder()
-				.withUrl('/Hubs/Mapping').build();
-			nc.start().then(_ => {
-				nc.on('Progress', (project, progress, error, working) => {
-					dispatch(updateMapping(project, progress, error, working));
-				});
-			});
-			setConnection(nc);
+		let isMouted = true;
+
+		async function connect() {
+			if (connection === null) {
+				var nc = new signalR.HubConnectionBuilder()
+					.withUrl('/Hubs/Mapping').build();
+				await nc.start();
+				if (isMouted) {
+					nc.on('Progress', (project, progress, error, working) => {
+						dispatch(updateMapping(project, progress, error, working));
+					});
+					setConnection(nc);
+				}
+				else {
+					nc.stop();
+				}
+			}
 		}
+
+		connect();
+
 		return () => {
+			isMouted = false;
 			if (connection !== null) {
 				connection.off('Progress');
 				connection.stop();
