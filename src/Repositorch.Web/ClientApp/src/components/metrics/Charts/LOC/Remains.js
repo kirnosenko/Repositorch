@@ -22,7 +22,7 @@ export default function Summary(props) {
 			);
 		}
 
-		var colors = getColors(result.keys.lenght);
+		var colors = getColors(result.keys.length);
 
 		return (
 			<Fragment>
