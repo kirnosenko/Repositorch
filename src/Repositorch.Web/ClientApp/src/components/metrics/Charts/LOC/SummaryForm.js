@@ -1,19 +1,26 @@
 ﻿import React from 'react';
+import DatePicker from "react-datepicker";
+import Moment from 'moment';
 import propTypes from 'prop-types';
+import "react-datepicker/dist/react-datepicker.css";
 
 export default function SummaryForm(props) {
 
 	const [settings, setSettings] = React.useState(props.data.settings);
 	const authors = props.data.formData.authors;
 
+	function updateSettings(name, value) {
+		setSettings({
+			...settings,
+			[name]: value
+		});
+	}
+
 	function handleChange(evt) {
 		const value = evt.target.type === "checkbox"
 			? evt.target.checked
 			: evt.target.value;
-		setSettings({
-			...settings,
-			[evt.target.name]: value
-		});
+		updateSettings(evt.target.name, value);
 	}
 
 	async function handleSubmit(event) {
@@ -65,6 +72,18 @@ export default function SummaryForm(props) {
 					name="path"
 					value={settings.path}
 					onChange={handleChange} />
+			</div>
+			<div className="form-group">
+				<div className="heading">From date</div>
+				<DatePicker
+					selected={Moment.unix(settings.dateFrom).toDate()}
+					onChange={(date) => updateSettings("dateFrom", Moment(date).unix())} />
+			</div>
+			<div className="form-group">
+				<div className="heading">Till date</div>
+				<DatePicker
+					selected={Moment.unix(settings.dateTo).toDate()}
+					onChange={(date) => updateSettings("dateTo", Moment(date).unix())} />
 			</div>
 			<button
 				type="submit"

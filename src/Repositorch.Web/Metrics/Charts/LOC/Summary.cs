@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Newtonsoft.Json.Linq;
 using Repositorch.Data;
 using Repositorch.Data.Entities;
@@ -15,6 +16,8 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 			public bool locRemoved { get; set; }
 			public string author { get; set; }
 			public string path { get; set; }
+			public long dateFrom { get; set; }
+			public long dateTo { get; set; }
 		}
 
 		public override object GetDefaultSettings(IRepository repository)
@@ -26,6 +29,10 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 				locRemoved = false,
 				author = string.Empty,
 				path = string.Empty,
+				dateFrom = new DateTimeOffset(repository.GetReadOnly<Commit>()
+					.Min(x => x.Date)).ToUnixTimeSeconds(),
+				dateTo = new DateTimeOffset(repository.GetReadOnly<Commit>()
+					.Max(x => x.Date)).ToUnixTimeSeconds()
 			};
 		}
 		public override object GetFormData(IRepository repository)
@@ -46,6 +53,7 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 				: repository.SelectionDSL()
 					.Authors().NameIs(settings.author)
 					.Commits().ByAuthors();
+
 			var modifications = string.IsNullOrEmpty(settings.path)
 				? repository.GetReadOnly<Modification>()
 				: repository.SelectionDSL()
