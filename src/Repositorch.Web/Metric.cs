@@ -6,18 +6,13 @@ namespace Repositorch.Web
 {
 	public interface IMetric
 	{
-		object GetDefaultSettings(IRepository repository);
-		object GetFormData(IRepository repository);
+		object GetSettings(IRepository repository);
 		object Calculate(IRepository repository, JObject settings);
 	}
 
 	public abstract class Metric : IMetric
 	{
-		public virtual object GetDefaultSettings(IRepository repository)
-		{
-			return null;
-		}
-		public virtual object GetFormData(IRepository repository)
+		public virtual object GetSettings(IRepository repository)
 		{
 			return null;
 		}

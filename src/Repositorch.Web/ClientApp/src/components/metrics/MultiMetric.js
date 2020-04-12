@@ -18,12 +18,9 @@ export default function MultiMetric(props) {
 	async function loadMetric() {
 		var url = metricUrl;
 		var data = props.getData();
-		var settings = data !== null ? data.settings : null;
+		var settings = data !== null ? data.settingsDelta : null;
 		if (settings !== null) {
-			var keys = Object.keys(settings).filter(k => {
-				var value = settings[k];
-				return value !== null && value !== '' && value !== false && value !== 0
-			});
+			var keys = Object.keys(settings);
 			if (keys.length > 0) {
 				var params = keys
 					.map(k => k + '=' + encodeURIComponent(settings[k]))

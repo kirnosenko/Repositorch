@@ -9,21 +9,47 @@ import SummaryForm from './SummaryForm';
 export default function Summary(props) {
 
 	const [data, setData] = React.useState(null);
-	
+
+	function updateSettings(settings) {
+		var settingsDelta = {};
+		Object.keys(data.settings).forEach(key => {
+			if (data.settings[key] !== settings[key]) {
+				settingsDelta[key] = settings[key];
+			}
+		});
+		updateData({
+			settings: settingsDelta,
+			settingsDelta: settingsDelta,
+			result: null
+		})
+	}
+
 	function updateData(data) {
 		setData((prevState, props) => {
 			if (prevState === null) {
 				return data;
 			}
-			return {
-				...prevState,
-				...data
-			};
+			return updateObject({ ...prevState }, data);
 		});
 	}
 
-	function renderMetric(data) {
+	function updateObject(dest, src) {
+		Object.keys(src).forEach(key => {
+			var value = src[key];
+			if (dest[key] === undefined
+				|| dest[key] === null
+				|| value === null
+				|| typeof value != "object") {
+				dest[key] = value
+			}
+			else {
+				updateObject(dest[key], value)
+			}
+		});
+		return dest;
+	}
 
+	function renderMetric(data) {	
 		function LocLine(title, dataKey, color) {
 			return (
 				data.settings[dataKey] ?
@@ -41,8 +67,8 @@ export default function Summary(props) {
 		return (
 			<Fragment>
 				<SummaryForm
-					data={data}
-					updateData={updateData} />
+					settings={data.settings}
+					updateSettings={updateSettings} />
 				<ResponsiveContainer aspect={2} >
 					<LineChart data={data.result}>
 						<CartesianGrid strokeDasharray="3 3" />

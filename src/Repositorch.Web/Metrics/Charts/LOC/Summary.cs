@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Repositorch.Data;
 using Repositorch.Data.Entities;
@@ -9,36 +10,36 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 {
 	public class Summary : Metric
 	{
-		private class Settings
+		private class SettingsIn
+		{
+			public string author { get; set; }
+			public string path { get; set; }
+		}
+
+		private class SettingsOut : SettingsIn
 		{
 			public bool locTotal { get; set; }
 			public bool locAdded { get; set; }
 			public bool locRemoved { get; set; }
-			public string author { get; set; }
-			public string path { get; set; }
 			public long dateFrom { get; set; }
 			public long dateTo { get; set; }
+			public string[] authors { get; set; }
 		}
 
-		public override object GetDefaultSettings(IRepository repository)
+		public override object GetSettings(IRepository repository)
 		{
-			return new Settings()
+			return new SettingsOut()
 			{
+				author = string.Empty,
+				path = string.Empty,
+
 				locTotal = true,
 				locAdded = false,
 				locRemoved = false,
-				author = string.Empty,
-				path = string.Empty,
 				dateFrom = new DateTimeOffset(repository.GetReadOnly<Commit>()
 					.Min(x => x.Date)).ToUnixTimeSeconds(),
 				dateTo = new DateTimeOffset(repository.GetReadOnly<Commit>()
-					.Max(x => x.Date)).ToUnixTimeSeconds()
-			};
-		}
-		public override object GetFormData(IRepository repository)
-		{
-			return new
-			{
+					.Max(x => x.Date)).ToUnixTimeSeconds(),
 				authors = repository.GetReadOnly<Author>()
 					.Select(x => x.Name)
 					.ToArray(),
@@ -46,7 +47,7 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 		}
 		public override object Calculate(IRepository repository, JObject jsettings)
 		{
-			var settings = jsettings.ToObject<Settings>();
+			var settings = jsettings.ToObject<SettingsIn>();
 
 			var commits = string.IsNullOrEmpty(settings.author)
 				? repository.GetReadOnly<Commit>()

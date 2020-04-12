@@ -65,7 +65,7 @@ namespace Repositorch.Web.Controllers
 						? parameters.ToDictionary(
 							x => x.Key,
 							x => Uri.UnescapeDataString(x.Value))
-						: metric.GetDefaultSettings(repository);
+						: metric.GetSettings(repository);
 					var settings = settingsObject != null
 						? JObject.FromObject(settingsObject)
 						: null;
@@ -78,14 +78,6 @@ namespace Repositorch.Web.Controllers
 					if (parameters.Count == 0 && settings != null)
 					{
 						metricData.Add(nameof(settings), settings);
-					}
-					if (parameters.Count == 0)
-					{
-						var formData = metric.GetFormData(repository);
-						if (formData != null)
-						{
-							metricData.Add(nameof(formData), formData);
-						}
 					}
 					metricData.Add(nameof(time), time.FormatedTime);
 

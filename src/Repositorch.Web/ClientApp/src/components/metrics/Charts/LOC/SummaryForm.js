@@ -6,10 +6,9 @@ import "react-datepicker/dist/react-datepicker.css";
 
 export default function SummaryForm(props) {
 
-	const [settings, setSettings] = React.useState(props.data.settings);
-	const authors = props.data.formData.authors;
-
-	function updateSettings(name, value) {
+	const [settings, setSettings] = React.useState(props.settings);
+	
+	function setSetting(name, value) {
 		setSettings({
 			...settings,
 			[name]: value
@@ -20,15 +19,12 @@ export default function SummaryForm(props) {
 		const value = evt.target.type === "checkbox"
 			? evt.target.checked
 			: evt.target.value;
-		updateSettings(evt.target.name, value);
+		setSetting(evt.target.name, value);
 	}
 
 	async function handleSubmit(event) {
 		event.preventDefault();
-		props.updateData({
-			settings: settings,
-			result: null
-		});
+		props.updateSettings(settings);
 	}
 
 	function LocCheckBox(title, dataKey) {
@@ -60,7 +56,7 @@ export default function SummaryForm(props) {
 					value={settings.author ?? ""}
 					onChange={handleChange} >
 					<option value="">Not selected</option>
-					{authors.map(author => {
+					{settings.authors.map(author => {
 						return <option key={author} value={author}>{author}</option>
 					})}
 				</select>
@@ -77,13 +73,13 @@ export default function SummaryForm(props) {
 				<div className="heading">From date</div>
 				<DatePicker
 					selected={Moment.unix(settings.dateFrom).toDate()}
-					onChange={(date) => updateSettings("dateFrom", Moment(date).unix())} />
+					onChange={(date) => setSetting("dateFrom", Moment(date).unix())} />
 			</div>
 			<div className="form-group">
 				<div className="heading">Till date</div>
 				<DatePicker
 					selected={Moment.unix(settings.dateTo).toDate()}
-					onChange={(date) => updateSettings("dateTo", Moment(date).unix())} />
+					onChange={(date) => setSetting("dateTo", Moment(date).unix())} />
 			</div>
 			<button
 				type="submit"
@@ -95,6 +91,6 @@ export default function SummaryForm(props) {
 }
 
 SummaryForm.propTypes = {
-	data: propTypes.object.isRequired,
-	updateData: propTypes.func.isRequired
+	settings: propTypes.object.isRequired,
+	updateSettings: propTypes.func.isRequired
 };
