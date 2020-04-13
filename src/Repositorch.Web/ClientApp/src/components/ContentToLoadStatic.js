@@ -2,31 +2,27 @@
 import propTypes from 'prop-types';
 import ContentToLoad from './ContentToLoad';
 
-export default function ContentToLoadClosed(props) {
+export default function ContentToLoadStatic(props) {
 
-	const [state, setState] = React.useState(null);
-
-	function getData() {
-		return state;
-	}
+	const [data, setData] = React.useState(null);
 
 	async function loadData() {
 		var response = await fetch(props.url);
 		if (!response.ok) throw new Error(response.status);
 		var json = await response.json();
-		setState(json);
+		setData(json);
 	}
 
 	return (
 		<ContentToLoad
-			getData={getData}
+			getData={() => data}
 			loadData={loadData}
 			renderData={props.renderData}
 			noloading={props.noloading} />
 	);
 }
 
-ContentToLoadClosed.propTypes = {
+ContentToLoadStatic.propTypes = {
 	url: propTypes.string.isRequired,
 	renderData: propTypes.func.isRequired,
 	noloading: propTypes.bool,

@@ -3,7 +3,7 @@ import {
 	LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import { getColors, formatDate } from '../functions';
-import MultiMetric from '../../MultiMetric';
+import Metric from '../../Metric';
 import SummaryForm from './SummaryForm';
 
 export default function Summary(props) {
@@ -86,7 +86,7 @@ export default function Summary(props) {
 	}
 
 	return (
-		<MultiMetric
+		<Metric
 			title="Lines Of Code Summary"
 			projectMetricPath={props.projectMetricPath}
 			renderMetric={renderMetric}

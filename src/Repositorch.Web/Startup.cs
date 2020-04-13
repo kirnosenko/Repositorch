@@ -6,12 +6,12 @@ using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Autofac;
 using LiteDB;
+using Repositorch.Web.Middleware;
 
 namespace Repositorch.Web
 {
@@ -53,6 +53,8 @@ namespace Repositorch.Web
 			{
 				app.UseExceptionHandler("/Error");
 			}
+
+			app.UseMiddleware<TimerMiddleware>();
 
 			app.UseStaticFiles();
 			app.UseSpaStaticFiles();

@@ -59,7 +59,6 @@ namespace Repositorch.Web.Controllers
 			{
 				var data = new SqlServerDataStore(project);
 				using (var repository = data.OpenSession())
-				using (var time = TimeLogger.Start())
 				{
 					var settingsObject = parameters.Count > 0
 						? parameters.ToDictionary(
@@ -79,7 +78,6 @@ namespace Repositorch.Web.Controllers
 					{
 						metricData.Add(nameof(settings), settings);
 					}
-					metricData.Add(nameof(time), time.FormatedTime);
 
 					return Ok(metricData);
 				}

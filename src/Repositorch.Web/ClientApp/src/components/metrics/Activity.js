@@ -1,5 +1,5 @@
 ﻿import React from 'react';
-import Metric from './Metric';
+import MetricStatic from './MetricStatic';
 import SortableTable from '../table/SortableTable';
 
 function renderResult(result) {
@@ -24,7 +24,7 @@ function renderResult(result) {
 
 export default function Activity(props) {
 	return (
-		<Metric
+		<MetricStatic
 			title="Activity"
 			projectMetricPath={props.projectMetricPath}
 			renderResult={renderResult} />

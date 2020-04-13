@@ -1,5 +1,5 @@
 ﻿import React, { Fragment } from 'react';
-import Metric from './Metric';
+import MetricStatic from './MetricStatic';
 import SortableTable from '../table/SortableTable';
 
 function renderResult(result) {
@@ -36,7 +36,7 @@ function renderResult(result) {
 
 export default function Files(props) {
 	return (
-		<Metric
+		<MetricStatic
 			title="Files"
 			projectMetricPath={props.projectMetricPath}
 			renderResult={renderResult} />

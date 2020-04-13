@@ -1,5 +1,5 @@
 ﻿import React, { Fragment } from 'react';
-import Metric from './Metric';
+import MetricStatic from './MetricStatic';
 
 function renderResult(result) {
 	return (
@@ -17,7 +17,7 @@ function renderResult(result) {
 
 export default function Summary(props) {
 	return (
-		<Metric
+		<MetricStatic
 			title="Summary"
 			projectMetricPath={props.projectMetricPath}
 			renderResult={renderResult} />

@@ -3,7 +3,7 @@ import {
 	AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
 import { getColors, formatDate } from '../functions';
-import Metric from '../../Metric';
+import MetricStatic from '../../MetricStatic';
 
 export default function Summary(props) {
 
@@ -43,7 +43,7 @@ export default function Summary(props) {
 	}
 
 	return (
-		<Metric
+		<MetricStatic
 			title="Lines Of Code Remains (Burn Down)"
 			projectMetricPath={props.projectMetricPath}
 			renderResult={renderResult} />
