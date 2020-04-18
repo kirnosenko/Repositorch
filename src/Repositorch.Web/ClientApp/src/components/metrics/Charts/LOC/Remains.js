@@ -2,7 +2,8 @@
 import {
 	AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
-import { getColors, formatDate } from '../functions';
+import { secondsToDateFormat } from '../../functions';
+import { getColors } from '../functions';
 import MetricStatic from '../../MetricStatic';
 
 export default function Summary(props) {
@@ -29,7 +30,9 @@ export default function Summary(props) {
 				<ResponsiveContainer aspect={2} >
 					<AreaChart data={result.values}>
 						<CartesianGrid strokeDasharray="3 3" />
-						<XAxis dataKey="date" tickFormatter={formatDate} />
+						<XAxis
+							dataKey="date"
+							tickFormatter={secondsToDateFormat} />
 						<YAxis />
 						<Tooltip />
 						<Legend />

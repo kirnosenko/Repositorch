@@ -1,6 +1,4 @@
-﻿import Moment from 'moment';
-
-export const getColors = (number) => {
+﻿export const getColors = (number) => {
 	var masks = [
 		"#0000X",
 		"#00X00",
@@ -27,8 +25,4 @@ export const getColors = (number) => {
 	}
 
 	return colors;
-}
-
-export const formatDate = (date) => {
-	return Moment(date).format('YYYY-MM-DD');
 }

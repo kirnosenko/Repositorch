@@ -1,7 +1,7 @@
 ﻿import React from 'react';
 import DatePicker from "react-datepicker";
-import Moment from 'moment';
 import propTypes from 'prop-types';
+import { secondsToDate, dateToSeconds } from '../../functions';
 import "react-datepicker/dist/react-datepicker.css";
 
 export default function SummaryForm(props) {
@@ -72,14 +72,14 @@ export default function SummaryForm(props) {
 			<div className="form-group">
 				<div className="heading">From date</div>
 				<DatePicker
-					selected={Moment.unix(settings.dateFrom).toDate()}
-					onChange={(date) => setSetting("dateFrom", Moment(date).unix())} />
+					selected={secondsToDate(settings.dateFrom)}
+					onChange={(date) => setSetting("dateFrom", dateToSeconds(date))} />
 			</div>
 			<div className="form-group">
 				<div className="heading">Till date</div>
 				<DatePicker
-					selected={Moment.unix(settings.dateTo).toDate()}
-					onChange={(date) => setSetting("dateTo", Moment(date).unix())} />
+					selected={secondsToDate(settings.dateTo)}
+					onChange={(date) => setSetting("dateTo", dateToSeconds(date))} />
 			</div>
 			<button
 				type="submit"

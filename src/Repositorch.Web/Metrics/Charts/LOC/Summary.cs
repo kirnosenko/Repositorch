@@ -76,7 +76,7 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 
 			var loc = codeByDate.Select(c => new
 			{
-				date = c.date,
+				date = new DateTimeOffset(c.date).ToUnixTimeSeconds(),
 				locTotal = codeByDate
 					.Where(x => x.date <= c.date)
 					.Sum(x => x.locTotal),

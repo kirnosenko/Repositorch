@@ -44,7 +44,7 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 				{
 					var data = new Dictionary<string, object>()
 					{
-						{ "date", date },
+						{ "date", new DateTimeOffset(date).ToUnixTimeSeconds() },
 					};
 					foreach (var year in years)
 					{

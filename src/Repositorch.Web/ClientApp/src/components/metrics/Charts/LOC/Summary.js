@@ -2,13 +2,15 @@
 import {
 	LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
-import { getColors, formatDate } from '../functions';
+import { secondsToDate, secondsToDateFormat, updateObject } from '../../functions';
+import { getColors } from '../functions';
 import Metric from '../../Metric';
 import SummaryForm from './SummaryForm';
 
 export default function Summary(props) {
 
 	const [data, setData] = React.useState(null);
+	const settingsIn = ["author", "path"];
 
 	function updateSettings(settings) {
 		var settingsDelta = {};
@@ -17,11 +19,17 @@ export default function Summary(props) {
 				settingsDelta[key] = settings[key];
 			}
 		});
-		updateData({
+		var newData = {
 			settings: settingsDelta,
-			settingsDelta: settingsDelta,
-			result: null
-		})
+			settingsDelta: settingsDelta
+		};
+		var needUpdate = Object.keys(settingsDelta).some(s => {
+			return settingsIn.includes(s);
+		});
+		if (needUpdate) {
+			newData.result = null;
+		}
+		updateData(newData);
 	}
 
 	function updateData(data) {
@@ -31,22 +39,6 @@ export default function Summary(props) {
 			}
 			return updateObject({ ...prevState }, data);
 		});
-	}
-
-	function updateObject(dest, src) {
-		Object.keys(src).forEach(key => {
-			var value = src[key];
-			if (dest[key] === undefined
-				|| dest[key] === null
-				|| value === null
-				|| typeof value != "object") {
-				dest[key] = value
-			}
-			else {
-				updateObject(dest[key], value)
-			}
-		});
-		return dest;
 	}
 
 	function renderMetric(data) {	
@@ -63,7 +55,7 @@ export default function Summary(props) {
 		}
 
 		var colors = getColors(3);
-
+		
 		return (
 			<Fragment>
 				<SummaryForm
@@ -72,7 +64,12 @@ export default function Summary(props) {
 				<ResponsiveContainer aspect={2} >
 					<LineChart data={data.result}>
 						<CartesianGrid strokeDasharray="3 3" />
-						<XAxis dataKey="date" tickFormatter={formatDate} />
+						<XAxis
+							dataKey="date"
+							type="number"
+							tickFormatter={secondsToDateFormat}
+							domain={[data.settings["dateFrom"], data.settings["dateTo"]]}
+							allowDataOverflow />
 						<YAxis />
 						<Tooltip />
 						<Legend />
