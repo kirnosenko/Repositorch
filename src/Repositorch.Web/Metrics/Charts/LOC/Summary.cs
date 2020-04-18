@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Repositorch.Data;
 using Repositorch.Data.Entities;
@@ -49,11 +48,17 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 		{
 			var settings = jsettings.ToObject<SettingsIn>();
 
-			var commits = string.IsNullOrEmpty(settings.author)
-				? repository.GetReadOnly<Commit>()
+			int? authorId = string.IsNullOrEmpty(settings.author)
+				? (int?)null
 				: repository.SelectionDSL()
 					.Authors().NameIs(settings.author)
-					.Commits().ByAuthors();
+					.SingleOrDefault()?.Id;
+
+			var commits = repository.GetReadOnly<Commit>();
+			if (authorId != null)
+			{
+				commits = commits.Where(x => x.AuthorId == authorId);
+			}
 
 			var modifications = string.IsNullOrEmpty(settings.path)
 				? repository.GetReadOnly<Modification>()
@@ -74,17 +79,39 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 					locRemoved = cbc.Sum(x => x < 0 ? -x : 0),
 				}).ToArray();
 
-			var loc = codeByDate.Select(c => new
+			var codeByDateForAuthor = authorId == null ? null : (
+				from c in repository.GetReadOnly<Commit>()
+				join m in modifications on c.Id equals m.CommitId
+				join cb in repository.GetReadOnly<CodeBlock>() on m.Id equals cb.ModificationId
+				join tcb in repository.GetReadOnly<CodeBlock>() on cb.TargetCodeBlockId ?? cb.Id equals tcb.Id
+				join tcbc in repository.GetReadOnly<Commit>() on tcb.AddedInitiallyInCommitId equals tcbc.Id
+				where tcbc.AuthorId == authorId
+				group cb.Size by c.Date into cbc
+				select new
+				{
+					date = cbc.Key,
+					locTotal = cbc.Sum()
+				}).ToArray();
+
+			var dates = repository.GetReadOnly<Commit>()
+				.Select(x => x.Date)
+				.ToArray();
+
+			var loc = dates.Select(date => new
 			{
-				date = new DateTimeOffset(c.date).ToUnixTimeSeconds(),
-				locTotal = codeByDate
-					.Where(x => x.date <= c.date)
-					.Sum(x => x.locTotal),
+				date = new DateTimeOffset(date).ToUnixTimeSeconds(),
+				locTotal = codeByDateForAuthor != null
+					? codeByDateForAuthor
+						.Where(x => x.date <= date)
+						.Sum(x => x.locTotal)
+					: codeByDate
+						.Where(x => x.date <= date)
+						.Sum(x => x.locTotal),
 				locAdded = codeByDate
-					.Where(x => x.date <= c.date)
+					.Where(x => x.date <= date)
 					.Sum(x => x.locAdded),
 				locRemoved = codeByDate
-					.Where(x => x.date <= c.date)
+					.Where(x => x.date <= date)
 					.Sum(x => x.locRemoved),
 			}).OrderBy(x => x.date).ToArray();
 

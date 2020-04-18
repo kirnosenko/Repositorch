@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Autofac.Features.Indexed;
 using Microsoft.AspNetCore.Mvc;
@@ -63,7 +62,7 @@ namespace Repositorch.Web.Controllers
 					var settingsObject = parameters.Count > 0
 						? parameters.ToDictionary(
 							x => x.Key,
-							x => Uri.UnescapeDataString(x.Value))
+							x => x.Value != null ? Uri.UnescapeDataString(x.Value) : null)
 						: metric.GetSettings(repository);
 					var settings = settingsObject != null
 						? JObject.FromObject(settingsObject)
