@@ -1,16 +1,16 @@
 ﻿import React, { Fragment } from 'react';
 import {
-	LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
+	AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
-import { secondsToDate, secondsToDateFormat, updateObject } from '../../functions';
+import { secondsToDateFormat, updateObject } from '../../functions';
 import { getColors } from '../functions';
 import Metric from '../../Metric';
-import SummaryForm from './SummaryForm';
+import BurndownForm from './BurndownForm';
 
-export default function Summary(props) {
+export default function Burndown(props) {
 
 	const [data, setData] = React.useState(null);
-	const settingsIn = ["author", "path"];
+	const settingsIn = ["path"];
 
 	function updateSettings(settings) {
 		var settingsDelta = {};
@@ -45,25 +45,26 @@ export default function Summary(props) {
 
 		function LocLine(title, dataKey, color) {
 			return (
-				data.settings[dataKey] ?
-					<Line
-						type="monotone"
-						name={title}
-						dataKey={dataKey}
-						stroke={color}
-						dot={{ r: 0 }} /> : ""
+				<Area
+					type="monotone"
+					name={title}
+					key={dataKey}
+					dataKey={dataKey}
+					stackId="1"
+					stroke={color}
+					fill={color} />
 			);
 		}
 
-		var colors = getColors(3);
-		
+		var colors = getColors(data.result.keys.length);
+
 		return (
 			<Fragment>
-				<SummaryForm
+				<BurndownForm
 					settings={data.settings}
 					updateSettings={updateSettings} />
 				<ResponsiveContainer aspect={2} >
-					<LineChart data={data.result}>
+					<AreaChart data={data.result.values}>
 						<CartesianGrid strokeDasharray="3 3" />
 						<XAxis
 							dataKey="date"
@@ -74,10 +75,10 @@ export default function Summary(props) {
 						<YAxis />
 						<Tooltip />
 						<Legend />
-						{LocLine("LOC total", "locTotal", colors[0])}
-						{LocLine("LOC added", "locAdded", colors[1])}
-						{LocLine("LOC removed", "locRemoved", colors[2])}
-					</LineChart>
+						{data.result.keys.map((key, index) => {
+							return LocLine(key, key, colors[index]);
+						})}
+					</AreaChart>
 				</ResponsiveContainer>
 			</Fragment>
 		);
@@ -85,7 +86,7 @@ export default function Summary(props) {
 
 	return (
 		<Metric
-			title="Lines Of Code Summary"
+			title="Lines Of Code Burndown"
 			projectMetricPath={props.projectMetricPath}
 			renderMetric={renderMetric}
 			getData={() => data}

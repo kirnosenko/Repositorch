@@ -44,6 +44,7 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 					.ToArray(),
 			};
 		}
+
 		public override object Calculate(IRepository repository, JObject jsettings)
 		{
 			var settings = jsettings.ToObject<SettingsIn>();
