@@ -35,9 +35,9 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 				locTotal = true,
 				locAdded = false,
 				locRemoved = false,
-				dateFrom = new DateTimeOffset(repository.GetReadOnly<Commit>()
+				dateFrom = new DateTimeOffset(repository.Get<Commit>()
 					.Min(x => x.Date)).ToUnixTimeSeconds(),
-				dateTo = new DateTimeOffset(repository.GetReadOnly<Commit>()
+				dateTo = new DateTimeOffset(repository.Get<Commit>()
 					.Max(x => x.Date)).ToUnixTimeSeconds(),
 				authors = repository.GetReadOnly<Author>()
 					.Select(x => x.Name)

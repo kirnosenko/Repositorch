@@ -8,7 +8,7 @@ using Repositorch.Data.Entities.DSL.Selection;
 
 namespace Repositorch.Web.Metrics.Charts.LOC
 {
-	public class Burndown : Metric
+	public class Ownership : Metric
 	{
 		private class SettingsIn
 		{
@@ -38,26 +38,24 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 		{
 			var settings = jsettings.ToObject<SettingsIn>();
 
-			var yearMin = repository.Get<Commit>().Min(x => x.Date).Year;
-			var yearMax = repository.Get<Commit>().Max(x => x.Date).Year;
-			var years = Enumerable.Range(yearMin, yearMax - yearMin + 1).ToArray();
-
+			var authors = repository.GetReadOnly<Author>().ToArray();
+			
 			var modifications = string.IsNullOrEmpty(settings.path)
 				? repository.GetReadOnly<Modification>()
 				: repository.SelectionDSL()
 					.Files().PathContains(settings.path)
 					.Modifications().InFiles();
 
-			var remainingСodeByDate = years.Select(year => new
+			var remainingСodeByAuthor = authors.Select(author => new
 			{
-				year = year,
+				author = author,
 				code = (
 					from c in repository.GetReadOnly<Commit>()
 					join m in modifications on c.Id equals m.CommitId
 					join cb in repository.GetReadOnly<CodeBlock>() on m.Id equals cb.ModificationId
 					join tcb in repository.GetReadOnly<CodeBlock>() on cb.TargetCodeBlockId ?? cb.Id equals tcb.Id
 					join tcbc in repository.GetReadOnly<Commit>() on tcb.AddedInitiallyInCommitId equals tcbc.Id
-					where tcbc.Date.Year == year
+					where tcbc.AuthorId == author.Id
 					group cb.Size by c.Date into cbc
 					select new
 					{
@@ -66,7 +64,7 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 					}).ToArray()
 			}).ToArray();
 
-			var dates = remainingСodeByDate
+			var dates = remainingСodeByAuthor
 				.SelectMany(x => x.code.Select(c => c.date))
 				.Distinct()
 				.OrderBy(x => x)
@@ -79,15 +77,15 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 					{
 						{ "date", new DateTimeOffset(date).ToUnixTimeSeconds() },
 					};
-					foreach (var year in years)
+					foreach (var author in authors)
 					{
-						var codeSize = remainingСodeByDate
-							.Single(x => x.year == year).code
+						var codeSize = remainingСodeByAuthor
+							.Single(x => x.author == author).code
 							.Where(x => x.date <= date)
 							.Sum(x => x.locTotal);
 						if (codeSize > 0)
 						{
-							data.Add(year.ToString(), codeSize);
+							data.Add(author.Name, codeSize);
 						}
 					}
 					return data;
@@ -95,7 +93,7 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 
 			return new
 			{
-				keys = years.Select(x => x.ToString()).ToArray(),
+				keys = authors.Select(x => x.Name).ToArray(),
 				values = loc,
 			};
 		}
