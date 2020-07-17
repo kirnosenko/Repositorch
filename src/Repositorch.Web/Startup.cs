@@ -12,6 +12,8 @@ using Microsoft.Extensions.Hosting;
 using Autofac;
 using LiteDB;
 using Repositorch.Web.Middleware;
+using Repositorch.Web.Options;
+using Microsoft.Extensions.Options;
 
 namespace Repositorch.Web
 {
@@ -33,6 +35,7 @@ namespace Repositorch.Web
 		{
 			services.AddSignalR();
 			services.AddHostedService<MappingService>();
+			services.Configure<DataStoreOptionsCollection>(Configuration);
 			services.AddControllers().AddNewtonsoftJson();
 
 			// In production, the React files will be served from this directory
@@ -86,6 +89,9 @@ namespace Repositorch.Web
 
 			builder.RegisterType<MappingNotifier>()
 				.As<IMappingNotifier>()
+				.SingleInstance();
+			builder.RegisterType<ProjectDataFactory>()
+				.As<IProjectDataFactory>()
 				.SingleInstance();
 		}
 

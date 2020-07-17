@@ -16,7 +16,7 @@ namespace Repositorch
 	{
 		static void Main(string[] args)
 		{
-			var data = new SqlServerDataStore("git")
+			var data = new SqlServerDataStore("git", ".\\SQLEXPRESS")
 			//var data = new PostgreSqlDataStore("git", "postgres", "123")
 			{
 				//Logging = true,

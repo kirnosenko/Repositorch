@@ -13,13 +13,16 @@ namespace Repositorch.Web.Controllers
 	[Produces("application/json")]
 	public class MetricsController : ControllerBase
 	{
-		private IIndex<string,IMetric> metrics;
-		private IIndex<string,List<MetricMenu.MetricMenuItem>> metricsMenu;
+		private readonly IProjectDataFactory projectFactory;
+		private readonly IIndex<string,IMetric> metrics;
+		private readonly IIndex<string,List<MetricMenu.MetricMenuItem>> metricsMenu;
 		
 		public MetricsController(
+			IProjectDataFactory projectFactory,
 			IIndex<string,IMetric> metrics,
 			IIndex<string,List<MetricMenu.MetricMenuItem>> metricsMenu)
 		{
+			this.projectFactory = projectFactory;
 			this.metrics = metrics;
 			this.metricsMenu = metricsMenu;
 		}
@@ -56,7 +59,7 @@ namespace Repositorch.Web.Controllers
 			
 			if (metrics.TryGetValue(metricPath, out var metric))
 			{
-				var data = new SqlServerDataStore(project);
+				var data = projectFactory.GetProjectDataStore(project);
 				using (var repository = data.OpenSession())
 				{
 					var settingsObject = parameters.Count > 0

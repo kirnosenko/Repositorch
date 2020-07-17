@@ -3,31 +3,26 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.SignalR;
-using LiteDB;
 using Newtonsoft.Json;
 using Repositorch.Data.Entities.Mapping;
-using Repositorch.Data.VersionControl;
-using Repositorch.Data.VersionControl.Git;
-using Repositorch.Data.Entities.Persistent;
 
 namespace Repositorch.Web
 {
 	public class MappingService : BackgroundService
 	{
+		private readonly IProjectDataFactory projectFactory;
 		private readonly IMappingNotifier mappingNotifier;
-		private readonly LiteDatabase liteDb;
-
+		
 		private readonly ConcurrentDictionary<string, CancellationTokenSource> mappingTokens;
 		private readonly ConcurrentQueue<string> projectsToStart;
 		private readonly ConcurrentQueue<string> projectsToStop;
 
 		public MappingService(
-			IMappingNotifier mappingNotifier,
-			LiteDatabase liteDb)
+			IProjectDataFactory projectFactory,
+			IMappingNotifier mappingNotifier)
 		{
+			this.projectFactory = projectFactory;
 			this.mappingNotifier = mappingNotifier;
-			this.liteDb = liteDb;
 			this.mappingTokens = new ConcurrentDictionary<string, CancellationTokenSource>();
 			this.projectsToStart = new ConcurrentQueue<string>();
 			this.projectsToStop = new ConcurrentQueue<string>();
@@ -49,9 +44,7 @@ namespace Repositorch.Web
 			{
 				while (projectsToStart.TryDequeue(out var projectToStart))
 				{
-					var projectSettings = liteDb.GetCollection<ProjectSettings>()
-						.FindOne(x => x.Name == projectToStart);
-					var projectTask = StartMappingTask(projectSettings);
+					var projectTask = StartMappingTask(projectToStart);
 				}
 				while (projectsToStop.TryDequeue(out var projectToStop))
 				{
@@ -65,15 +58,15 @@ namespace Repositorch.Web
 			}
 		}
 
-		private Task StartMappingTask(ProjectSettings settings)
+		private Task StartMappingTask(string projectName)
 		{
 			return Task.Run(async () => {
 				using (var cts = new CancellationTokenSource())
 				{
-					mappingTokens.TryAdd(settings.Name, cts);
+					mappingTokens.TryAdd(projectName, cts);
 					try
 					{
-						var mapper = CreateDataMapper(settings);
+						var mapper = CreateDataMapper(projectName);
 						var mappingSettings = new VcsDataMapper.MappingSettings()
 						{
 							Check = VcsDataMapper.CheckMode.TOUCHED,
@@ -81,34 +74,29 @@ namespace Repositorch.Web
 						if (mapper.MapRevisions(mappingSettings, cts.Token))
 						{
 							await mappingNotifier.Notify(
-								settings.Name, null, null, false);
+								projectName, null, null, false);
 						}
 					}
 					catch (Exception e)
 					{
 						await mappingNotifier.Notify(
-							settings.Name,
+							projectName,
 							null,
 							JsonConvert.SerializeObject(e, Formatting.Indented),
 							false);
 					}
 					finally
 					{
-						mappingTokens.TryRemove(settings.Name, out _);
+						mappingTokens.TryRemove(projectName, out _);
 					}
 				}
 			});
 		}
 
-		private VcsDataMapper CreateDataMapper(ProjectSettings settings)
+		private VcsDataMapper CreateDataMapper(string projectName)
 		{
-			var data = new SqlServerDataStore(settings.Name);
-			var gitClient = new CommandLineGitClient(settings.RepositoryPath)
-			{
-				Branch = settings.Branch,
-				ExtendedLog = settings.UseExtendedLog,
-			};
-			var vcsData = new VcsDataCached(gitClient, 1000, 1000);
+			var data = projectFactory.GetProjectDataStore(projectName);
+			var vcsData = projectFactory.GetProjectVcsData(projectName);
 
 			VcsDataMapper dataMapper = new VcsDataMapper(data, vcsData);
 			dataMapper.RegisterMapper(new CommitMapper(vcsData));
@@ -124,22 +112,22 @@ namespace Repositorch.Web
 			dataMapper.OnMapRevision += async revision =>
 			{
 				await mappingNotifier.Notify(
-					settings.Name, $"Mapping: {revision}", null, true);
+					projectName, $"Mapping: {revision}", null, true);
 			};
 			dataMapper.OnTruncateRevision += async revision =>
 			{
 				await mappingNotifier.Notify(
-					settings.Name, $"Truncating: {revision}", null, true);
+					projectName, $"Truncating: {revision}", null, true);
 			};
 			dataMapper.OnCheckRevision += async revision =>
 			{
 				await mappingNotifier.Notify(
-					settings.Name, $"Checking: {revision}", null, true);
+					projectName, $"Checking: {revision}", null, true);
 			};
 			dataMapper.OnError += async message =>
 			{
 				await mappingNotifier.Notify(
-					settings.Name, null, $"Error: {message}", false);
+					projectName, null, $"Error: {message}", false);
 			};
 
 			return dataMapper;
