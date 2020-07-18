@@ -65,20 +65,13 @@ export default function ProjectItem(props) {
 	var bg = '';
 	var style = styles.progress;
 	if (mapping !== undefined) {
-		if (mapping.working === undefined) {
-			progress = "Preparing for mapping..."
+		progress = mapping.progress || mapping.error || "Mapping is finished.";
+		if (!mapping.working) {
+			bg = mapping.error === null
+				? 'bg-success'
+				: 'bg-danger';
+			style = styles.result;
 		}
-		else {
-			progress = mapping.progress || mapping.error || "Mapping is finished.";
-			if (!mapping.working) {
-				bg = mapping.error === null
-					? 'bg-success'
-					: 'bg-danger';
-				style = styles.result;
-			}
-		}
-	}
-	if (progress !== '') {
 		progress =
 			<div className={`card-footer ${bg}`} style={style}>
 				{progress}

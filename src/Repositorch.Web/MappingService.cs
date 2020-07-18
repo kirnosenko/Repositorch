@@ -54,7 +54,7 @@ namespace Repositorch.Web
 					}
 				}
 
-				await Task.Delay(1000);
+				await Task.Delay(100);
 			}
 		}
 
@@ -66,6 +66,8 @@ namespace Repositorch.Web
 					mappingTokens.TryAdd(projectName, cts);
 					try
 					{
+						await mappingNotifier.Notify(
+							projectName, "Preparing for mapping...", null, true);
 						var mapper = CreateDataMapper(projectName);
 						var mappingSettings = new VcsDataMapper.MappingSettings()
 						{
