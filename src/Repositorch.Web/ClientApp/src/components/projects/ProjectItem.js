@@ -20,6 +20,10 @@ const styles = {
 export default function ProjectItem(props) {
 	const mapping = useSelector(state => state.mappings[props.name]);
 
+	function isMappingInProgress() {
+		return mapping !== undefined && mapping.working === true
+	}
+
 	function startMapping() {
 		fetch('api/Mapping/Start/' + props.name, {
 			method: 'POST'
@@ -45,9 +49,9 @@ export default function ProjectItem(props) {
 	}
 
 	function switchMapping() {
-		mapping === undefined
-			? startMapping()
-			: stopMapping();
+		isMappingInProgress()
+			? stopMapping()
+			: startMapping();
 	}
 
 	function removeProject() {
@@ -96,7 +100,7 @@ export default function ProjectItem(props) {
 								type="button"
 								className="btn btn-outline-dark btn-sm"
 								onClick={() => switchMapping()}>
-								{mapping === undefined ? "Start mapping" : "Stop mapping"}</button>
+								{isMappingInProgress() ? "Stop mapping" : "Start mapping"}</button>
 							&nbsp;
 							<Link to={`/edit/${props.name}`}>
 								<button

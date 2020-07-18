@@ -7,10 +7,3 @@
 		working: working
 	};
 }
-
-export const clearMapping = (name) => {
-	return {
-		type: 'clearMapping',
-		name: name
-	};
-}

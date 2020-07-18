@@ -7,9 +7,6 @@
 				working: action.working
 			};
 			break;
-		case 'clearMapping':
-			delete state[action.name];
-			break;
 		default:
 			return state;
 	}
