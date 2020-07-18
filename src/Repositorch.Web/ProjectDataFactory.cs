@@ -35,14 +35,27 @@ namespace Repositorch.Web
 			{
 				throw new ArgumentException(nameof(projectName));
 			}
-			
-			DataStoreOptions projectStoreOptions = options.Store["SQL Server"];
-			return new SqlServerDataStore(
-				projectName,
-				projectStoreOptions.Address,
-				projectStoreOptions.Port,
-				projectStoreOptions.User,
-				projectStoreOptions.Password);
+
+			DataStoreOptions projectStoreOptions = options.Store[projectSettings.StoreName];
+			switch (projectStoreOptions.DataBase)
+			{
+				case "sqlserver":
+					return new SqlServerDataStore(
+						projectName,
+						projectStoreOptions.Address,
+						projectStoreOptions.Port,
+						projectStoreOptions.User,
+						projectStoreOptions.Password);
+				case "postgresql":
+					return new PostgreSqlDataStore(
+						projectName,
+						projectStoreOptions.Address,
+						projectStoreOptions.Port,
+						projectStoreOptions.User,
+						projectStoreOptions.Password);
+				default:
+					throw new ArgumentException(nameof(projectStoreOptions.DataBase));
+			}
 		}
 
 		public IVcsData GetProjectVcsData(string projectName)

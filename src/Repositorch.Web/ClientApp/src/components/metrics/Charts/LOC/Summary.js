@@ -2,7 +2,7 @@
 import {
 	LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
-import { secondsToDate, secondsToDateFormat, updateObject } from '../../functions';
+import { secondsToDateFormat, updateObject } from '../../functions';
 import { getColors } from '../functions';
 import Metric from '../../Metric';
 import SummaryForm from './SummaryForm';

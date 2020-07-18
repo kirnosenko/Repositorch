@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using Microsoft.Extensions.Options;
 using LiteDB;
-using Repositorch.Data.Entities.Persistent;
+using Repositorch.Web.Options;
 
 namespace Repositorch.Web.Controllers
 {
@@ -18,10 +16,14 @@ namespace Repositorch.Web.Controllers
     {
 		private static readonly Regex ProjectNameRegExp = new Regex(@"^[a-zA-Z0-9\-\._\~]*$");
 		private readonly ILiteCollection<ProjectSettings> projects;
+		private readonly DataStoreOptionsCollection storeOptions;
 
-		public ProjectsController(LiteDatabase liteDb)
+		public ProjectsController(
+			LiteDatabase liteDb,
+			IOptions<DataStoreOptionsCollection> storeOptions)
 		{
-			projects = liteDb.GetCollection<ProjectSettings>();
+			this.projects = liteDb.GetCollection<ProjectSettings>();
+			this.storeOptions = storeOptions.Value;
 		}
 
 		[HttpGet]
@@ -44,6 +46,13 @@ namespace Repositorch.Web.Controllers
 			var names = projects.FindAll().Select(x => x.Name);
 
 			return Ok(names);
+		}
+
+		[HttpGet]
+		[Route("[action]")]
+		public IActionResult GetDataStoreNames()
+		{
+			return Ok(storeOptions.Store.Keys);
 		}
 
 		[HttpPost]
@@ -110,6 +119,12 @@ namespace Repositorch.Web.Controllers
 			{
 				errors.Add(nameof(settings.Name),
 					$"Project {settings.Name} already exists.");
+			}
+
+			if (!storeOptions.Store.TryGetValue(settings.StoreName, out _))
+			{
+				errors.Add(nameof(settings.StoreName),
+					"Invalid data store name.");
 			}
 
 			if (string.IsNullOrEmpty(settings.RepositoryPath))

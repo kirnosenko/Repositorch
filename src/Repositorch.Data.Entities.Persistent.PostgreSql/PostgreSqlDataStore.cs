@@ -1,23 +1,32 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Repositorch.Data.Entities.Persistent
 {
 	public class PostgreSqlDataStore : NamedDataStore
 	{
-		private string user;
-		private string password;
-
-		public PostgreSqlDataStore(string name, string user, string password)
+		private readonly string address;
+		private readonly string credentials;
+		
+		public PostgreSqlDataStore(
+			string name,
+			string address,
+			string port,
+			string user,
+			string password)
 			: base(name)
 		{
-			this.user = user;
-			this.password = password;
+			if (string.IsNullOrEmpty(port))
+			{
+				port = "5432";
+			}
+			this.address = $"Server={address};Port={port}";
+			this.credentials = $"User ID={user};Password={password}";
 		}
 		protected override void Configure(DbContextOptionsBuilder options)
 		{
-			options.UseNpgsql(
-				$"User ID={user};Password={password};Server=localhost;Port=5432;Database={name};Integrated Security=true;Pooling=true;");
+			var cs = $"{credentials};{address};Database={name};Integrated Security=true;Pooling=true;";
+
+			options.UseNpgsql(cs);
 		}
 	}
 }

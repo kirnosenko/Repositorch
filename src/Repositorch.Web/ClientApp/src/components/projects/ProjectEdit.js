@@ -4,17 +4,34 @@ import { Redirect } from 'react-router-dom'
 export default function ProjectEdit({ match }) {
 
 	const project = match.params.project;
+	const [storeNames, setStoreNames] = React.useState([]);
 	const [settings, setSettings] = React.useState({
 		name: "",
+		storeName: "",
+		vcsName: "Git",
 		repositoryPath: "",
 		branch: "master",
 		useExtendedLog: true,
 		checkResult: "1"
 	});
-	const [validation, setValidation] = React.useState({
-	});
+	const [validation, setValidation] = React.useState({});
 
 	function loadSettings() {
+
+		fetch(`api/Projects/GetDataStoreNames`)
+			.then((response) => {
+				if (!response.ok) throw new Error(response.status);
+				return response.json();
+			})
+			.then((data) => {
+				if (data.length > 0) {
+					setStoreNames(data);
+				}
+			})
+			.catch((error) => {
+				console.error(error);
+			});
+
 		if (project === undefined || settings === null || project === settings.name) {
 			return;
 		}
@@ -33,13 +50,14 @@ export default function ProjectEdit({ match }) {
 	}
 
 	function handleChange(evt) {
+		const name = evt.target.name;
 		const value = evt.target.type === "checkbox"
 			? evt.target.checked
 			: evt.target.value;
-		setSettings({
-			...settings,
-			[evt.target.name]: value
-		});
+		setSettings((state, props) => ({
+			...state,
+			[name]: value
+		}));
 	}
 
 	async function handleSubmit(event) {
@@ -91,6 +109,28 @@ export default function ProjectEdit({ match }) {
 					onChange={handleChange} />
 				<small className="form-text text-muted">
 					Name of the project to identify it inside Repositorch.
+				</small>
+			</div>
+			<div className="form-group">
+				<div className="heading">Data store</div>
+				<select
+					className={`custom-select ${validatedClass('StoreName')}`}
+					title={validatedTitle('StoreName')}
+					name="storeName"
+					disabled={project !== undefined}
+					value={settings.storeName}
+					onChange={handleChange}>
+					<option value="">Not selected</option>
+					{
+						storeNames.map(storeName => {
+							return (
+								<option key={storeName} value={storeName}>{storeName}</option>
+							);
+						})
+					}
+				</select>
+				<small className="form-text text-muted">
+					Database to keep information from version control system.
 				</small>
 			</div>
 			<div className="form-group">
