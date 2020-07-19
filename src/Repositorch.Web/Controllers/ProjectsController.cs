@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using LiteDB;
 using Repositorch.Web.Options;
 
 namespace Repositorch.Web.Controllers
@@ -14,24 +12,24 @@ namespace Repositorch.Web.Controllers
 	[Route("api/[controller]")]
 	[Produces("application/json")]
 	public class ProjectsController : ControllerBase
-    {
+	{
 		private static readonly Regex ProjectNameRegExp = new Regex(@"^[a-zA-Z0-9\-\._\~]*$");
-		private readonly ILiteCollection<ProjectSettings> projects;
+		private readonly IProjectManager projectManager;
 		private readonly DataStoreOptionsCollection storeOptions;
 
 		public ProjectsController(
-			LiteDatabase liteDb,
+			IProjectManager projectManager,
 			IOptions<DataStoreOptionsCollection> storeOptions)
 		{
-			this.projects = liteDb.GetCollection<ProjectSettings>();
+			this.projectManager = projectManager;
 			this.storeOptions = storeOptions.Value;
 		}
 
 		[HttpGet]
 		[Route("[action]/{name}")]
-		public IActionResult GetSettings([FromRoute]string name)
+		public IActionResult GetSettings([FromRoute] string name)
 		{
-			var project = projects.FindOne(x => x.Name == name);
+			var project = projectManager.GetProject(name);
 			if (project == null)
 			{
 				return BadRequest();
@@ -44,7 +42,7 @@ namespace Repositorch.Web.Controllers
 		[Route("[action]")]
 		public IActionResult GetNames()
 		{
-			var names = projects.FindAll().Select(x => x.Name);
+			var names = projectManager.GetProjectNames();
 
 			return Ok(names);
 		}
@@ -73,7 +71,7 @@ namespace Repositorch.Web.Controllers
 			var errors = Validate(settings, false);
 			if (errors.Count == 0)
 			{
-				projects.Insert(settings);
+				projectManager.AddProject(settings);
 			}
 
 			return Ok(errors);
@@ -83,16 +81,10 @@ namespace Repositorch.Web.Controllers
 		[Route("[action]")]
 		public IActionResult Update(ProjectSettings settings)
 		{
-			var project = projects.FindOne(x => x.Name == settings.Name);
-			if (project == null)
-			{
-				return BadRequest();
-			}
-
 			var errors = Validate(settings, true);
 			if (errors.Count == 0)
 			{
-				projects.Update(settings);
+				projectManager.UpdateProject(settings);
 			}
 
 			return Ok(errors);
@@ -100,20 +92,10 @@ namespace Repositorch.Web.Controllers
 
 		[HttpDelete]
 		[Route("[action]/{name}")]
-		public IActionResult Remove([FromRoute]string name)
+		public IActionResult Remove([FromRoute] string name)
 		{
-			if (projects.Delete(new BsonValue(name)))
-			{
-				return BadRequest();
-			}
-			
-			//var data = new SqlServerDataStore(name);
-			//using (var session = data.OpenSession())
-			{
-				//var context = session as DbContext;
-				//context.Database.EnsureDeleted();
-			}
-			
+			projectManager.RemoveProject(name);
+
 			return Ok();
 		}
 
@@ -148,7 +130,7 @@ namespace Repositorch.Web.Controllers
 					errors.Add(nameof(settings.Name),
 						"Project name may consist of letters(A-Z, a-z), digits (0-9) and special characters '-', '.', '_', '~'.");
 				}
-				else if (projects.FindOne(x => x.Name == settings.Name) != null)
+				else if (projectManager.GetProject(settings.Name) != null)
 				{
 					errors.Add(nameof(settings.Name),
 						$"Project {settings.Name} already exists.");
@@ -156,7 +138,7 @@ namespace Repositorch.Web.Controllers
 			}
 			else
 			{
-				if (projects.FindOne(x => x.Name == settings.Name) == null)
+				if (projectManager.GetProject(settings.Name) == null)
 				{
 					errors.Add(nameof(settings.Name),
 						$"Project {settings.Name} does not exist.");
@@ -168,7 +150,7 @@ namespace Repositorch.Web.Controllers
 				errors.Add(nameof(settings.StoreName),
 					"Invalid data store name.");
 			}
-
+			
 			if (string.IsNullOrEmpty(settings.RepositoryPath) 
 				|| !Directory.Exists(settings.RepositoryPath))
 			{
@@ -180,6 +162,22 @@ namespace Repositorch.Web.Controllers
 			{
 				errors.Add(nameof(settings.Branch),
 					"Invalid branch.");
+			}
+
+			if (!update && errors.Count == 0)
+			{
+				try
+				{
+					var data = projectManager.GetProjectDataStore(settings);
+					using (var s = data.OpenSession())
+					{
+					}
+				}
+				catch (Exception e)
+				{
+					errors.Add(nameof(settings.StoreName),
+						$"Invalid data store: {e.Message}");
+				}
 			}
 
 			return errors;

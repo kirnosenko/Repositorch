@@ -90,8 +90,8 @@ namespace Repositorch.Web
 			builder.RegisterType<MappingNotifier>()
 				.As<IMappingNotifier>()
 				.SingleInstance();
-			builder.RegisterType<ProjectDataFactory>()
-				.As<IProjectDataFactory>()
+			builder.RegisterType<ProjectManager>()
+				.As<IProjectManager>()
 				.SingleInstance();
 		}
 

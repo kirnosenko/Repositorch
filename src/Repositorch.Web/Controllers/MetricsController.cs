@@ -13,12 +13,12 @@ namespace Repositorch.Web.Controllers
 	[Produces("application/json")]
 	public class MetricsController : ControllerBase
 	{
-		private readonly IProjectDataFactory projectFactory;
+		private readonly IProjectManager projectFactory;
 		private readonly IIndex<string,IMetric> metrics;
 		private readonly IIndex<string,List<MetricMenu.MetricMenuItem>> metricsMenu;
 		
 		public MetricsController(
-			IProjectDataFactory projectFactory,
+			IProjectManager projectFactory,
 			IIndex<string,IMetric> metrics,
 			IIndex<string,List<MetricMenu.MetricMenuItem>> metricsMenu)
 		{

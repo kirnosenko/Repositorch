@@ -10,7 +10,7 @@ namespace Repositorch.Web
 {
 	public class MappingService : BackgroundService
 	{
-		private readonly IProjectDataFactory projectFactory;
+		private readonly IProjectManager projectFactory;
 		private readonly IMappingNotifier mappingNotifier;
 		
 		private readonly ConcurrentDictionary<string, CancellationTokenSource> mappingTokens;
@@ -18,7 +18,7 @@ namespace Repositorch.Web
 		private readonly ConcurrentQueue<string> projectsToStop;
 
 		public MappingService(
-			IProjectDataFactory projectFactory,
+			IProjectManager projectFactory,
 			IMappingNotifier mappingNotifier)
 		{
 			this.projectFactory = projectFactory;
