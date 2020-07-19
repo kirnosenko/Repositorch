@@ -5,6 +5,7 @@ export default function ProjectEdit({ match }) {
 
 	const project = match.params.project;
 	const [storeNames, setStoreNames] = React.useState([]);
+	const [repoDirs, setRepoDirs] = React.useState([]);
 	const [settings, setSettings] = React.useState({
 		name: "",
 		storeName: "",
@@ -18,24 +19,42 @@ export default function ProjectEdit({ match }) {
 
 	function loadSettings() {
 
-		fetch(`api/Projects/GetDataStoreNames`)
-			.then((response) => {
-				if (!response.ok) throw new Error(response.status);
-				return response.json();
-			})
-			.then((data) => {
-				if (data.length > 0) {
-					setStoreNames(data);
-				}
-			})
-			.catch((error) => {
-				console.error(error);
-			});
-
 		if (project === undefined || settings === null || project === settings.name) {
+
+			if (storeNames.length == 0 && repoDirs.length == 0) {
+	
+				fetch(`api/Projects/GetDataStoreNames`)
+					.then((response) => {
+						if (!response.ok) throw new Error(response.status);
+						return response.json();
+					})
+					.then((data) => {
+						if (data.length > 0) {
+							setStoreNames(data);
+						}
+					})
+					.catch((error) => {
+						console.error(error);
+					});
+
+				fetch(`api/Projects/GetRepoDirs`)
+					.then((response) => {
+						if (!response.ok) throw new Error(response.status);
+						return response.json();
+					})
+					.then((data) => {
+						if (data.length > 0) {
+							setRepoDirs(data);
+						}
+					})
+					.catch((error) => {
+						console.error(error);
+					});
+			}
+
 			return;
 		}
-
+		
 		fetch(`api/Projects/GetSettings/${project}`)
 			.then((response) => {
 				if (!response.ok) throw new Error(response.status);
@@ -43,6 +62,8 @@ export default function ProjectEdit({ match }) {
 			})
 			.then((data) => {
 				setSettings(data);
+				setStoreNames([data.storeName]);
+				setRepoDirs([data.repositoryPath]);
 			})
 			.catch((error) => {
 				console.error(error);
@@ -94,6 +115,31 @@ export default function ProjectEdit({ match }) {
 	if (settings == null) {
 		return <Redirect to='/' />
 	}
+
+	const repositoryPathInput = project !== undefined
+		? <input
+				className={`form-control ${validatedClass('RepositoryPath')}`}
+				title={validatedTitle('RepositoryPath')}
+				type="text"
+				name="repositoryPath"
+				value={settings.repositoryPath}
+				onChange={handleChange} />
+		: <select
+				className={`custom-select ${validatedClass('RepositoryPath')}`}
+				title={validatedTitle('RepositoryPath')}
+				name="repositoryPath"
+				disabled={project !== undefined}
+				value={settings.repositoryPath}
+				onChange={handleChange}>
+				<option value="">Not selected</option>
+				{
+					repoDirs.map(repoDir => {
+						return (
+							<option key={repoDir} value={repoDir}>{repoDir}</option>
+						);
+					})
+				}
+			</select>
 	
 	return (
 		<form onSubmit={handleSubmit}>
@@ -135,13 +181,7 @@ export default function ProjectEdit({ match }) {
 			</div>
 			<div className="form-group">
 				<div className="heading">Repository path</div>
-				<input
-					className={`form-control ${validatedClass('RepositoryPath')}`}
-					title={validatedTitle('RepositoryPath')}
-					type="text"
-					name="repositoryPath"
-					value={settings.repositoryPath}
-					onChange={handleChange} />
+				{repositoryPathInput}
 				<small className="form-text text-muted">
 					Path to the repository assosiated with the project.
 					Only git repositories are supported at the moment.

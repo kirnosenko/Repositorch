@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
@@ -55,6 +56,16 @@ namespace Repositorch.Web.Controllers
 			return Ok(storeOptions.Store.Keys);
 		}
 
+		[HttpGet]
+		[Route("[action]")]
+		public IActionResult GetRepoDirs()
+		{
+			List<string> repoDirs = new List<string>();
+			GetRepoDirs(EnvironmentExtensions.GetSrcPath(), repoDirs);
+
+			return Ok(repoDirs);
+		}
+
 		[HttpPost]
 		[Route("[action]")]
 		public IActionResult Create(ProjectSettings settings)
@@ -101,6 +112,21 @@ namespace Repositorch.Web.Controllers
 			return Ok();
 		}
 
+		private void GetRepoDirs(string rootDir, List<string> repoDirs)
+		{
+			var info = new DirectoryInfo(rootDir);
+			if (info.Name == ".git")
+			{
+				repoDirs.Add(rootDir);
+				return;
+			}
+
+			foreach (var dir in Directory.GetDirectories(rootDir))
+			{
+				GetRepoDirs(dir, repoDirs);
+			}
+		}
+
 		private Dictionary<string, string> Validate(ProjectSettings settings)
 		{
 			var errors = new Dictionary<string, string>();
@@ -127,7 +153,8 @@ namespace Repositorch.Web.Controllers
 					"Invalid data store name.");
 			}
 
-			if (string.IsNullOrEmpty(settings.RepositoryPath))
+			if (string.IsNullOrEmpty(settings.RepositoryPath) 
+				|| !Directory.Exists(settings.RepositoryPath))
 			{
 				errors.Add(nameof(settings.RepositoryPath),
 					"Invalid repository path.");

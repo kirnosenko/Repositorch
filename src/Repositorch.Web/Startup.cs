@@ -97,11 +97,7 @@ namespace Repositorch.Web
 
 		private void RegisterLiteDB(ContainerBuilder builder)
 		{
-			var homePath = (Environment.OSVersion.Platform == PlatformID.Unix ||
-				Environment.OSVersion.Platform == PlatformID.MacOSX)
-				? Environment.GetEnvironmentVariable("HOME")
-				: Environment.ExpandEnvironmentVariables("%HOMEDRIVE%%HOMEPATH%");
-			var dbPath = Path.Combine(homePath, "repositorch.db");
+			var dbPath = Path.Combine(EnvironmentExtensions.GetHomePath(), "repositorch.db");
 			builder.Register<LiteDatabase>(c => {
 				var db = new LiteDatabase(dbPath);
 				db.Mapper.EmptyStringToNull = false;
