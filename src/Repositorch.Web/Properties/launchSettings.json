@@ -12,6 +12,7 @@
       "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
+        "REPOSITORCH_HOME_PATH": "d:\\repositorch",
         "ASPNETCORE_ENVIRONMENT": "Development",
         "REPOSITORCH_SRC_PATH": "d:\\src"
       }

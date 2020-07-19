@@ -70,7 +70,7 @@ namespace Repositorch.Web.Controllers
 		[Route("[action]")]
 		public IActionResult Create(ProjectSettings settings)
 		{
-			var errors = Validate(settings);
+			var errors = Validate(settings, false);
 			if (errors.Count == 0)
 			{
 				projects.Insert(settings);
@@ -89,8 +89,13 @@ namespace Repositorch.Web.Controllers
 				return BadRequest();
 			}
 
-			projects.Update(settings);
-			return Ok();
+			var errors = Validate(settings, true);
+			if (errors.Count == 0)
+			{
+				projects.Update(settings);
+			}
+
+			return Ok(errors);
 		}
 
 		[HttpDelete]
@@ -127,24 +132,35 @@ namespace Repositorch.Web.Controllers
 			}
 		}
 
-		private Dictionary<string, string> Validate(ProjectSettings settings)
+		private Dictionary<string, string> Validate(ProjectSettings settings, bool update)
 		{
 			var errors = new Dictionary<string, string>();
 
-			if (string.IsNullOrEmpty(settings.Name))
+			if (!update)
 			{
-				errors.Add(nameof(settings.Name),
-					"Project name may not be empty");
+				if (string.IsNullOrEmpty(settings.Name))
+				{
+					errors.Add(nameof(settings.Name),
+						"Project name may not be empty");
+				}
+				else if (!ProjectNameRegExp.IsMatch(settings.Name))
+				{
+					errors.Add(nameof(settings.Name),
+						"Project name may consist of letters(A-Z, a-z), digits (0-9) and special characters '-', '.', '_', '~'.");
+				}
+				else if (projects.FindOne(x => x.Name == settings.Name) != null)
+				{
+					errors.Add(nameof(settings.Name),
+						$"Project {settings.Name} already exists.");
+				}
 			}
-			else if (!ProjectNameRegExp.IsMatch(settings.Name))
+			else
 			{
-				errors.Add(nameof(settings.Name),
-					"Project name may consist of letters(A-Z, a-z), digits (0-9) and special characters '-', '.', '_', '~'.");
-			}
-			else if (projects.FindOne(x => x.Name == settings.Name) != null)
-			{
-				errors.Add(nameof(settings.Name),
-					$"Project {settings.Name} already exists.");
+				if (projects.FindOne(x => x.Name == settings.Name) == null)
+				{
+					errors.Add(nameof(settings.Name),
+						$"Project {settings.Name} does not exist.");
+				}
 			}
 
 			if (!storeOptions.Store.TryGetValue(settings.StoreName, out _))
