@@ -4,8 +4,10 @@ services:
   
   repositorch:
     build:
-      context: ./
-      dockerfile: ../src/Repositorch.Web/Dockerfile
+      context: ../src
+      dockerfile: ./Repositorch.Web/Dockerfile
+    env_file: ../docker/.env
+    container_name: repositorch
     restart: on-failure
     ports:
       - "5000:80"

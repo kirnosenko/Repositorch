@@ -53,7 +53,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			int fileId,
 			Func<IModificationMappingExpression,string,double,CodeBlockMappingExpression> codeToExp)
 		{
-			var remaining—odeByRevision = (
+			var remainigCodeByRevision = (
 				from m in expression.Get<Modification>().Where(x => x.FileId == fileId)
 				join c in commits on m.CommitId equals c.Id
 				join cb in expression.Get<CodeBlock>() on m.Id equals cb.ModificationId
@@ -67,7 +67,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 				}).ToArray();
 
 			CodeBlockMappingExpression codeExp = null;
-			foreach (var codeForRevision in remaining—odeByRevision)
+			foreach (var codeForRevision in remainigCodeByRevision)
 			{
 				codeExp = codeToExp(
 					codeExp ?? expression,
