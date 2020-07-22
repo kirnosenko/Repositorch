@@ -13,8 +13,8 @@
       "launchBrowser": true,
       "environmentVariables": {
         "REPOSITORCH_HOME_PATH": "d:\\repositorch",
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "REPOSITORCH_SRC_PATH": "d:\\src"
+        "REPOSITORCH_REPO_PATH": "d:\\src",
+        "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
     "Repositorch.Web": {

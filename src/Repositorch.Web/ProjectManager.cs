@@ -89,14 +89,14 @@ namespace Repositorch.Web
 				case "sqlserver":
 					return new SqlServerDataStore(
 						projectSettings.Name,
-						projectStoreOptions.Address,
+						projectStoreOptions.Host,
 						projectStoreOptions.Port,
 						projectStoreOptions.User,
 						projectStoreOptions.Password);
 				case "postgresql":
 					return new PostgreSqlDataStore(
 						projectSettings.Name,
-						projectStoreOptions.Address,
+						projectStoreOptions.Host,
 						projectStoreOptions.Port,
 						projectStoreOptions.User,
 						projectStoreOptions.Password);

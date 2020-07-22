@@ -59,7 +59,7 @@ namespace Repositorch.Web.Controllers
 		public IActionResult GetRepoDirs()
 		{
 			List<string> repoDirs = new List<string>();
-			GetRepoDirs(EnvironmentExtensions.GetSrcPath(), repoDirs);
+			GetRepoDirs(EnvironmentExtensions.GetRepoPath(), repoDirs);
 
 			return Ok(repoDirs);
 		}

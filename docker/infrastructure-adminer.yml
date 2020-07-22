@@ -1,0 +1,10 @@
+version: '3.7'
+
+services:
+
+  adminer:
+    image: adminer
+    restart: on-failure
+    ports:
+      - 8080:8080
+      

@@ -9,9 +9,9 @@ namespace Repositorch.Web
 			return Environment.GetEnvironmentVariable("REPOSITORCH_HOME_PATH") ?? GetOsHomePath();
 		}
 
-		public static string GetSrcPath()
+		public static string GetRepoPath()
 		{
-			return Environment.GetEnvironmentVariable("REPOSITORCH_SRC_PATH") ?? GetOsHomePath();
+			return Environment.GetEnvironmentVariable("REPOSITORCH_REPO_PATH") ?? GetOsHomePath();
 		}
 
 		private static string GetOsHomePath()
