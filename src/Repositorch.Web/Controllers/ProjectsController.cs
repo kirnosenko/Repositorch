@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -13,6 +14,7 @@ namespace Repositorch.Web.Controllers
 	[Produces("application/json")]
 	public class ProjectsController : ControllerBase
 	{
+		private static readonly string GitRepoDirName = ".git";
 		private static readonly Regex ProjectNameRegExp = new Regex(@"^[a-zA-Z0-9\-\._\~]*$");
 		private readonly IProjectManager projectManager;
 		private readonly DataStoreOptionsCollection storeOptions;
@@ -101,14 +103,17 @@ namespace Repositorch.Web.Controllers
 
 		private void GetRepoDirs(string rootDir, List<string> repoDirs)
 		{
-			var info = new DirectoryInfo(rootDir);
-			if (info.Name == ".git")
+			var innerDirs = Directory.GetDirectories(rootDir);
+			var repoDir = innerDirs.SingleOrDefault(x => x.EndsWith(GitRepoDirName) &&
+				new DirectoryInfo(x).Name == GitRepoDirName);
+
+			if (repoDir != null)
 			{
-				repoDirs.Add(rootDir);
+				repoDirs.Add(repoDir);
 				return;
 			}
 
-			foreach (var dir in Directory.GetDirectories(rootDir))
+			foreach (var dir in innerDirs)
 			{
 				GetRepoDirs(dir, repoDirs);
 			}
