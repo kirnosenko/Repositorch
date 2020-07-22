@@ -3,10 +3,7 @@ version: '3.7'
 services:
   
   repositorch:
-    build:
-      context: ../src
-      dockerfile: ./Repositorch.Web/Dockerfile
-    env_file: ../docker/.env
+    image: repositorch
     container_name: repositorch
     restart: on-failure
     ports:
