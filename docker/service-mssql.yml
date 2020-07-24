@@ -6,6 +6,7 @@ services:
     image: mcr.microsoft.com/mssql/server
     container_name: mssql
     restart: on-failure
+    user: root
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=QWEqwe123
@@ -13,4 +14,4 @@ services:
     ports:
       - "1433:1433"
     volumes:
-      - ${REPOSITORCH_HOME_PATH}/mssql:/var/opt/mssql
+      - ${REPOSITORCH_HOME_PATH}/mssql:/var/opt/mssql/data

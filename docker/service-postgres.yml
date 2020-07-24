@@ -6,6 +6,7 @@ services:
     image: postgres
     container_name: postgres
     restart: on-failure
+    user: root
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres

@@ -3,7 +3,7 @@ version: '3.7'
 services:
   
   repositorch:
-    image: repositorch
+    image: kirnosenko/repositorch
     container_name: repositorch
     restart: on-failure
     ports:
