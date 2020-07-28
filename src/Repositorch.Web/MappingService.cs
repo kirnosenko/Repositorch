@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
@@ -14,6 +16,7 @@ namespace Repositorch.Web
 		private readonly IMappingNotifier mappingNotifier;
 		
 		private readonly ConcurrentDictionary<string, CancellationTokenSource> mappingTokens;
+		private readonly ConcurrentDictionary<string, List<string>> mappingErrors;
 		private readonly ConcurrentQueue<string> projectsToStart;
 		private readonly ConcurrentQueue<string> projectsToStop;
 
@@ -24,6 +27,7 @@ namespace Repositorch.Web
 			this.projectFactory = projectFactory;
 			this.mappingNotifier = mappingNotifier;
 			this.mappingTokens = new ConcurrentDictionary<string, CancellationTokenSource>();
+			this.mappingErrors = new ConcurrentDictionary<string, List<string>>();
 			this.projectsToStart = new ConcurrentQueue<string>();
 			this.projectsToStop = new ConcurrentQueue<string>();
 		}
@@ -64,6 +68,7 @@ namespace Repositorch.Web
 				using (var cts = new CancellationTokenSource())
 				{
 					mappingTokens.TryAdd(projectName, cts);
+					mappingErrors.TryAdd(projectName, new List<string>());
 					try
 					{
 						await mappingNotifier.Notify(
@@ -78,6 +83,17 @@ namespace Repositorch.Web
 							await mappingNotifier.Notify(
 								projectName, null, null, false);
 						}
+						else
+						{
+							var projectErrors = mappingErrors[projectName];
+							var errorsText = new StringBuilder();
+							foreach (var err in projectErrors)
+							{
+								errorsText.AppendLine(err);
+							}
+							await mappingNotifier.Notify(
+								projectName, null, errorsText.ToString(), false);
+						}
 					}
 					catch (Exception e)
 					{
@@ -90,6 +106,7 @@ namespace Repositorch.Web
 					finally
 					{
 						mappingTokens.TryRemove(projectName, out _);
+						mappingErrors.TryRemove(projectName, out _);
 					}
 				}
 			});
@@ -126,10 +143,10 @@ namespace Repositorch.Web
 				await mappingNotifier.Notify(
 					projectName, $"Checking: {revision}", null, true);
 			};
-			dataMapper.OnError += async message =>
+			dataMapper.OnError += message =>
 			{
-				await mappingNotifier.Notify(
-					projectName, null, $"Error: {message}", false);
+				var projectErrors = mappingErrors[projectName];
+				projectErrors.Add(message);
 			};
 
 			return dataMapper;

@@ -343,7 +343,6 @@ namespace Repositorch.Data.Entities.Mapping
 
 			foreach (var error in incorrectCode)
 			{
-				var xxx = s.Get<Commit>().ToArray();
 				var sourceCommit = s.Get<Commit>()
 					.Where(x => x.Revision == error.SourceRevision)
 					.SingleOrDefault();

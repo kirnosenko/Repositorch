@@ -1,1 +1,1 @@
-docker-compose -f infrastructure-mssql.yml -f infrastructure-postgres.yml -f infrastructure-adminer.yml up
+docker-compose -f service-mssql.yml -f service-postgres.yml -f service-adminer.yml up

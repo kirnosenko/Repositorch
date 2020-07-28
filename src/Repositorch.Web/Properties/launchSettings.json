@@ -13,6 +13,7 @@
       "launchBrowser": true,
       "environmentVariables": {
         "REPOSITORCH_HOME_PATH": "d:\\repositorch",
+        "REPOSITORCH_DB_FILE": "debug.db",
         "REPOSITORCH_REPO_PATH": "d:\\src",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

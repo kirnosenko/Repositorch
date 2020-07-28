@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 
 namespace Repositorch.Web
 {
@@ -7,6 +8,12 @@ namespace Repositorch.Web
 		public static string GetHomePath()
 		{
 			return Environment.GetEnvironmentVariable("REPOSITORCH_HOME_PATH") ?? GetOsHomePath();
+		}
+
+		public static string GetSettingsFilePath()
+		{
+			var fileName = Environment.GetEnvironmentVariable("REPOSITORCH_DB_FILE") ?? "repositorch.db";
+			return Path.Combine(GetHomePath(), fileName);
 		}
 
 		public static string GetRepoPath()

@@ -21,7 +21,7 @@ export function Footer() {
 			<div style={underfooter}>
 			</div>
 			<div style={footer}>
-				Powered by <a href="https://github.com/kirnosenko/Repositorch">Repositorch</a> 0.1.0 alpha
+				Powered by <a href="https://github.com/kirnosenko/Repositorch" target="_blank">Repositorch</a> 0.1.0 alpha
 			</div>
 		</Fragment>
 	)

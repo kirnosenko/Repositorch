@@ -97,7 +97,7 @@ namespace Repositorch.Web
 
 		private void RegisterLiteDB(ContainerBuilder builder)
 		{
-			var dbPath = Path.Combine(EnvironmentExtensions.GetHomePath(), "repositorch.db");
+			var dbPath = EnvironmentExtensions.GetSettingsFilePath();
 			builder.Register<LiteDatabase>(c => {
 				var db = new LiteDatabase(dbPath);
 				db.Mapper.EmptyStringToNull = false;
