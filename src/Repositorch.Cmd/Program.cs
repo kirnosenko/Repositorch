@@ -16,8 +16,8 @@ namespace Repositorch
 	{
 		static void Main(string[] args)
 		{
-			var data = new SqlServerDataStore("git", ".\\SQLEXPRESS")
-			//var data = new PostgreSqlDataStore("git", "postgres", "123")
+			var data = new SqlServerDataStore("git", "localhost", "1433", "sa", "QWEqwe123")
+			//var data = new PostgreSqlDataStore("git", "localhost", "5432", "postgres", "postgres")
 			{
 				//Logging = true,
 				//SingletonSession = true,
@@ -34,7 +34,7 @@ namespace Repositorch
 			{
 				var settings = new VcsDataMapper.MappingSettings()
 				{
-					RevisionLimit = 2000,
+					RevisionLimit = 6000,
 					Check = VcsDataMapper.CheckMode.TOUCHED,
 				};
 				mapper.MapRevisions(settings);

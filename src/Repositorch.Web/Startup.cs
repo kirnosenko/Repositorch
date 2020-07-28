@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using Microsoft.AspNetCore.Builder;
@@ -13,7 +12,6 @@ using Autofac;
 using LiteDB;
 using Repositorch.Web.Middleware;
 using Repositorch.Web.Options;
-using Microsoft.Extensions.Options;
 
 namespace Repositorch.Web
 {

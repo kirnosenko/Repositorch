@@ -19,7 +19,6 @@ namespace Repositorch.Data.VersionControl.Git
 		{
 			if (revisions == null)
 			{
-				GitConfig();
 				revisions = new GitRevisions(GetRevList());
 			}
 
@@ -29,7 +28,6 @@ namespace Repositorch.Data.VersionControl.Git
 		{
 			if (revisions == null)
 			{
-				GitConfig();
 				revisions = new GitRevisions(GetRevList());
 			}
 
@@ -68,11 +66,6 @@ namespace Repositorch.Data.VersionControl.Git
 			get; set;
 		}
 
-		private void GitConfig()
-		{
-			RunCommand("config diff.renameLimit 999999");
-			RunCommand("config merge.renameLimit 999999");
-		}
 		private Stream GetRevList()
 		{
 			return RunCommand(
