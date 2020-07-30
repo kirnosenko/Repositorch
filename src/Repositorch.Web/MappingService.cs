@@ -12,11 +12,28 @@ namespace Repositorch.Web
 {
 	public class MappingService : BackgroundService
 	{
+		class MappingInfo : IDisposable
+		{
+			public MappingInfo()
+			{
+				TokenSource = new CancellationTokenSource();
+				Revision = string.Empty;
+				Errors = new List<string>();
+			}
+			public void Dispose()
+			{
+				TokenSource.Dispose();
+			}
+
+			public CancellationTokenSource TokenSource { get; protected set; }
+			public string Revision { get; set; }
+			public List<string> Errors { get; protected set; }
+		}
+
 		private readonly IProjectManager projectFactory;
 		private readonly IMappingNotifier mappingNotifier;
 		
-		private readonly ConcurrentDictionary<string, CancellationTokenSource> mappingTokens;
-		private readonly ConcurrentDictionary<string, List<string>> mappingErrors;
+		private readonly ConcurrentDictionary<string, MappingInfo> mappingInfo;
 		private readonly ConcurrentQueue<string> projectsToStart;
 		private readonly ConcurrentQueue<string> projectsToStop;
 
@@ -26,8 +43,7 @@ namespace Repositorch.Web
 		{
 			this.projectFactory = projectFactory;
 			this.mappingNotifier = mappingNotifier;
-			this.mappingTokens = new ConcurrentDictionary<string, CancellationTokenSource>();
-			this.mappingErrors = new ConcurrentDictionary<string, List<string>>();
+			this.mappingInfo = new ConcurrentDictionary<string, MappingInfo>();
 			this.projectsToStart = new ConcurrentQueue<string>();
 			this.projectsToStop = new ConcurrentQueue<string>();
 		}
@@ -52,9 +68,9 @@ namespace Repositorch.Web
 				}
 				while (projectsToStop.TryDequeue(out var projectToStop))
 				{
-					if (mappingTokens.TryGetValue(projectToStop, out var mappingToken))
+					if (mappingInfo.TryGetValue(projectToStop, out var info))
 					{
-						mappingToken.Cancel();	
+						info.TokenSource.Cancel();	
 					}
 				}
 
@@ -65,10 +81,9 @@ namespace Repositorch.Web
 		private Task StartMappingTask(string projectName)
 		{
 			return Task.Run(async () => {
-				using (var cts = new CancellationTokenSource())
+				using (var mi = new MappingInfo())
 				{
-					mappingTokens.TryAdd(projectName, cts);
-					mappingErrors.TryAdd(projectName, new List<string>());
+					mappingInfo.TryAdd(projectName, mi);
 					try
 					{
 						await mappingNotifier.Notify(
@@ -78,16 +93,16 @@ namespace Repositorch.Web
 						{
 							Check = VcsDataMapper.CheckMode.TOUCHED,
 						};
-						if (mapper.MapRevisions(mappingSettings, cts.Token))
+						if (mapper.MapRevisions(mappingSettings, mi.TokenSource.Token))
 						{
 							await mappingNotifier.Notify(
 								projectName, null, null, false);
 						}
 						else
 						{
-							var projectErrors = mappingErrors[projectName];
 							var errorsText = new StringBuilder();
-							foreach (var err in projectErrors)
+							errorsText.AppendLine($"Error for revision {mi.Revision}");
+							foreach (var err in mi.Errors)
 							{
 								errorsText.AppendLine(err);
 							}
@@ -105,8 +120,7 @@ namespace Repositorch.Web
 					}
 					finally
 					{
-						mappingTokens.TryRemove(projectName, out _);
-						mappingErrors.TryRemove(projectName, out _);
+						mappingInfo.TryRemove(projectName, out _);
 					}
 				}
 			});
@@ -130,6 +144,7 @@ namespace Repositorch.Web
 			dataMapper.RegisterMapper(new CodeBlockMapper(vcsData));
 			dataMapper.OnMapRevision += async revision =>
 			{
+				mappingInfo[projectName].Revision = revision;
 				await mappingNotifier.Notify(
 					projectName, $"Mapping: {revision}", null, true);
 			};
@@ -145,7 +160,7 @@ namespace Repositorch.Web
 			};
 			dataMapper.OnError += message =>
 			{
-				var projectErrors = mappingErrors[projectName];
+				var projectErrors = mappingInfo[projectName].Errors;
 				projectErrors.Add(message);
 			};
 
