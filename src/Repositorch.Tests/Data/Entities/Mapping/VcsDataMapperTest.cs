@@ -185,7 +185,7 @@ namespace Repositorch.Data.Entities.Mapping
 			settings.RevisionLimit = 5;
 			var result = mapper.MapRevisions(settings);
 
-			Assert.True(result);
+			result.Should().Be(VcsDataMapper.MappingResult.SUCCESS);
 			Assert.Equal(new string[] { "1", "2", "3", "4", "5" }, revisions);
 		}
 		[Fact]
@@ -200,7 +200,7 @@ namespace Repositorch.Data.Entities.Mapping
 			mapper.OnMapRevision += (r) => revisions.Add(r);
 			var result = mapper.MapRevisions(settings);
 
-			Assert.True(result);
+			result.Should().Be(VcsDataMapper.MappingResult.SUCCESS);
 			Assert.Equal(new string[] { "1", "2", "3", "4", "5" }, revisions);
 		}
 		[Fact]
@@ -215,7 +215,7 @@ namespace Repositorch.Data.Entities.Mapping
 			mapper.OnMapRevision += (r) => revisions.Add(r);
 			var result = mapper.MapRevisions(settings);
 
-			result.Should().BeTrue();
+			result.Should().Be(VcsDataMapper.MappingResult.SUCCESS);
 			revisions.Count.Should().Be(0);
 		}
 		[Fact]
@@ -234,7 +234,7 @@ namespace Repositorch.Data.Entities.Mapping
 				mapper.OnMapRevision += (r) => revisions.Add(r);
 				var result = mapper.MapRevisions(settings, cts.Token);
 
-				result.Should().BeTrue();
+				result.Should().Be(VcsDataMapper.MappingResult.STOPPED);
 				revisions.Count.Should().Be(0);
 			}
 		}
@@ -389,7 +389,7 @@ namespace Repositorch.Data.Entities.Mapping
 			settings.Check = VcsDataMapper.CheckMode.ALL;
 			var result = mapper.MapRevisions(settings);
 
-			result.Should().BeFalse();
+			result.Should().Be(VcsDataMapper.MappingResult.ERROR);
 			data.UsingSession(s =>
 			{
 				Assert.Equal(0, s.Get<Commit>().Count());

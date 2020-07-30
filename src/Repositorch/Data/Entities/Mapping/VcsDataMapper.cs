@@ -13,6 +13,12 @@ namespace Repositorch.Data.Entities.Mapping
 {
 	public class VcsDataMapper
 	{
+		public enum MappingResult
+		{
+			STOPPED,
+			SUCCESS,
+			ERROR
+		}
 		public enum CheckMode
 		{
 			NOTHING,
@@ -87,20 +93,24 @@ namespace Repositorch.Data.Entities.Mapping
 				}
 			});
 		}
-		public bool MapRevisions(MappingSettings settings, CancellationToken stopToken = default)
+		public MappingResult MapRevisions(MappingSettings settings, CancellationToken stopToken = default)
 		{
 			int nextRevisionNumber = data.UsingSession(s =>
 				s.Get<Commit>().Count() + 1);
 			string nextRevision = vcsData.GetRevisionByNumber(nextRevisionNumber);
 
-			while (nextRevision != null && !stopToken.IsCancellationRequested)
+			while (nextRevision != null)
 			{
+				if (stopToken.IsCancellationRequested)
+				{
+					return MappingResult.STOPPED;
+				}
 				OnMapRevision?.Invoke(GetRevisionName(nextRevision, nextRevisionNumber));
 				MapRevision(nextRevision);
 				if (!CheckRevision(nextRevision, settings.Check, true))
 				{
 					Truncate(nextRevisionNumber - 1);
-					return false;
+					return MappingResult.ERROR;
 				}
 				nextRevision = ++nextRevisionNumber > (settings.RevisionLimit ?? int.MaxValue) ?
 					null
@@ -108,7 +118,7 @@ namespace Repositorch.Data.Entities.Mapping
 					vcsData.GetRevisionByNumber(nextRevisionNumber);
 			}
 
-			return true;
+			return MappingResult.SUCCESS;
 		}
 		public void MapRevision(string revision)
 		{

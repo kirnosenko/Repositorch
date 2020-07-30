@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -93,18 +94,30 @@ namespace Repositorch.Web
 						{
 							Check = VcsDataMapper.CheckMode.TOUCHED,
 						};
-						if (mapper.MapRevisions(mappingSettings, mi.TokenSource.Token))
+						var result = mapper.MapRevisions(mappingSettings, mi.TokenSource.Token);
+						switch (result)
 						{
-							await mappingNotifier.Notify(
-								projectName, null, null, false);
-						}
-						else
-						{
-							await mappingNotifier.Notify(
-								projectName,
-								$"Error for revision {mi.Revision}",
-								mi.Errors,
-								false);
+							case VcsDataMapper.MappingResult.SUCCESS:
+								await mappingNotifier.Notify(
+									projectName,
+									null,
+									Enumerable.Empty<string>(),
+									false);
+								break;
+							case VcsDataMapper.MappingResult.ERROR:
+								await mappingNotifier.Notify(
+									projectName,
+									$"Error for revision {mi.Revision}",
+									mi.Errors,
+									false);
+								break;
+							default:
+								await mappingNotifier.Notify(
+									projectName,
+									null,
+									null,
+									false);
+								break;
 						}
 					}
 					catch (Exception e)

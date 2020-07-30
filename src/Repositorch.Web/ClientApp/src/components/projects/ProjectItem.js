@@ -66,21 +66,26 @@ export default function ProjectItem(props) {
 	var errors = '';
 	var style = styles.progress;
 	if (mapping !== undefined) {
-		progress = mapping.progress || "Mapping is finished.";
+		progress = mapping.progress || 'Mapping is stopped.';
 		if (!mapping.working) {
 			bg = mapping.errors === null
-				? 'bg-success'
-				: 'bg-danger';
+				? 'bg-warning'
+				: (mapping.errors.length > 0 ? 'bg-danger' : 'bg-success');
 			style = styles.result;
 		}
 		if (mapping.errors !== null) {
-			errors = mapping.errors.map(error => {
-				return (
-					<Fragment>
-						<br/>{error}
-					</Fragment>
-				)
-			})
+			if (mapping.errors.length === 0) {
+				progress = "Mapping is finished.";
+			}
+			else {
+				errors = mapping.errors.map(error => {
+					return (
+						<Fragment>
+							<br />{error}
+						</Fragment>
+					)
+				})
+			}
 		}
 		progress =
 			<div className={`card-footer ${bg}`} style={style}>

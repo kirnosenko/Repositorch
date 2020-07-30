@@ -7,22 +7,22 @@ namespace Repositorch.Web
 {
 	public interface IMappingNotifier
 	{
-		Task Notify(string project, string progress, List<string> errors, bool working);
+		Task Notify(string project, string progress, IEnumerable<string> errors, bool working);
 		Task NotifyOnConnect(string connectionId);
 	}
 
 	public class MappingNotifier : IMappingNotifier
 	{
 		private readonly IHubContext<MappingHub, IMappingWatcher> mappingHub;
-		private readonly ConcurrentDictionary<string, (string progress,List<string> errors,bool working)> notifications;
+		private readonly ConcurrentDictionary<string, (string progress,IEnumerable<string> errors,bool working)> notifications;
 
 		public MappingNotifier(IHubContext<MappingHub, IMappingWatcher> mappingHub)
 		{
 			this.mappingHub = mappingHub;
-			this.notifications = new ConcurrentDictionary<string, (string, List<string>, bool)>();
+			this.notifications = new ConcurrentDictionary<string, (string, IEnumerable<string>, bool)>();
 		}
 
-		public async Task Notify(string project, string progress, List<string> errors, bool working)
+		public async Task Notify(string project, string progress, IEnumerable<string> errors, bool working)
 		{
 			notifications.AddOrUpdate(
 				project,

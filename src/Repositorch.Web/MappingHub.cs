@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 
@@ -7,7 +6,7 @@ namespace Repositorch.Web
 {
 	public interface IMappingWatcher
 	{
-		Task Progress(string project, string progress, List<string> errors, bool working);
+		Task Progress(string project, string progress, IEnumerable<string> errors, bool working);
 	}
 
 	public class MappingHub : Hub<IMappingWatcher>
