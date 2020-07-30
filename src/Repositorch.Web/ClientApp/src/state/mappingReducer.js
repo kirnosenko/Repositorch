@@ -3,7 +3,7 @@
 		case 'updateMapping':
 			state[action.name] = {
 				progress: action.progress,
-				error: action.error,
+				errors: action.errors,
 				working: action.working
 			};
 			break;

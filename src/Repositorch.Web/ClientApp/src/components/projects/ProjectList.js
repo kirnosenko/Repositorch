@@ -67,8 +67,8 @@ export default function ProjectList() {
 					.withUrl('/Hubs/Mapping').build();
 				await nc.start();
 				if (isMouted) {
-					nc.on('Progress', (project, progress, error, working) => {
-						dispatch(updateMapping(project, progress, error, working));
+					nc.on('Progress', (project, progress, errors, working) => {
+						dispatch(updateMapping(project, progress, errors, working));
 					});
 					setConnection(nc);
 				}

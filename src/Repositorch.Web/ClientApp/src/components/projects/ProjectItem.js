@@ -1,4 +1,4 @@
-﻿import React from 'react'
+﻿import React, { Fragment } from 'react'
 import { Link } from 'react-router-dom'
 import { useSelector } from 'react-redux';
 import { YesNoButton } from '../YesNoButton';
@@ -63,18 +63,29 @@ export default function ProjectItem(props) {
 
 	var progress = '';
 	var bg = '';
+	var errors = '';
 	var style = styles.progress;
 	if (mapping !== undefined) {
-		progress = mapping.progress || mapping.error || "Mapping is finished.";
+		progress = mapping.progress || "Mapping is finished.";
 		if (!mapping.working) {
-			bg = mapping.error === null
+			bg = mapping.errors === null
 				? 'bg-success'
 				: 'bg-danger';
 			style = styles.result;
 		}
+		if (mapping.errors !== null) {
+			errors = mapping.errors.map(error => {
+				return (
+					<Fragment>
+						<br/>{error}
+					</Fragment>
+				)
+			})
+		}
 		progress =
 			<div className={`card-footer ${bg}`} style={style}>
 				{progress}
+				{errors}
 			</div>;
 	}
 	

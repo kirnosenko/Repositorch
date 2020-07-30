@@ -100,22 +100,19 @@ namespace Repositorch.Web
 						}
 						else
 						{
-							var errorsText = new StringBuilder();
-							errorsText.AppendLine($"Error for revision {mi.Revision}");
-							foreach (var err in mi.Errors)
-							{
-								errorsText.AppendLine(err);
-							}
 							await mappingNotifier.Notify(
-								projectName, null, errorsText.ToString(), false);
+								projectName,
+								$"Error for revision {mi.Revision}",
+								mi.Errors,
+								false);
 						}
 					}
 					catch (Exception e)
 					{
 						await mappingNotifier.Notify(
 							projectName,
-							null,
-							JsonConvert.SerializeObject(e, Formatting.Indented),
+							$"Error for revision {mi.Revision}",
+							new List<string>() { JsonConvert.SerializeObject(e, Formatting.Indented) },
 							false);
 					}
 					finally
@@ -144,7 +141,10 @@ namespace Repositorch.Web
 			dataMapper.RegisterMapper(new CodeBlockMapper(vcsData));
 			dataMapper.OnMapRevision += async revision =>
 			{
-				mappingInfo[projectName].Revision = revision;
+				if (mappingInfo.TryGetValue(projectName, out var mi))
+				{
+					mi.Revision = revision;
+				}
 				await mappingNotifier.Notify(
 					projectName, $"Mapping: {revision}", null, true);
 			};
@@ -160,8 +160,10 @@ namespace Repositorch.Web
 			};
 			dataMapper.OnError += message =>
 			{
-				var projectErrors = mappingInfo[projectName].Errors;
-				projectErrors.Add(message);
+				if (mappingInfo.TryGetValue(projectName, out var mi))
+				{
+					mi.Errors.Add(message);
+				}
 			};
 
 			return dataMapper;
