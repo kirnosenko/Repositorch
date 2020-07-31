@@ -18,7 +18,7 @@ namespace Repositorch.Web.Metrics
 
 			var periodFrames = SplitPeriod(
 				repository.GetReadOnly<Commit>().Min(x => x.Date),
-				repository.GetReadOnly<Commit>().Max(x => x.Date));
+				repository.GetReadOnly<Commit>().Max(x => x.Date)).ToArray();
 
 			var periods =
 				(from frame in periodFrames
@@ -41,8 +41,9 @@ namespace Repositorch.Web.Metrics
 					 Authors().OfCommits().Count()
 				 let totalAuthorsCount = totalCommits
 					 .Authors().OfCommits().Count()
-				 let lastRevision = commits
-					 .SingleOrDefault(c => c.OrderedNumber == commits.Max(x => x.OrderedNumber))?.Revision
+				 let lastRevision = totalCommits
+					 .OrderByDescending(x => x.Date)
+					 .First().Revision
 				 select new
 				 {
 					 period = string.Format("{0}-{1:00}", frame.start.Year, frame.start.Month),
@@ -54,8 +55,8 @@ namespace Repositorch.Web.Metrics
 						 authorsCount,
 						 totalAuthorsCount
 					 ),
-					 files = lastRevision == null ? 0 : repository.SelectionDSL()
-						 .Files().ExistInRevision(lastRevision).Count(),
+					 files = totalCommits.Files().AddedInCommits().Count() -
+						totalCommits.Files().RemovedInCommits().Count(),
 					 locAdded = string.Format("{0} ({1})",
 						 code.Added().CalculateLOC(),
 						 totalCode.Added().CalculateLOC()
