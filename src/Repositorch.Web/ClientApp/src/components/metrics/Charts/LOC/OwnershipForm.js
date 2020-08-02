@@ -15,6 +15,15 @@ export default function OwnershipForm(props) {
 				<FromTillDatesPicker
 					settings={settings}
 					setSetting={setSetting} />
+				<div className="form-group">
+					<div className="heading">Minimal contribution</div>
+					<input
+						type="number"
+						step="0.01"
+						name="minimalContribution"
+						value={settings.minimalContribution}
+						onChange={handleChange} />
+				</div>
 			</Fragment>
 		);
 	}

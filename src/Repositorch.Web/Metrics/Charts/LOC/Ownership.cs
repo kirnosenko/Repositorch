@@ -13,6 +13,7 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 		private class SettingsIn
 		{
 			public string path { get; set; }
+			public float minimalContribution { get; set; }
 		}
 
 		private class SettingsOut : SettingsIn
@@ -26,6 +27,7 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 			return new SettingsOut()
 			{
 				path = string.Empty,
+				minimalContribution = 0.01f,
 
 				dateFrom = new DateTimeOffset(repository.Get<Commit>()
 					.Min(x => x.Date)).ToUnixTimeSeconds(),
@@ -70,6 +72,7 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 				.OrderBy(x => x)
 				.ToArray();
 
+			var valuableAuthors = new HashSet<string>();
 			var loc = dates
 				.Select(date =>
 				{
@@ -77,15 +80,21 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 					{
 						{ "date", new DateTimeOffset(date).ToUnixTimeSeconds() },
 					};
+					var dateCodeSize = remainingСodeByAuthor
+						.Sum(a => a.code.Where(x => x.date <= date).Sum(x => x.locTotal));
 					foreach (var author in authors)
 					{
-						var codeSize = remainingСodeByAuthor
+						var authorCodeSize = remainingСodeByAuthor
 							.Single(x => x.author == author).code
 							.Where(x => x.date <= date)
 							.Sum(x => x.locTotal);
-						if (codeSize > 0)
+						if (authorCodeSize > 0)
 						{
-							data.Add(author.Name, codeSize);
+							data.Add(author.Name, authorCodeSize);
+							if (authorCodeSize / dateCodeSize >= settings.minimalContribution)
+							{
+								valuableAuthors.Add(author.Name);
+							}
 						}
 					}
 					return data;
@@ -93,7 +102,7 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 
 			return new
 			{
-				keys = authors.Select(x => x.Name).ToArray(),
+				keys = valuableAuthors,
 				values = loc,
 			};
 		}

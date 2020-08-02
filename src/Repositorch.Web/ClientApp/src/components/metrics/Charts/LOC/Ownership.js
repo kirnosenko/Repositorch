@@ -10,7 +10,7 @@ import OwnershipForm from './OwnershipForm';
 export default function Ownership(props) {
 
 	const [data, setData] = React.useState(null);
-	const settingsIn = ["path"];
+	const settingsIn = ["path", "minimalContribution"];
 
 	function updateSettings(settings) {
 		var settingsDelta = {};
