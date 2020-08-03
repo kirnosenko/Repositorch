@@ -21,7 +21,7 @@ export default function ProjectEdit({ match }) {
 
 		if (project === undefined || settings === null || project === settings.name) {
 
-			if (storeNames.length == 0 && repoDirs.length == 0) {
+			if (storeNames.length === 0 && repoDirs.length === 0) {
 	
 				fetch(`api/Projects/GetDataStoreNames`)
 					.then((response) => {
