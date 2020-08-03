@@ -72,7 +72,7 @@ export default function Summary(props) {
 							domain={[data.settings["dateFrom"], data.settings["dateTo"]]}
 							allowDataOverflow />
 						<YAxis />
-						<Tooltip />
+						<Tooltip labelFormatter={secondsToDateFormat} />
 						<Legend />
 						{LocLine("LOC total", "locTotal", colors[0])}
 						{LocLine("LOC added", "locAdded", colors[1])}

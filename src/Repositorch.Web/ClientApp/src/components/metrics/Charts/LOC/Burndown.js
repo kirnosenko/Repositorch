@@ -73,7 +73,7 @@ export default function Burndown(props) {
 							domain={[data.settings["dateFrom"], data.settings["dateTo"]]}
 							allowDataOverflow />
 						<YAxis />
-						<Tooltip />
+						<Tooltip labelFormatter={secondsToDateFormat} />
 						<Legend />
 						{data.result.keys.map((key, index) => {
 							return LocLine(key, key, colors[index]);
