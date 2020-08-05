@@ -204,8 +204,11 @@ namespace Repositorch.Data.Entities.Mapping
 		}
 		public void Check(int revisionsToSkip, CheckMode mode)
 		{
-			var revisions = data.UsingSession(s =>
-				s.Get<Commit>().Skip(revisionsToSkip).Select(c => c.Revision).ToArray());
+			var revisions = data.UsingSession(s => s.Get<Commit>()
+				.OrderBy(x => x.OrderedNumber)
+				.Skip(revisionsToSkip)
+				.Select(c => c.Revision)
+				.ToArray());
 
 			foreach (var r in revisions)
 			{
