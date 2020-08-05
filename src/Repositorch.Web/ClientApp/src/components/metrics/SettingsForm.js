@@ -13,10 +13,12 @@ export default function SettingsForm(props) {
 	}
 
 	function handleChange(evt) {
+		const key = evt.target.name;
 		const value = evt.target.type === "checkbox"
 			? evt.target.checked
 			: evt.target.value;
-		setSetting(evt.target.name, value);
+
+		setSetting(key, value);
 	}
 
 	async function handleSubmit(event) {

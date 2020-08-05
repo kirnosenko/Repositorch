@@ -9,6 +9,17 @@ export default function BurndownForm(props) {
 	function getFormContent(settings, setSetting, handleChange) {
 		return (
 			<Fragment>
+				<div className="form-group">
+					<div className="heading">Slice type</div>
+					<select
+						className="custom-select"
+						name="slice"
+						value={settings.slice}
+						onChange={handleChange} >
+						<option value="0">Year</option>
+						<option value="1">Tag</option>
+					</select>
+				</div>
 				<PathText
 					settings={settings}
 					handleChange={handleChange} />

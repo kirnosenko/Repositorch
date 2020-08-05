@@ -10,7 +10,7 @@ import BurndownForm from './BurndownForm';
 export default function Burndown(props) {
 
 	const [data, setData] = React.useState(null);
-	const settingsIn = ["path"];
+	const settingsIn = ["slice", "path"];
 
 	function updateSettings(settings) {
 		var settingsDelta = {};
