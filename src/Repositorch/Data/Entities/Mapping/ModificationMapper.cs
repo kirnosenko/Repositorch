@@ -37,20 +37,33 @@ namespace Repositorch.Data.Entities.Mapping
 					 join c in commitsToLookAt on m.CommitId equals c.Id
 					 orderby c.OrderedNumber descending
 					 select m).FirstOrDefault();
-				if (lastFileModification == null || touchedFile.Action != lastFileModification.Action)
+
+				if (lastFileModification == null)
 				{
 					if (touchedFile.Action == TouchedFileAction.ADDED)
 					{
 						return SingleExpression(expression.Added());
 					}
-
-					return SingleExpression(expression.Removed());
 				}
-				else if (touchedFile.Action == TouchedFileAction.ADDED)
+				else
 				{
-					return SingleExpression(expression.Modified());
-				}
+					if (touchedFile.Action != lastFileModification.Action)
+					{
+						if (touchedFile.Action == TouchedFileAction.ADDED)
+						{
+							return lastFileModification.Action == TouchedFileAction.MODIFIED
+								? SingleExpression(expression.Modified())
+								: SingleExpression(expression.Added());
+						}
 
+						return SingleExpression(expression.Removed());
+					}
+					else if (touchedFile.Action == TouchedFileAction.ADDED)
+					{
+						return SingleExpression(expression.Modified());
+					}
+				}
+				
 				return NoExpressions();
 			}
 
