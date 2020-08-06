@@ -24,9 +24,9 @@ namespace Repositorch.Data.Entities.Mapping
 			else // one or more parent revisions
 			{
 				var parentBranches =
-					(from pr in log.ParentRevisions
-					join c in expression.Get<Commit>() on pr equals c.Revision
-					join b in expression.Get<Branch>() on c.BranchId equals b.Id
+					(from c in expression.GetReadOnly<Commit>()
+					join b in expression.GetReadOnly<Branch>() on c.BranchId equals b.Id
+					where log.ParentRevisions.Contains(c.Revision)
 					select b).ToArray();
 				var parentChildren = log.ParentRevisions
 					.SelectMany(pr => vcsData.Log(pr).ChildRevisions)
