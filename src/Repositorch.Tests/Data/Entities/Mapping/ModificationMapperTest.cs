@@ -252,7 +252,6 @@ namespace Repositorch.Data.Entities.Mapping
 			Assert.Equal(1, (int)file2Exp.Count());
 			Assert.Equal(TouchedFileAction.MODIFIED, file2Exp.First().CurrentEntity<Modification>().Action);
 		}
-
 		[Fact]
 		public void Should_map_file_as_modified_in_merge_when_it_is_added_and_has_modified_history_state()
 		{

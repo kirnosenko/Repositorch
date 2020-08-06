@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
@@ -15,20 +15,28 @@ namespace Repositorch.Web
 	{
 		class MappingInfo : IDisposable
 		{
+			private CancellationTokenSource tokenSource;
+			private string revision;
+			private List<string> errors;
+			private Stopwatch time;
+
 			public MappingInfo()
 			{
-				TokenSource = new CancellationTokenSource();
-				Revision = string.Empty;
-				Errors = new List<string>();
+				tokenSource = new CancellationTokenSource();
+				revision = string.Empty;
+				errors = new List<string>();
+				time = Stopwatch.StartNew();
 			}
 			public void Dispose()
 			{
-				TokenSource.Dispose();
+				tokenSource.Dispose();
+				time.Stop();
 			}
 
-			public CancellationTokenSource TokenSource { get; protected set; }
-			public string Revision { get; set; }
-			public List<string> Errors { get; protected set; }
+			public CancellationTokenSource TokenSource => tokenSource;
+			public string Revision { get => revision; set => revision = value; }
+			public List<string> Errors => errors;
+			public string Time => time.Elapsed.ToFormatedTimeString();
 		}
 
 		private readonly IProjectManager projectFactory;
@@ -88,7 +96,7 @@ namespace Repositorch.Web
 					try
 					{
 						await mappingNotifier.Notify(
-							projectName, "Preparing for mapping...", null, true);
+							projectName, "Preparing for mapping...", null, null);
 						var mapper = CreateDataMapper(projectName);
 						var mappingSettings = new VcsDataMapper.MappingSettings()
 						{
@@ -102,21 +110,21 @@ namespace Repositorch.Web
 									projectName,
 									null,
 									Enumerable.Empty<string>(),
-									false);
+									mi.Time);
 								break;
 							case VcsDataMapper.MappingResult.ERROR:
 								await mappingNotifier.Notify(
 									projectName,
 									$"Error for revision {mi.Revision}",
 									mi.Errors,
-									false);
+									mi.Time);
 								break;
 							default:
 								await mappingNotifier.Notify(
 									projectName,
 									null,
 									null,
-									false);
+									mi.Time);
 								break;
 						}
 					}
@@ -126,7 +134,7 @@ namespace Repositorch.Web
 							projectName,
 							$"Error for revision {mi.Revision}",
 							new List<string>() { JsonConvert.SerializeObject(e, Formatting.Indented) },
-							false);
+							mi.Time);
 					}
 					finally
 					{
@@ -159,17 +167,17 @@ namespace Repositorch.Web
 					mi.Revision = revision;
 				}
 				await mappingNotifier.Notify(
-					projectName, $"Mapping: {revision}", null, true);
+					projectName, $"Mapping: {revision}", null, null);
 			};
 			dataMapper.OnTruncateRevision += async revision =>
 			{
 				await mappingNotifier.Notify(
-					projectName, $"Truncating: {revision}", null, true);
+					projectName, $"Truncating: {revision}", null, null);
 			};
 			dataMapper.OnCheckRevision += async revision =>
 			{
 				await mappingNotifier.Notify(
-					projectName, $"Checking: {revision}", null, true);
+					projectName, $"Checking: {revision}", null, null);
 			};
 			dataMapper.OnError += message =>
 			{

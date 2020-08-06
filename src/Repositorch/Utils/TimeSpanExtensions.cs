@@ -2,7 +2,7 @@
 {
 	public static class TimeSpanExtensions
 	{
-		public static string ToFormatedString(this TimeSpan span)
+		public static string ToFormatedTimeString(this TimeSpan span)
 		{
 			return
 				span.Hours.ToString("D2") + ":" +

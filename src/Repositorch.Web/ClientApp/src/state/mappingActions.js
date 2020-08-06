@@ -1,9 +1,9 @@
-﻿export const updateMapping = (name, progress, errors, working) => {
+﻿export const updateMapping = (name, progress, errors, time) => {
 	return {
 		type: 'updateMapping',
 		name: name,
 		progress: progress,
 		errors: errors,
-		working: working
+		time: time
 	};
 }

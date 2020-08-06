@@ -4,7 +4,7 @@
 			state[action.name] = {
 				progress: action.progress,
 				errors: action.errors,
-				working: action.working
+				time: action.time
 			};
 			break;
 		default:

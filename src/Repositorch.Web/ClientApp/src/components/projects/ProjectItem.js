@@ -21,7 +21,7 @@ export default function ProjectItem(props) {
 	const mapping = useSelector(state => state.mappings[props.name]);
 
 	function isMappingInProgress() {
-		return mapping !== undefined && mapping.working === true
+		return mapping !== undefined && mapping.time === null
 	}
 
 	function startMapping() {
@@ -64,14 +64,20 @@ export default function ProjectItem(props) {
 	var progress = '';
 	var bg = '';
 	var errors = '';
+	var time = '';
 	var style = styles.progress;
 	if (mapping !== undefined) {
 		progress = mapping.progress || 'Mapping is stopped.';
-		if (!mapping.working) {
+		if (mapping.time !== null) {
 			bg = mapping.errors === null
 				? 'bg-warning'
 				: (mapping.errors.length > 0 ? 'bg-danger' : 'bg-success');
 			style = styles.result;
+			time = (
+				<Fragment>
+					<br />Time: {mapping.time}
+				</Fragment>
+			);
 		}
 		if (mapping.errors !== null) {
 			if (mapping.errors.length === 0) {
@@ -90,6 +96,7 @@ export default function ProjectItem(props) {
 		progress =
 			<div className={`card-footer ${bg}`} style={style}>
 				{progress}
+				{time}
 				{errors}
 			</div>;
 	}

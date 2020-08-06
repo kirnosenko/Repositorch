@@ -27,7 +27,7 @@
 		{
 			get
 			{
-				return timer.Elapsed.ToFormatedString();
+				return timer.Elapsed.ToFormatedTimeString();
 			}
 		}
 	}
