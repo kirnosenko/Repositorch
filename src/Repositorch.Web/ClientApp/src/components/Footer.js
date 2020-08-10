@@ -1,4 +1,5 @@
 ﻿import React, { Fragment } from 'react';
+import ContentToLoadStatic from './ContentToLoadStatic';
 
 var underfooter = {
 	height: "30px",
@@ -22,7 +23,14 @@ export function Footer() {
 			</div>
 			<div style={footer}>
 				Powered by <a href="https://github.com/kirnosenko/Repositorch"
-					target="_blank" rel="noopener noreferrer">Repositorch</a> 0.1.0 alpha
+					target="_blank" rel="noopener noreferrer">Repositorch</a>
+				&nbsp;
+				<ContentToLoadStatic
+					url="api/Info/GetVersion"
+					noloading="true"
+					renderData={(version) => version} />
+				&nbsp;
+				(<a href="/env">ENV</a>)
 			</div>
 		</Fragment>
 	)

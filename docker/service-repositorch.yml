@@ -13,5 +13,5 @@ services:
       - REPOSITORCH_REPO_PATH=/root/repo
     volumes:
       - ${REPOSITORCH_HOME_PATH}:/root/data
-      - ${REPOSITORCH_REPO_PATH}:/root/repo
+      - ${REPOSITORCH_REPO_PATH}:/root/repo:ro,cached
       

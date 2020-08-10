@@ -1,24 +1,50 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Repositorch.Web
 {
 	public static class EnvironmentExtensions
 	{
-		public static string GetHomePath()
+		public static Dictionary<string, string> GetVariables()
 		{
-			return Environment.GetEnvironmentVariable("REPOSITORCH_HOME_PATH") ?? GetOsHomePath();
+			return new Dictionary<string, string>()
+			{
+				{ "HOME", GetHomePath() },
+				{ "REPO", GetRepoPath() },
+				{ "DB", GetDbPath() }
+			};
 		}
 
-		public static string GetSettingsFilePath()
+		public static string GetHomePath()
 		{
-			var fileName = Environment.GetEnvironmentVariable("REPOSITORCH_DB_FILE") ?? "repositorch.db";
+			return GetEnvHomePath() ?? GetOsHomePath();
+		}
+
+		public static string GetDbPath()
+		{
+			var fileName = GetEnvDbFile() ?? "repositorch.db";
 			return Path.Combine(GetHomePath(), fileName);
 		}
 
 		public static string GetRepoPath()
 		{
-			return Environment.GetEnvironmentVariable("REPOSITORCH_REPO_PATH") ?? GetOsHomePath();
+			return GetEnvRepoPath() ?? GetOsHomePath();
+		}
+
+		private static string GetEnvHomePath()
+		{
+			return Environment.GetEnvironmentVariable("REPOSITORCH_HOME_PATH");
+		}
+
+		private static string GetEnvRepoPath()
+		{
+			return Environment.GetEnvironmentVariable("REPOSITORCH_REPO_PATH");
+		}
+
+		private static string GetEnvDbFile()
+		{
+			return Environment.GetEnvironmentVariable("REPOSITORCH_DB_FILE");
 		}
 
 		private static string GetOsHomePath()

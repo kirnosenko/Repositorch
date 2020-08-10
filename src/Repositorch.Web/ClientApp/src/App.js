@@ -4,7 +4,8 @@ import { Layout } from './components/Layout';
 import ProjectList from './components/projects/ProjectList';
 import ProjectBrowse from './components/projects/ProjectBrowse';
 import ProjectEdit from './components/projects/ProjectEdit';
-import './custom.css'
+import Environment from './components/Environment';
+import './custom.css';
 
 export default class App extends Component {
 	static displayName = App.name;
@@ -14,6 +15,7 @@ export default class App extends Component {
 			<Layout>
 				<Switch>
 					<Route exact path='/' component={ProjectList} />
+					<Route exact path='/env' component={Environment} />
 					<Route exact path='/new' component={ProjectEdit} />
 					<Route exact path='/edit/:project' component={ProjectEdit} />
 					<Route exact path='/:project' component={ProjectBrowse} />
