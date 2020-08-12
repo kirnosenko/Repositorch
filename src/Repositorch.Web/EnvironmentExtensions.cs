@@ -34,12 +34,22 @@ namespace Repositorch.Web
 
 		private static string GetEnvHomePath()
 		{
-			return Environment.GetEnvironmentVariable("REPOSITORCH_HOME_PATH");
+			return GetEnvPath("REPOSITORCH_HOME_PATH");
 		}
 
 		private static string GetEnvRepoPath()
 		{
-			return Environment.GetEnvironmentVariable("REPOSITORCH_REPO_PATH");
+			return GetEnvPath("REPOSITORCH_REPO_PATH");
+		}
+
+		private static string GetEnvPath(string name)
+		{
+			var envPath = Environment.GetEnvironmentVariable(name);
+			if (envPath != null && !Directory.Exists(envPath))
+			{
+				envPath = null;
+			}
+			return envPath;
 		}
 
 		private static string GetEnvDbFile()
