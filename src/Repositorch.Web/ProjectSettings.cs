@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.IO;
 using LiteDB;
 
 namespace Repositorch.Web
@@ -13,5 +13,15 @@ namespace Repositorch.Web
 		public string Branch { get; set; }
 		public bool UseExtendedLog { get; set; }
 		public string CheckResult { get; set; }
+	}
+
+	public static class ProjectSettingsExtension
+	{
+		public static string GetFullRepositoryPath(this ProjectSettings settings)
+		{
+			return Path.Combine(
+				EnvironmentExtensions.GetRepoPath(),
+				settings.RepositoryPath);
+		}
 	}
 }

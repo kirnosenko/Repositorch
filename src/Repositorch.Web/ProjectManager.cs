@@ -118,7 +118,7 @@ namespace Repositorch.Web
 
 		public IVcsData GetProjectVcsData(ProjectSettings projectSettings)
 		{
-			var vcsClient = new CommandLineGitClient(projectSettings.RepositoryPath)
+			var vcsClient = new CommandLineGitClient(projectSettings.GetFullRepositoryPath())
 			{
 				Branch = projectSettings.Branch,
 				ExtendedLog = projectSettings.UseExtendedLog,

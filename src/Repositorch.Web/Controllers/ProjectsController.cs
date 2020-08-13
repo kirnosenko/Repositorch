@@ -61,7 +61,8 @@ namespace Repositorch.Web.Controllers
 		public IActionResult GetRepoDirs()
 		{
 			List<string> repoDirs = new List<string>();
-			GetRepoDirs(EnvironmentExtensions.GetRepoPath(), repoDirs);
+			var repoRoot = EnvironmentExtensions.GetRepoPath();
+			GetRepoDirs(repoRoot, repoRoot, repoDirs);
 
 			return Ok(repoDirs);
 		}
@@ -101,21 +102,25 @@ namespace Repositorch.Web.Controllers
 			return Ok();
 		}
 
-		private void GetRepoDirs(string rootDir, List<string> repoDirs)
+		/// <summary>
+		/// Return unix-styled relative pathes.
+		/// </summary>
+		private void GetRepoDirs(string rootDir, string currentDir, List<string> repoDirs)
 		{
-			var innerDirs = Directory.GetDirectories(rootDir);
+			var innerDirs = Directory.GetDirectories(currentDir);
 			var repoDir = innerDirs.SingleOrDefault(x => x.EndsWith(GitRepoDirName) &&
 				new DirectoryInfo(x).Name == GitRepoDirName);
 
 			if (repoDir != null)
 			{
-				repoDirs.Add(repoDir);
+				var path = Path.GetRelativePath(rootDir, repoDir).Replace("\\", "/");
+				repoDirs.Add(path);
 				return;
 			}
 
 			foreach (var dir in innerDirs)
 			{
-				GetRepoDirs(dir, repoDirs);
+				GetRepoDirs(rootDir, dir, repoDirs);
 			}
 		}
 
@@ -155,9 +160,9 @@ namespace Repositorch.Web.Controllers
 				errors.Add(nameof(settings.StoreName),
 					"Invalid data store name.");
 			}
-			
+
 			if (string.IsNullOrEmpty(settings.RepositoryPath) 
-				|| !Directory.Exists(settings.RepositoryPath))
+				|| !Directory.Exists(settings.GetFullRepositoryPath()))
 			{
 				errors.Add(nameof(settings.RepositoryPath),
 					"Invalid repository path.");
