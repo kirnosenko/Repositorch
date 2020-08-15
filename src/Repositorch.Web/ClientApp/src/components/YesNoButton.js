@@ -15,6 +15,7 @@ export const YesNoButton = (props) => {
 			<button
 				type="button"
 				className="btn btn-outline-dark btn-sm"
+				disabled={props.disabled}
 				onClick={toggle}>{props.label}</button>
 			<Modal isOpen={modal} toggle={toggle}>
 				<ModalHeader toggle={toggle}>{props.title}</ModalHeader>

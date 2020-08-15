@@ -19,6 +19,8 @@ const styles = {
 
 export default function ProjectItem(props) {
 	const mapping = useSelector(state => state.mappings[props.name]);
+	const [readyToSwitch, setReadyToSwitch] = React.useState(true);
+	const [readyToRemove, setReadyToRemove] = React.useState(true);
 
 	function isMappingInProgress() {
 		return mapping !== undefined && mapping.time === null
@@ -49,16 +51,21 @@ export default function ProjectItem(props) {
 	}
 
 	function switchMapping() {
+		setReadyToSwitch(false);
+		setReadyToRemove(false);
 		isMappingInProgress()
 			? stopMapping()
 			: startMapping();
 	}
 
 	function removeProject() {
+		setReadyToRemove(false);
 		props.removeProject(props.name);
 	}
 
 	React.useEffect(() => {
+		setReadyToSwitch(true);
+		setReadyToRemove(!isMappingInProgress());
 	}, [mapping]);
 
 	var progress = '';
@@ -115,6 +122,7 @@ export default function ProjectItem(props) {
 							<button
 								type="button"
 								className="btn btn-outline-dark btn-sm"
+								disabled={!readyToSwitch}
 								onClick={() => switchMapping()}>
 								{isMappingInProgress() ? "Stop mapping" : "Start mapping"}</button>
 							&nbsp;
@@ -133,6 +141,7 @@ export default function ProjectItem(props) {
 							<YesNoButton
 								label="Remove"
 								title="Remove project"
+								disabled={!readyToRemove}
 								text={`Are you sure wanna remove project ${props.name}?`}
 								yesAction={removeProject} />
 						</div>
