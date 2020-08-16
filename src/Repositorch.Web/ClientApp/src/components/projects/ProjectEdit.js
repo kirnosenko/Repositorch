@@ -16,6 +16,7 @@ export default function ProjectEdit({ match }) {
 		checkResult: "1"
 	});
 	const [validation, setValidation] = React.useState({});
+	const [readyToSave, setReadyToSave] = React.useState(true);
 
 	function loadSettings() {
 
@@ -84,6 +85,7 @@ export default function ProjectEdit({ match }) {
 	async function handleSubmit(event) {
 		event.preventDefault();
 
+		setReadyToSave(false);
 		var action = project === undefined ? "Create" : "Update"
 		var response = await fetch(`api/Projects/${action}`, {
 			method: 'POST',
@@ -97,6 +99,7 @@ export default function ProjectEdit({ match }) {
 		}
 		else {
 			setValidation(errors);
+			setReadyToSave(true);
 		}
 	}
 
@@ -233,7 +236,8 @@ export default function ProjectEdit({ match }) {
 			</div>
 			<button
 				type="submit"
-				className="btn btn-outline-dark btn-sm">
+				className="btn btn-outline-dark btn-sm"
+				disabled={!readyToSave} >
 				{project === undefined ? "Create project..." : "Update project..."}
 			</button>
 		</form>
