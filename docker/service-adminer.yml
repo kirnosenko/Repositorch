@@ -1,10 +1,11 @@
-version: '3.7'
+version: '3.8'
 
 services:
 
   adminer:
     image: adminer
-    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: none
     ports:
       - 8080:8080
-      

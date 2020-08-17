@@ -1,11 +1,13 @@
-version: '3.7'
+version: '3.8'
 
 services:
       
   postgres:
     image: postgres
     container_name: postgres
-    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: none
     user: root
     environment:
       - POSTGRES_USER=postgres

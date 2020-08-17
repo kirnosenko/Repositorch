@@ -1,11 +1,13 @@
-version: '3.7'
+version: '3.8'
 
 services:
   
   mssql:
     image: mcr.microsoft.com/mssql/server
     container_name: mssql
-    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: none
     user: root
     environment:
       - ACCEPT_EULA=Y

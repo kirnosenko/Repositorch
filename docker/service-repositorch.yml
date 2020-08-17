@@ -1,11 +1,13 @@
-version: '3.7'
+version: '3.8'
 
 services:
   
   repositorch:
     image: kirnosenko/repositorch
     container_name: repositorch
-    restart: on-failure
+    deploy:
+      restart_policy:
+        condition: on-failure
     ports:
       - "5000:80"
     environment:
