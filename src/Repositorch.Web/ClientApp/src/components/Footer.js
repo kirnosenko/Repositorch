@@ -27,7 +27,7 @@ export function Footer() {
 				&nbsp;
 				<ContentToLoadStatic
 					url="api/Info/GetVersion"
-					noloading="true"
+					noloading={true}
 					renderData={(version) => version} />
 				&nbsp;
 				(<a href="/env">ENV</a>)
