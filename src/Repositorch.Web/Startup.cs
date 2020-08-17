@@ -55,6 +55,7 @@ namespace Repositorch.Web
 				app.UseExceptionHandler("/Error");
 			}
 
+			app.UseMiddleware<NoCacheMiddleware>();
 			app.UseMiddleware<TimerMiddleware>();
 
 			app.UseStaticFiles();
