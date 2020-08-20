@@ -14,6 +14,14 @@ export default function Metric(props) {
 		return data;
 	}
 
+	function emptyLayout() {
+		return (
+			<p>
+				<b>No data...</b>
+			</p>
+		);
+	}
+
 	function metricLayout(title, time, body) {
 		return (
 			<Fragment>
@@ -25,6 +33,17 @@ export default function Metric(props) {
 				{body}
 			</Fragment>
 		);
+	}
+
+	function layout(metric) {
+		if (metric.result === undefined) {
+			return emptyLayout();
+		}
+
+		return metricLayout(
+			props.title,
+			metric.time,
+			props.renderMetric(metric));
 	}
 
 	async function loadMetric() {
@@ -51,10 +70,7 @@ export default function Metric(props) {
 		<ContentToLoad
 			getData={getData}
 			loadData={loadMetric}
-			renderData={(metric) => metricLayout(
-				props.title,
-				metric.time,
-				props.renderMetric(metric))} />
+			renderData={layout} />
 	);
 }
 

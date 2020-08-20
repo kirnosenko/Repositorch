@@ -4,7 +4,7 @@ using System.Linq;
 using Autofac.Features.Indexed;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
-using Repositorch.Data.Entities.Persistent;
+using Repositorch.Data.Entities;
 
 namespace Repositorch.Web.Controllers
 {
@@ -13,23 +13,23 @@ namespace Repositorch.Web.Controllers
 	[Produces("application/json")]
 	public class MetricsController : ControllerBase
 	{
-		private readonly IProjectManager projectFactory;
+		private readonly IProjectManager projectManager;
 		private readonly IIndex<string,IMetric> metrics;
 		private readonly IIndex<string,List<MetricMenu.MetricMenuItem>> metricsMenu;
 		
 		public MetricsController(
-			IProjectManager projectFactory,
+			IProjectManager projectManager,
 			IIndex<string,IMetric> metrics,
 			IIndex<string,List<MetricMenu.MetricMenuItem>> metricsMenu)
 		{
-			this.projectFactory = projectFactory;
+			this.projectManager = projectManager;
 			this.metrics = metrics;
 			this.metricsMenu = metricsMenu;
 		}
 
 		[HttpGet]
 		[Route("[action]/{path}")]
-		public ActionResult<JObject> GetMenu([FromRoute]string path)
+		public IActionResult GetMenu([FromRoute]string path)
 		{
 			path = Uri.UnescapeDataString(path);
 			if (metricsMenu.TryGetValue(path, out var menu))
@@ -50,7 +50,7 @@ namespace Repositorch.Web.Controllers
 
 		[HttpGet]
 		[Route("{project}/{metricPath}")]
-		public ActionResult<JObject> Calculate(
+		public IActionResult Calculate(
 			[FromRoute]string project, 
 			[FromRoute]string metricPath,
 			[FromQuery]IDictionary<string, string> parameters)
@@ -59,9 +59,14 @@ namespace Repositorch.Web.Controllers
 			
 			if (metrics.TryGetValue(metricPath, out var metric))
 			{
-				var data = projectFactory.GetProjectDataStore(project);
+				var data = projectManager.GetProjectDataStore(project);
 				using (var repository = data.OpenSession())
 				{
+					if (repository.Get<Commit>().Count() == 0)
+					{
+						return Ok(new object());
+					}
+
 					var settingsObject = parameters.Count > 0
 						? parameters.ToDictionary(
 							x => x.Key,
