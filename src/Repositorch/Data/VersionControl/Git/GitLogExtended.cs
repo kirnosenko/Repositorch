@@ -24,7 +24,7 @@ namespace Repositorch.Data.VersionControl.Git
 		{
 		}
 
-		protected override void ParseTouchedFiles(TextReader reader)
+		protected override void ParseTouchedFiles(TextReader reader, int infoLines)
 		{
 			string line;
 			touchedFiles = new List<TouchedFile>();
@@ -35,7 +35,7 @@ namespace Repositorch.Data.VersionControl.Git
 				if (line == string.Empty)
 				{
 					// skip revision info section
-					for (int i = 0; i < 7; i++)
+					for (int i = 0; i < infoLines + 1; i++)
 					{
 						line = reader.ReadLine();
 					}

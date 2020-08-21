@@ -12,8 +12,9 @@ private readonly string log_1 =
 @"7672db20c2060f20b01788e4a4289ebc5f818605
 Linus Torvalds
 torvalds@g5.osdl.org
-2005-07-08 17:07:37 -0700
 [PATCH] Expose object ID computation functions.
+
+2005-07-08 17:07:37 -0700
 
 36	0	Documentation/git-hash-object.txt
 0	33	Documentation/git-write-blob.txt
@@ -35,8 +36,9 @@ private readonly string log_2 =
 @"235ac465991c28bc85e72250f211cb27cd51abcc
 mr.exodia
 mr.exodia.tpodt@gmail.com
-2013-11-15 20:33:59 +0100
 forgot x64 bin
+
+2013-11-15 20:33:59 +0100
 
 0	2	.gitignore
 -	-	bin/x64/BeaEngine.dll
@@ -58,8 +60,9 @@ private readonly string log_3 =
  @"99665af5c0be0fe4319b39183e84917993153576
 Petr Baudis
 xpasky@machine.sinus.cz
-2005-05-15 02:05:03 +0200
 [PATCH 2/3] Rename git-diff-tree-helper to git-diff-helper.
+
+2005-05-15 02:05:03 +0200
 
 1	1	Documentation/diff-format.txt
 0	0	Documentation/{git-diff-tree-helper.txt => git-diff-helper.txt}
@@ -74,8 +77,9 @@ private readonly string log_4 =
 @"c15726cf2c77201f5685dd52d5e17443ef53ee40
 mr.exodia
 mr.exodia.tpodt@gmail.com
-2013-11-20 17:55:59 +0100
 BRIDGE: added BridgeSetting* exports
+
+2013-11-20 17:55:59 +0100
 
 2	2	help/DeleteBPX_bpc_bc.htm
 23	0	help/DeleteHardwareBreakpoint_bphc_bphwc.htm
@@ -115,8 +119,9 @@ private readonly string log_5 =
 @"f87d2079b7775dff93c56022b1a175088c378b2a
 Mr. eXoDia
 mr.exodia.tpodt@gmail.com
-2014-05-15 02:06:42 +0200
 GUI: some failures
+
+2014-05-15 02:06:42 +0200
 
 0	0	x64_dbg_gui/Project/Src/{ => Gui}/TabBar.cpp
 0	0	x64_dbg_gui/Project/Src/{ => Gui}/TabBar.h
@@ -131,8 +136,9 @@ private readonly string log_6 =
 @"63c3101f384075719d5950319a61bcb5498b6249
 mrexodia
 mr.exodia.tpodt@gmail.com
-2016-01-07 17:06:30 +0100
 PROJECT: capstone_wrapper as a submodule
+
+2016-01-07 17:06:30 +0100
 
 0	44	src/capstone_wrapper/capstone_wrapper.h
 1	0	src/dbg/capstone_wrapper
@@ -143,8 +149,9 @@ private readonly string log_7 =
 @"66c006d7038f2a528cf0f6e811250fabf9f97d80
 Duncan Ogilvie
 mr.exodia.tpodt@gmail.com
-2017-07-04 17:26:01 +0200
 Small code improvement (#1637)
+
+2017-07-04 17:26:01 +0200
 
 1	1	src/dbg/command.cpp
 6	0	src/dbg/stringutils.cpp
@@ -159,8 +166,9 @@ private readonly string log_8 =
 @"6b32ee2381deb414378a76cae213a4fe633f8fcc
 Junio C Hamano
 junkio@cox.net
-2006-04-10 19:44:35 -0700
 Merge branch 'jc/withraw' into next
+
+2006-04-10 19:44:35 -0700
 
 16	9	Documentation/git-diff-tree.txt
 8	3	Makefile
@@ -189,8 +197,9 @@ private readonly string log_9 =
 @"d4935bfe2689e9542d33ceb41fb171380158692e
 bob
 bob@mail
-2019-12-07 20:25:37 +0400
 ccc
+
+2019-12-07 20:25:37 +0400
 HEAD -> master
 0	0	aaa bbb.txt => aaa bbb ccc.txt
  rename aaa bbb.txt => aaa bbb ccc.txt (100%)";

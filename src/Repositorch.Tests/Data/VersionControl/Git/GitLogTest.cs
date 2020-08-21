@@ -12,8 +12,9 @@ private readonly string log_1 =
 @"4bb04f2190d526f8917663f0be62d8026e1ed100
 Linus Torvalds
 torvalds@ppc970.osdl.org
-2005-04-11 15:47:57 -0700
 Rename '.dircache' directory to '.git'
+
+2005-04-11 15:47:57 -0700
 
 M	README
 M	cache.h
@@ -26,8 +27,9 @@ private readonly string log_2 =
 @"a3df180138b85a603656582bde6df757095618cf
 Linus Torvalds
 torvalds@ppc970.osdl.org
-2005-04-29 14:09:11 -0700
 Rename git core commands to be 'git-xxxx' to avoid name clashes.
+
+2005-04-29 14:09:11 -0700
 
 M	Makefile
 R100	show-diff.c	diff-files.c
@@ -38,8 +40,9 @@ private readonly string log_3 =
 @"35587ec664abcf6ed79d9d743ab58d0600cf0bc1
 adrian
 ???
-2005-07-14 18:20:03 +0000
 Created django.contrib and moved comments into it
+
+2005-07-14 18:20:03 +0000
 
 C100	django/views/comments/__init__.py	django/contrib/__init__.py
 C100	django/views/comments/__init__.py	django/contrib/comments/__init__.py";
@@ -48,8 +51,9 @@ private readonly string log_4 =
 @"766c647d9b9cf3e84353536ebb928153c96fdece
 jezdez
 ???
-2011-02-14 23:45:32 +0000
 Fixed the staticfiles management commands collectstatic and findstatic to not raise encoding related exceptions when handlings filenames with non-ASCII characters.
+
+2011-02-14 23:45:32 +0000
 
 M	django/contrib/staticfiles/management/commands/collectstatic.py
 M	django/contrib/staticfiles/management/commands/findstatic.py
@@ -60,8 +64,9 @@ private readonly string log_5 =
 @"b51ad4314078298194d23d46e2b4473ffd32a88a
 Linus Torvalds
 torvalds@ppc970.osdl.org
-2005-04-18 12:12:00 -0700
 Merge the new object model thing from Daniel Barkalow
+
+2005-04-18 12:12:00 -0700
 
 M	Makefile
 A	blob.c
@@ -79,8 +84,9 @@ A	tree.h
 b51ad4314078298194d23d46e2b4473ffd32a88a
 Linus Torvalds
 torvalds@ppc970.osdl.org
-2005-04-18 12:12:00 -0700
 Merge the new object model thing from Daniel Barkalow
+
+2005-04-18 12:12:00 -0700
 
 M	Makefile
 M	README
@@ -98,8 +104,9 @@ private readonly string log_6 =
 @"10
 alan
 alan@mail
-2000-01-01 00:00:00 -0700
 message
+
+2000-01-01 00:00:00 -0700
 
 M	file1
 A	file2
@@ -108,8 +115,9 @@ M	file3
 10
 alan
 alan@mail
-2000-01-01 00:00:00 -0700
 message
+
+2000-01-01 00:00:00 -0700
 
 M	file1
 M	file2
@@ -119,8 +127,9 @@ private readonly string log_7 =
 @"10
 alan
 alan@mail
-2000-01-01 00:00:00 -0700
 message
+
+2000-01-01 00:00:00 -0700
 HEAD -> master, tag: qwe, tag: ab,c, tag: 0.99
 A	file1";
 
@@ -128,8 +137,9 @@ private readonly string log_8 =
 @"824100eea88c38c5a8c7f84d17f832bf6611e26d
 Duncan Ogilvie
 mr.exodia.tpodt@gmail.com
-2019-11-13 01:13:06 +0100
 DBG: implement memcpy command
+
+2019-11-13 01:13:06 +0100
 HEAD -> development, origin/development, origin/HEAD
 M	src/dbg/commands/cmd-memory-operations.cpp
 M	src/dbg/commands/cmd-memory-operations.h
@@ -140,17 +150,34 @@ private readonly string log_9 =
 @"e90a4c0ed17b66c302f48ec0a234cac6f27e5eec
 Linus Torvalds
 torvalds@ppc970.osdl.org
-2005-04-18 16:11:32 -0700
-Add 'dotest' and 'applypatch' scripts to actually make things useful.";
+Add 'dotest' and 'applypatch' scripts to actually make things useful.
+
+2005-04-18 16:11:32 -0700";
 
 private readonly string log_10 =
 @"d4935bfe2689e9542d33ceb41fb171380158692e
 bob
 bob@mail
-2019-12-07 20:25:37 +0400
 ccc
+
+2019-12-07 20:25:37 +0400
 HEAD -> master
 R100	aaa bbb.txt	aaa bbb ccc.txt";
+
+private readonly string log_11 =
+@"1daf97f3b862ded3d9d6c55ad1be42def826f463
+Pavel Krymets
+pavel@krymets.com
+Move 
+efs to shared runtime
+
+2016-05-02 09:36:02 -0700
+
+M	src/installer/DependencyContext.cs
+M	src/installer/DependencyContextLoader.cs
+A	src/installer/DependencyContextPaths.cs
+M	src/installer/Resolution/AppBaseCompilationAssemblyResolver.cs
+A	src/installer/TargetInfo.cs";
 
 		private GitLog log;
 		
@@ -329,6 +356,14 @@ R100	aaa bbb.txt	aaa bbb ccc.txt";
 
 			Assert.Equal(new string[] { }, log.Tags);
 			Assert.Equal(new TouchedFile[] { }, log.TouchedFiles);
+		}
+
+		[Fact]
+		public void Should_parse_multiline_message()
+		{
+			log = new GitLog(log_11.ToStream(), null, null);
+
+			Assert.Equal("Move " + Environment.NewLine + "efs to shared runtime", log.Message);
 		}
 	}
 }

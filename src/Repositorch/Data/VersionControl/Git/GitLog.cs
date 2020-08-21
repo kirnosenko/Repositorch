@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Repositorch.Data.VersionControl.Git
@@ -22,11 +23,30 @@ namespace Repositorch.Data.VersionControl.Git
 		{
 			TextReader reader = new StreamReader(log);
 
+			int infoLines = 5;
 			Revision = reader.ReadLine();
 			AuthorName = reader.ReadLine();
 			AuthorEmail = reader.ReadLine();
+			var messageText = new StringBuilder();
+			do
+			{
+				var line = reader.ReadLine();
+				infoLines++;
+				if (line != string.Empty)
+				{
+					if (messageText.Length > 0)
+					{
+						messageText.AppendLine();
+					}
+					messageText.Append(line);
+				}
+				else
+				{
+					break;
+				}
+			} while (true);
+			Message = messageText.ToString();
 			Date = DateTime.Parse(reader.ReadLine()).ToUniversalTime();
-			Message = reader.ReadLine();
 			var tags = reader.ReadLine();
 			var tagMatches = string.IsNullOrEmpty(tags) ? null : TagRegExp.Matches(tags);
 			if (tagMatches != null && tagMatches.Count > 0)
@@ -45,10 +65,10 @@ namespace Repositorch.Data.VersionControl.Git
 			ParentRevisions = parentRevisions;
 			ChildRevisions = childRevisions;
 
-			ParseTouchedFiles(reader);
+			ParseTouchedFiles(reader, infoLines);
 		}
 
-		protected virtual void ParseTouchedFiles(TextReader reader)
+		protected virtual void ParseTouchedFiles(TextReader reader, int infoLines)
 		{
 			string line;
 			touchedFiles = new List<TouchedFile>();
@@ -58,7 +78,7 @@ namespace Repositorch.Data.VersionControl.Git
 				if (line == string.Empty)
 				{
 					// skip revision info section
-					for (int i = 0; i < 7; i++)
+					for (int i = 0; i < infoLines + 1; i++)
 					{
 						line = reader.ReadLine();
 					}
