@@ -249,6 +249,14 @@ namespace Repositorch.Data.Entities.Mapping
 				return result;
 			}
 		}
+		public bool CheckFile(string revision, string path)
+		{
+			using (var s = data.OpenSession())
+			{
+				var file = s.Get<CodeFile>().SingleOrDefault(x => x.Path == path);
+				return CheckLinesContent(s, revision, file);
+			}
+		}
 		public void CheckAndTruncate(string path)
 		{
 			var revisions = data.UsingSession(s => s.Get<Commit>().Count());
@@ -284,21 +292,27 @@ namespace Repositorch.Data.Entities.Mapping
 		private bool CheckLinesContent(ISession s, string revision, CodeFile file)
 		{
 			var fileBlame = vcsData.Blame(revision, file.Path);
-			if (fileBlame == null)
-			{
-				OnError?.Invoke(string.Format("Could not get blame for file {0} in revision {1}.",
-					file.Path, revision));
-				return false;
-			}
-			
 			var commitsToLookAt = s.SelectionDSL()
 				.Commits().TillRevision(revision).Fixed();
-
 			double currentLOC = commitsToLookAt
 				.Files().IdIs(file.Id)
 				.Modifications().InCommits().InFiles()
 				.CodeBlocks().InModifications()
 				.CalculateLOC();
+			
+			if (fileBlame == null)
+			{
+				if (currentLOC == 0)
+				{
+					return true;
+				}
+				else
+				{
+					OnError?.Invoke(string.Format("Could not get blame for file {0} in revision {1}.",
+						file.Path, revision));
+					return false;
+				}
+			}
 
 			if (currentLOC != fileBlame.Count)
 			{

@@ -281,5 +281,33 @@ namespace Repositorch.Data.Entities.Mapping
 			Assert.Equal(1, (int)file3Exp.Count());
 			Assert.Equal(TouchedFileAction.MODIFIED, file3Exp.First().CurrentEntity<Modification>().Action);
 		}
+		[Fact]
+		// repository: https://github.com/microsoft/vscode
+		// revision: 206f9a84d2a29a681e8829edc424dc0fa4023923
+		// file: /src/vs/workbench/parts/feedback/browser/media/feedback.css and others
+		public void Should_map_file_as_removed_in_merge_when_it_is_removed_and_has_removed_history_state()
+		{
+			mappingDSL
+				.AddCommit("1").OnBranch("1")
+					.File("file1").Added()
+			.Submit()
+				.AddCommit("2").OnBranch("11")
+					.File("file1").Removed()
+			.Submit()
+				.AddCommit("3").OnBranch("11")
+					.File("file1").Added()
+			.Submit()
+				.AddCommit("4").OnBranch("101")
+					.File("file1").Removed()
+			.Submit();
+
+			log.ParentRevisionsAre("3", "4");
+			log.FileRemoved("file1");
+
+			var commitMappingExpression = mappingDSL.AddCommit("10").OnBranch("111");
+			var file1Exp = mapper.Map(commitMappingExpression.File("file1"));
+			Assert.Equal(1, (int)file1Exp.Count());
+			Assert.Equal(TouchedFileAction.REMOVED, file1Exp.First().CurrentEntity<Modification>().Action);
+		}
 	}
 }

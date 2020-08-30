@@ -47,20 +47,15 @@ namespace Repositorch.Data.Entities.Mapping
 				}
 				else
 				{
-					if (touchedFile.Action != lastFileModification.Action)
+					if (touchedFile.Action == TouchedFileAction.ADDED)
 					{
-						if (touchedFile.Action == TouchedFileAction.ADDED)
-						{
-							return lastFileModification.Action == TouchedFileAction.MODIFIED
-								? SingleExpression(expression.Modified())
-								: SingleExpression(expression.Added());
-						}
-
-						return SingleExpression(expression.Removed());
+						return lastFileModification.Action != TouchedFileAction.REMOVED
+							? SingleExpression(expression.Modified())
+							: SingleExpression(expression.Added());
 					}
-					else if (touchedFile.Action == TouchedFileAction.ADDED)
+					else // removed
 					{
-						return SingleExpression(expression.Modified());
+						return SingleExpression(expression.Removed());
 					}
 				}
 				

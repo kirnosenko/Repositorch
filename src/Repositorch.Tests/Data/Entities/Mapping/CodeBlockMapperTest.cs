@@ -4,6 +4,7 @@ using Xunit;
 using FluentAssertions;
 using NSubstitute;
 using Repositorch.Data.Entities.DSL.Mapping;
+using Repositorch.Data.VersionControl;
 
 namespace Repositorch.Data.Entities.Mapping
 {
@@ -217,12 +218,9 @@ namespace Repositorch.Data.Entities.Mapping
 			);
 			SubmitChanges();
 
-			var mergeCodeBlocks =
-				(from cb in Get<CodeBlock>()
-				join m in Get<Modification>() on cb.ModificationId equals m.Id
-				join c in Get<Commit>() on m.CommitId equals c.Id
-				where c.Revision == "4"
-				select cb).ToArray();
+			var mergeCodeBlocks = Get<CodeBlock>()
+				.Where(x => x.Modification.Commit.Revision == "4")
+				.ToArray();
 
 			mergeCodeBlocks.Select(x => x.Size)
 				.Should().BeEquivalentTo(new double[] { 10, -5, -10 });
@@ -231,54 +229,6 @@ namespace Repositorch.Data.Entities.Mapping
 			Assert.True(mergeCodeBlocks
 				.Select(x => x.AddedInitiallyInCommit)
 				.All(x => x == null));
-		}
-		[Fact]
-		public void Should_not_map_removed_file_when_remove_modification_is_not_on_merged_branches()
-		{
-			mappingDSL
-				.AddCommit("1").OnBranch("1")
-					.File("file1").Added()
-						.Code(100)
-			.Submit()
-				.AddCommit("2").OnBranch("11")
-					.File("file1").Modified()
-						.Code(10)
-			.Submit()
-				.AddCommit("3").OnBranch("11")
-					.File("file1").Modified()
-						.Code(10)
-			.Submit()
-				.AddCommit("4").OnBranch("101")
-					.File("file1").Modified()
-						.Code(10)
-			.Submit()
-				.AddCommit("5").OnBranch("101")
-					.File("file1").Removed()
-			.Submit()
-				.AddCommit("6").OnBranch("111")
-			.Submit()
-				.AddCommit("7").OnBranch("1011")
-			.Submit();
-
-			vcsData.Log("10")
-				.Returns(new TestLog("10").ParentRevisionsAre("6", "7"));
-			vcsData.Blame("10", "file1")
-				.Returns((TestBlame)null);
-
-			mapper.Map(
-				mappingDSL.AddCommit("10").OnBranch("1111")
-					.File("file1").Modified()
-			);
-			SubmitChanges();
-
-			var modifications =
-				(from m in Get<Modification>()
-				 join c in Get<Commit>() on m.CommitId equals c.Id
-				 where c.Revision == "10"
-				 select m).ToArray();
-
-			modifications.Count()
-				.Should().Be(0);
 		}
 		[Fact]
 		public void Should_take_into_account_possible_changes_in_renamed_file_from_original_file_in_merge()
@@ -318,6 +268,50 @@ namespace Repositorch.Data.Entities.Mapping
 			blocks.Select(x => x.AddedInitiallyInCommit != null ?
 				x.AddedInitiallyInCommit.Revision : null)
 				.Should().BeEquivalentTo(new string[] { "1", null, "3" });
+		}
+		[Fact]
+		// repository: https://github.com/microsoft/vscode
+		// revision: 206f9a84d2a29a681e8829edc424dc0fa4023923
+		// file: /src/vs/workbench/parts/feedback/browser/media/feedback.css and others
+		public void Should_compensate_possible_code_changes_for_removed_file_in_merge()
+		{
+			mappingDSL
+				.AddCommit("1").OnBranch("1")
+					.File("file1").Added()
+						.Code(100)
+			.Submit()
+				.AddCommit("2").OnBranch("11")
+					.File("file1").Removed()
+						.RemoveCode()
+			.Submit()
+				.AddCommit("3").OnBranch("11")
+					.File("file1").Added()
+						.Code(100)
+			.Submit()
+				.AddCommit("4").OnBranch("101")
+					.File("file1").Removed()
+						.RemoveCode()
+			.Submit();
+
+			vcsData.Log("10")
+				.Returns(new TestLog("10").ParentRevisionsAre("3", "4"));
+			vcsData.Blame("10", "file1")
+				.Returns((IBlame)null);
+
+			mapper.Map(
+				mappingDSL.AddCommit("10").OnBranch("111")
+					.File("file1").Removed()
+			);
+			SubmitChanges();
+
+			var mergeCodeBlocks = Get<CodeBlock>()
+				.Where(x => x.Modification.Commit.Revision == "10")
+				.ToArray();
+			mergeCodeBlocks.Select(x => x.Size)
+				.Should().BeEquivalentTo(new double[] { -100, +100 });
+			Assert.True(mergeCodeBlocks
+				.Select(x => x.AddedInitiallyInCommit)
+				.All(x => x == null));
 		}
 		[Fact]
 		public void Should_revert_parent_modification_if_no_blocks_were_added()

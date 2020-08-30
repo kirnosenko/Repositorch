@@ -362,6 +362,25 @@ namespace Repositorch.Data.Entities.Mapping
 			Assert.False(mapper.CheckRevision("2", VcsDataMapper.CheckMode.ALL));
 		}
 		[Fact]
+		public void Should_check_code_blocks_for_removed_file()
+		{
+			data.UsingSession(s =>
+				s.MappingDSL()
+					.AddCommit("1").OnBranch("1").AuthorIs("alan")
+						.File("file1").Added()
+							.Code(100)
+				.Submit()
+					.AddCommit("2").OnBranch("1").AuthorIs("bob")
+						.File("file1").Removed()
+							.RemoveCode()
+				.Submit());
+
+			vcsData.Blame("2", "file1")
+				.Returns((IBlame)null);
+
+			Assert.True(mapper.CheckFile("2", "file1"));
+		}
+		[Fact]
 		public void Should_truncate_unsuccessfully_mapped_revision()
 		{
 			commitMapper
