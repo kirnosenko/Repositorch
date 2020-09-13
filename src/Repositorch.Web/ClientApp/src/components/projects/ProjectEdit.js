@@ -214,7 +214,7 @@ export default function ProjectEdit({ match }) {
 				<label className="form-check-label">Use extended log</label>
 				<small className="form-text text-muted">
 					Whether to use extended log to allow mapping of repositories
-					with symbolic links and git links.
+					with binary files, symbolic links and git links.
 					Don't touch if you are not sure.
 				</small>
 			</div>
