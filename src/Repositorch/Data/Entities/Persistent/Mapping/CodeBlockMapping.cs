@@ -22,7 +22,7 @@ namespace Repositorch.Data.Entities.Persistent.Mapping
 
 			builder.HasOne(cb => cb.AddedInitiallyInCommit)
 				.WithMany((string)null)
-				.HasForeignKey(cb => cb.AddedInitiallyInCommitId)
+				.HasForeignKey(cb => cb.AddedInitiallyInCommitNumber)
 				.IsRequired(false);
 
 			builder.HasOne(cb => cb.TargetCodeBlock)

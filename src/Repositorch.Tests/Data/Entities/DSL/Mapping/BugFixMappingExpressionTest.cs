@@ -11,7 +11,9 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		{
 			mappingDSL
 				.AddCommit("1")
+			.Submit()
 				.AddCommit("2").IsBugFix()
+			.Submit()
 				.AddCommit("3")
 			.Submit();
 

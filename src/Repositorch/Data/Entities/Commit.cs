@@ -7,11 +7,10 @@ namespace Repositorch.Data.Entities
 	/// </summary>
 	public class Commit
 	{
-		public int Id { get; set; }
 		/// <summary>
 		/// Commit number in topologically ordered commit list.
 		/// </summary>
-		public int OrderedNumber { get; set; }
+		public int Number { get; set; }
 		/// <summary>
 		/// Unique identifier of the commit in VCS.
 		/// </summary>

@@ -88,7 +88,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				join b in parentExp.Queryable<Branch>() on c.BranchId equals b.Id
 				select new
 				{
-					Number = c.OrderedNumber,
+					Number = c.Number,
 					Branch = b,
 				}).SingleOrDefault();
 			if (revisionData == null)

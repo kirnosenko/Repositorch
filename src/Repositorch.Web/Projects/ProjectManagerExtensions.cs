@@ -16,7 +16,7 @@ namespace Repositorch.Web.Projects
 				return new ProjectData()
 				{
 					Settings = settings,
-					Commits = s.GetReadOnly<Commit>().OrderBy(x => x.Id).ToArray(),
+					Commits = s.GetReadOnly<Commit>().OrderBy(x => x.Number).ToArray(),
 					Tags = s.GetReadOnly<Tag>().OrderBy(x => x.Id).ToArray(),
 					Authors = s.GetReadOnly<Author>().OrderBy(x => x.Id).ToArray(),
 					Branches = s.GetReadOnly<Branch>().OrderBy(x => x.Id).ToArray(),
@@ -37,7 +37,7 @@ namespace Repositorch.Web.Projects
 			{
 				foreach (var tag in data.Tags)
 				{
-					tag.Commit = data.Commits.Single(x => x.Id == tag.CommitId);
+					tag.Commit = data.Commits.Single(x => x.Number == tag.CommitNumber);
 				}
 				foreach (var author in data.Authors)
 				{
@@ -51,18 +51,18 @@ namespace Repositorch.Web.Projects
 				}
 				foreach (var fix in data.Fixes)
 				{
-					fix.Commit = data.Commits.Single(x => x.Id == fix.CommitId);
+					fix.Commit = data.Commits.Single(x => x.Number == fix.CommitNumber);
 				}
 				foreach (var modification in data.Modifications)
 				{
 					modification.Commit = data.Commits
-						.Single(x => x.Id == modification.CommitId);
+						.Single(x => x.Number == modification.CommitNumber);
 					modification.File = data.Files
 						.Single(x => x.Id == modification.FileId);
-					if (modification.SourceCommitId.GetValueOrDefault() != 0)
+					if (modification.SourceCommitNumber.GetValueOrDefault() != 0)
 					{
 						modification.SourceCommit = data.Commits
-							.Single(x => x.Id == modification.SourceCommitId);
+							.Single(x => x.Number == modification.SourceCommitNumber);
 					}
 					if (modification.SourceFileId.GetValueOrDefault() != 0)
 					{
@@ -74,10 +74,10 @@ namespace Repositorch.Web.Projects
 				{
 					block.Modification = data.Modifications
 						.Single(x => x.Id == block.ModificationId);
-					if (block.AddedInitiallyInCommitId.GetValueOrDefault() != 0)
+					if (block.AddedInitiallyInCommitNumber.GetValueOrDefault() != 0)
 					{
 						block.AddedInitiallyInCommit = data.Commits
-							.Single(x => x.Id == block.AddedInitiallyInCommitId);
+							.Single(x => x.Number == block.AddedInitiallyInCommitNumber);
 					}
 					if (block.TargetCodeBlockId.GetValueOrDefault() != 0)
 					{
@@ -88,14 +88,13 @@ namespace Repositorch.Web.Projects
 
 				foreach (var commit in data.Commits)
 				{
-					commit.Id = 0;
 					commit.AuthorId = 0;
 					commit.BranchId = 0;
 				}
 				foreach (var tag in data.Tags)
 				{
 					tag.Id = 0;
-					tag.CommitId = 0;
+					tag.CommitNumber = 0;
 				}
 				foreach (var author in data.Authors)
 				{
@@ -108,7 +107,7 @@ namespace Repositorch.Web.Projects
 				foreach (var fix in data.Fixes)
 				{
 					fix.Id = 0;
-					fix.CommitId = 0;
+					fix.CommitNumber = 0;
 				}
 				foreach (var file in data.Files)
 				{
@@ -117,16 +116,16 @@ namespace Repositorch.Web.Projects
 				foreach (var modification in data.Modifications)
 				{
 					modification.Id = 0;
-					modification.CommitId = 0;
+					modification.CommitNumber = 0;
 					modification.FileId = 0;
-					modification.SourceCommitId = null;
+					modification.SourceCommitNumber = null;
 					modification.SourceFileId = null;
 				}
 				foreach (var block in data.Blocks)
 				{
 					block.Id = 0;
 					block.ModificationId = 0;
-					block.AddedInitiallyInCommitId = null;
+					block.AddedInitiallyInCommitNumber = null;
 					block.TargetCodeBlockId = null;
 				}
 

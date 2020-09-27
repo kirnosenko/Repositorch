@@ -14,7 +14,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			return parentExp.Reselect(s =>
 				from c in s
-				join t in parentExp.Selection<Tag>() on c.Id equals t.CommitId
+				join t in parentExp.Selection<Tag>() on c.Number equals t.CommitNumber
 				where t.Title == tag
 				select c
 			);
@@ -24,7 +24,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			return parentExp.Reselect(s =>
 				(from c in s
-				join t in parentExp.Selection<Tag>() on c.Id equals t.CommitId
+				join t in parentExp.Selection<Tag>() on c.Number equals t.CommitNumber
 				select c).Distinct()
 			);
 		}
@@ -70,7 +70,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			return Reselect((s) =>
 				from t in s
-				join c in Selection<Commit>() on t.CommitId equals c.Id
+				join c in Selection<Commit>() on t.CommitNumber equals c.Number
 				select t
 			);
 		}

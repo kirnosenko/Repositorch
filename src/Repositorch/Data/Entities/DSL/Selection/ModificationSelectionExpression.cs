@@ -14,7 +14,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			return parentExp.Reselect(s =>
 				(
 					from c in s
-					join m in parentExp.Selection<Modification>() on c.Id equals m.CommitId
+					join m in parentExp.Selection<Modification>() on c.Number equals m.CommitNumber
 					select c
 				).Distinct()
 			);
@@ -34,7 +34,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			return parentExp.Reselect(s =>
 				(
 					from c in s
-					join m in parentExp.Queryable<Modification>() on c.Id equals m.CommitId
+					join m in parentExp.Queryable<Modification>() on c.Number equals m.CommitNumber
 					join f in parentExp.Selection<CodeFile>() on m.FileId equals f.Id
 					select c
 				).Distinct()
@@ -46,7 +46,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				(
 					from f in s
 					join m in parentExp.Queryable<Modification>() on f.Id equals m.FileId
-					join c in parentExp.Selection<Commit>() on m.CommitId equals c.Id
+					join c in parentExp.Selection<Commit>() on m.CommitNumber equals c.Number
 					select f
 				).Distinct()
 			);
@@ -65,7 +65,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			return Reselect((s) =>
 				from m in s
-				join c in Selection<Commit>() on m.CommitId equals c.Id
+				join c in Selection<Commit>() on m.CommitNumber equals c.Number
 				select m
 			);
 		}

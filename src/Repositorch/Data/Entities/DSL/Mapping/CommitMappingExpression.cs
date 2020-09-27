@@ -20,7 +20,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 			: base(parentExp)
 		{
 			entity = new Commit();
-			entity.OrderedNumber = Get<Commit>().Count() + 1;
+			entity.Number = Get<Commit>().Count() + 1;
 			entity.Revision = revision;
 			Add(entity);
 		}

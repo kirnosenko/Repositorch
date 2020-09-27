@@ -187,19 +187,19 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				.Select(f => f.Path));
 		}
 		[Fact]
-		public void Should_get_existent_files_based_on_commit_ordered_number()
+		public void Should_get_existent_files_based_on_commit_number()
 		{
 			var commits = new Commit[]
 			{
 				new Commit()
 				{
 					Revision = "2",
-					OrderedNumber = 2
+					Number = 2
 				},
 				new Commit()
 				{
 					Revision = "1",
-					OrderedNumber = 1
+					Number = 1
 				},
 			};
 			var branch = new Branch()

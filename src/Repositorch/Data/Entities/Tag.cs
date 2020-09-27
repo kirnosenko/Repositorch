@@ -16,7 +16,7 @@ namespace Repositorch.Data.Entities
 		/// <summary>
 		/// The tagged commit.
 		/// </summary>
-		public int CommitId { get; set; }
+		public int CommitNumber { get; set; }
 		public Commit Commit { get; set; }
 	}
 }

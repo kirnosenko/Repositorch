@@ -48,39 +48,39 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			return Reselect(s => s.Where(x => x.Date >= date));
 		}
-		public CommitSelectionExpression BeforeNumber(int orderedNumber)
+		public CommitSelectionExpression BeforeNumber(int number)
 		{
 			return Reselect(s =>
 				from c in s
 				where
-					c.OrderedNumber < orderedNumber
+					c.Number < number
 				select c
 			);
 		}
-		public CommitSelectionExpression TillNumber(int orderedNumber)
+		public CommitSelectionExpression TillNumber(int number)
 		{
 			return Reselect(s =>
 				from c in s
 				where
-					c.OrderedNumber <= orderedNumber
+					c.Number <= number
 				select c
 			);
 		}
-		public CommitSelectionExpression FromNumber(int orderedNumber)
+		public CommitSelectionExpression FromNumber(int number)
 		{
 			return Reselect(s =>
 				from c in s
 				where
-					c.OrderedNumber >= orderedNumber
+					c.Number >= number
 				select c
 			);
 		}
-		public CommitSelectionExpression AfterNumber(int orderedNumber)
+		public CommitSelectionExpression AfterNumber(int number)
 		{
 			return Reselect(s =>
 				from c in s
 				where
-					c.OrderedNumber > orderedNumber
+					c.Number > number
 				select c
 			);
 		}

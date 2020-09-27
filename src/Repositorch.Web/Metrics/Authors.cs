@@ -13,7 +13,7 @@ namespace Repositorch.Web.Metrics
 		public override object Calculate(IRepository repository, JObject settings)
 		{
 			string revision = repository.GetReadOnly<Commit>()
-				.OrderByDescending(x => x.OrderedNumber)
+				.OrderByDescending(x => x.Number)
 				.First().Revision;
 			int commits = repository.GetReadOnly<Commit>().Count();
 			var authorNames = repository.GetReadOnly<Author>()

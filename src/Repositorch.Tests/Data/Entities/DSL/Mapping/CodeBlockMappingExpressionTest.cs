@@ -59,7 +59,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 				join f in Get<CodeFile>() on m.FileId equals f.Id
 				select f.Path);
 			(from m in targetModification
-			join c in Get<Commit>() on m.CommitId equals c.Id
+			join c in Get<Commit>() on m.CommitNumber equals c.Number
 			select c.Revision)
 				.Should().BeEquivalentTo(new string[] { "1", "2", "3" });
 		}

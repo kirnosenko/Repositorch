@@ -149,15 +149,15 @@ namespace Repositorch.Data.Entities.Mapping
 			{
 				var commitsToRemove = s.GetReadOnly<Commit>()
 					.Skip(revisionsToKeep)
-					.OrderByDescending(x => x.OrderedNumber)
+					.OrderByDescending(x => x.Number)
 					.ToArray();
 
 				foreach (var commit in commitsToRemove)
 				{
-					OnTruncateRevision?.Invoke(GetRevisionName(commit.Revision, commit.OrderedNumber));
+					OnTruncateRevision?.Invoke(GetRevisionName(commit.Revision, commit.Number));
 
 					var modificationsToRemove = s.GetReadOnly<Modification>()
-						.Where(m => m.CommitId == commit.Id)
+						.Where(m => m.CommitNumber == commit.Number)
 						.ToArray();
 					var codeToRemove =
 						(from m in modificationsToRemove
@@ -166,7 +166,7 @@ namespace Repositorch.Data.Entities.Mapping
 					var filesToRemove =
 						(from f in s.GetReadOnly<CodeFile>()
 						join m in s.GetReadOnly<Modification>()
-							.Where(x => x.CommitId != commit.Id) 
+							.Where(x => x.CommitNumber != commit.Number)
 							on f.Id equals m.FileId into nullm
 						from nm in nullm.DefaultIfEmpty()
 						where nm == null
@@ -174,18 +174,18 @@ namespace Repositorch.Data.Entities.Mapping
 					var authorsToRemove =
 						(from a in s.GetReadOnly<Author>()
 						join c in s.GetReadOnly<Commit>()
-							.Where(x => x.Id != commit.Id)
+							.Where(x => x.Number != commit.Number)
 							on a.Id equals c.AuthorId into nullc
 						from nc in nullc.DefaultIfEmpty()
 						where nc == null
 						select a).ToArray();
 					var fixesToRemove = s.GetReadOnly<BugFix>()
-						.Where(x => x.CommitId == commit.Id)
+						.Where(x => x.CommitNumber == commit.Number)
 						.ToArray();
 					var branchesToRemove =
 						(from b in s.GetReadOnly<Branch>()
 						join c in s.GetReadOnly<Commit>()
-							.Where(x => x.Id != commit.Id)
+							.Where(x => x.Number != commit.Number)
 							on b.Id equals c.BranchId into nullc
 						from nc in nullc.DefaultIfEmpty()
 						where nc == null
@@ -205,7 +205,7 @@ namespace Repositorch.Data.Entities.Mapping
 		public void Check(int revisionsToSkip, CheckMode mode)
 		{
 			var revisions = data.UsingSession(s => s.Get<Commit>()
-				.OrderBy(x => x.OrderedNumber)
+				.OrderBy(x => x.Number)
 				.Skip(revisionsToSkip)
 				.Select(c => c.Revision)
 				.ToArray());
@@ -231,7 +231,7 @@ namespace Repositorch.Data.Entities.Mapping
 				{
 					var revisionNumber = s.Get<Commit>()
 						.Single(x => x.Revision == revision)
-						.OrderedNumber;
+						.Number;
 					OnCheckRevision?.Invoke(GetRevisionName(revision, revisionNumber));
 				}
 				var filesToCheck = s.SelectionDSL()
@@ -266,7 +266,7 @@ namespace Repositorch.Data.Entities.Mapping
 				using (var s = data.OpenSession())
 				{
 					var revision = s.Get<Commit>()
-						.OrderByDescending(x => x.OrderedNumber)
+						.OrderByDescending(x => x.Number)
 						.Select(x => x.Revision)
 						.FirstOrDefault();
 					var file = s.Get<CodeFile>()
@@ -335,10 +335,10 @@ namespace Repositorch.Data.Entities.Mapping
 			(
 				from f in s.Get<CodeFile>().Where(x => x.Id == file.Id)
 				join m in s.Get<Modification>() on f.Id equals m.FileId
-				join c in commitsToLookAt on m.CommitId equals c.Id
+				join c in commitsToLookAt on m.CommitNumber equals c.Number
 				join cb in s.Get<CodeBlock>() on m.Id equals cb.ModificationId
 				join tcb in s.Get<CodeBlock>() on cb.TargetCodeBlockId ?? cb.Id equals tcb.Id
-				join tcbc in s.Get<Commit>() on tcb.AddedInitiallyInCommitId equals tcbc.Id
+				join tcbc in s.Get<Commit>() on tcb.AddedInitiallyInCommitNumber equals tcbc.Number
 				group cb.Size by tcbc.Revision into g
 				select new
 				{
@@ -376,7 +376,7 @@ namespace Repositorch.Data.Entities.Mapping
 				OnError?.Invoke(string.Format("Incorrect number of lines in file {0} from revision {1}. {2} should be {3}",
 					file.Path,
 					sourceCommit != null
-						? GetRevisionName(sourceCommit.Revision, sourceCommit.OrderedNumber)
+						? GetRevisionName(sourceCommit.Revision, sourceCommit.Number)
 						: null,
 					error.CodeSize,
 					error.RealCodeSize));

@@ -53,10 +53,10 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 				author = author,
 				code = (
 					from c in repository.GetReadOnly<Commit>()
-					join m in modifications on c.Id equals m.CommitId
+					join m in modifications on c.Number equals m.CommitNumber
 					join cb in repository.GetReadOnly<CodeBlock>() on m.Id equals cb.ModificationId
 					join tcb in repository.GetReadOnly<CodeBlock>() on cb.TargetCodeBlockId ?? cb.Id equals tcb.Id
-					join tcbc in repository.GetReadOnly<Commit>() on tcb.AddedInitiallyInCommitId equals tcbc.Id
+					join tcbc in repository.GetReadOnly<Commit>() on tcb.AddedInitiallyInCommitNumber equals tcbc.Number
 					where tcbc.AuthorId == author.Id
 					group cb.Size by c.Date into cbc
 					select new

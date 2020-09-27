@@ -15,7 +15,7 @@ namespace Repositorch.Data.Entities
 		/// <summary>
 		/// Commit that contains modification.
 		/// </summary>
-		public int CommitId { get; set; }
+		public int CommitNumber { get; set; }
 		public Commit Commit { get; set; }
 		/// <summary>
 		/// File touched by the modification.
@@ -31,7 +31,7 @@ namespace Repositorch.Data.Entities
 		/// <summary>
 		/// The revision the source file was taken from.
 		/// </summary>
-		public int? SourceCommitId { get; set; }
+		public int? SourceCommitNumber { get; set; }
 		public Commit SourceCommit { get; set; }
 	}
 }

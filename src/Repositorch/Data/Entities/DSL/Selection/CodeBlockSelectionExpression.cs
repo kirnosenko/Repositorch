@@ -23,11 +23,11 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			return parentExp.Reselect(s => s.Where(commit =>
 				(from c in s
-				 join m in parentExp.Queryable<Modification>() on c.Id equals m.CommitId
+				 join m in parentExp.Queryable<Modification>() on c.Number equals m.CommitNumber
 				 join cb in parentExp.Queryable<CodeBlock>() on m.Id equals cb.ModificationId
 				 where cb.TargetCodeBlock == null || cb.Size < 0
-				 group cb.Size by c.Id)
-				.Where(x => x.Sum() <= 0).Select(x => x.Key).Contains(commit.Id)));
+				 group cb.Size by c.Number)
+				.Where(x => x.Sum() <= 0).Select(x => x.Key).Contains(commit.Number)));
 		}
 	}
 
@@ -51,7 +51,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			return Reselect(s =>
 				from cb in s
-				join c in Selection<Commit>() on cb.AddedInitiallyInCommitId equals c.Id
+				join c in Selection<Commit>() on cb.AddedInitiallyInCommitNumber equals c.Number
 				select cb
 			);
 		}
@@ -88,8 +88,8 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			return Reselect(s =>
 				from cb in s
 				join m in Queryable<Modification>() on cb.ModificationId equals m.Id
-				join c in Queryable<Commit>() on m.CommitId equals c.Id
-				join bf in Selection<BugFix>() on c.Id equals bf.CommitId
+				join c in Queryable<Commit>() on m.CommitNumber equals c.Number
+				join bf in Selection<BugFix>() on c.Number equals bf.CommitNumber
 				select cb
 			);
 		}

@@ -14,12 +14,12 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		{
 			var modification = exp.CurrentEntity<Modification>();
 			var sourceCommit = (
-				from c in exp.GetReadOnly<Commit>().Where(x => x.Id == modification.SourceCommit.Id)
+				from c in exp.GetReadOnly<Commit>().Where(x => x.Number == modification.SourceCommit.Number)
 				join b in exp.GetReadOnly<Branch>() on c.BranchId equals b.Id
-				select new { c.OrderedNumber, b.Mask }).Single();
+				select new { c.Number, b.Mask }).Single();
 			var commitsOnBranch = exp.SelectionDSL().Commits()
 				.OnBranchBack(sourceCommit.Mask)
-				.Where(x => x.OrderedNumber <= sourceCommit.OrderedNumber);
+				.Where(x => x.Number <= sourceCommit.Number);
 
 			return DoWithRemainingCode(
 				exp, commitsOnBranch, modification.SourceFile.Id, CopyCodeBlock);
@@ -55,10 +55,10 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		{
 			var remainigCodeByRevision = (
 				from m in expression.Get<Modification>().Where(x => x.FileId == fileId)
-				join c in commits on m.CommitId equals c.Id
+				join c in commits on m.CommitNumber equals c.Number
 				join cb in expression.Get<CodeBlock>() on m.Id equals cb.ModificationId
 				join tcb in expression.Get<CodeBlock>() on cb.TargetCodeBlockId ?? cb.Id equals tcb.Id
-				join tcbc in expression.Get<Commit>() on tcb.AddedInitiallyInCommitId equals tcbc.Id
+				join tcbc in expression.Get<Commit>() on tcb.AddedInitiallyInCommitNumber equals tcbc.Number
 				group cb.Size by tcbc.Revision into g
 				select new
 				{

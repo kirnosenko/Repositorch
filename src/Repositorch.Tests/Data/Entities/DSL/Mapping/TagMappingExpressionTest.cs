@@ -12,7 +12,9 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 		{
 			mappingDSL
 				.AddCommit("1")
+			.Submit()
 				.AddCommit("2").HasTag("1.0")
+			.Submit()
 				.AddCommit("3").HasTags("1.1", "fix")
 			.Submit();
 

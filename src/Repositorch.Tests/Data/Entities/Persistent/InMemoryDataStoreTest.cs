@@ -25,12 +25,12 @@ namespace Repositorch.Data.Entities.Persistent
 		{
 			using (var s = data.OpenSession())
 			{
-				Commit c = new Commit();
+				CodeFile file = new CodeFile();
 				
-				s.Add(c);
+				s.Add(file);
 				s.SubmitChanges();
 
-				Assert.NotEqual(0, c.Id);
+				Assert.NotEqual(0, file.Id);
 			}
 		}
 		[Fact]
@@ -38,16 +38,16 @@ namespace Repositorch.Data.Entities.Persistent
 		{
 			using (var s = data.OpenSession())
 			{
-				Commit c1 = new Commit();
-				Commit c2 = new Commit();
-				Commit c3 = new Commit();
+				CodeFile file1 = new CodeFile();
+				CodeFile file2 = new CodeFile();
+				CodeFile file3 = new CodeFile();
 
-				s.Add(c1);
-				s.Add(c2);
-				s.Add(c3);
+				s.Add(file1);
+				s.Add(file2);
+				s.Add(file3);
 				s.SubmitChanges();
 
-				Assert.Equal(3, s.Get<Commit>().Select(x => x.Id).Distinct().Count());
+				Assert.Equal(3, s.Get<CodeFile>().Select(x => x.Id).Distinct().Count());
 			}
 		}
 		[Fact]
@@ -63,7 +63,7 @@ namespace Repositorch.Data.Entities.Persistent
 				bf.Commit = c;
 				s.SubmitChanges();
 
-				Assert.Equal(c.Id, bf.CommitId);
+				Assert.Equal(c.Number, bf.CommitNumber);
 			}
 		}
 		[Fact]
@@ -71,8 +71,8 @@ namespace Repositorch.Data.Entities.Persistent
 		{
 			using (var s = data.OpenSession())
 			{
-				Commit c1 = new Commit();
-				Commit c2 = new Commit();
+				Commit c1 = new Commit() { Number = 1 };
+				Commit c2 = new Commit() { Number = 2 };
 				BugFix bf = new BugFix();
 
 				s.Add(c1);
@@ -83,8 +83,8 @@ namespace Repositorch.Data.Entities.Persistent
 				bf.Commit = c2;
 				s.SubmitChanges();
 
-				Assert.NotEqual(c1.Id, bf.CommitId);
-				Assert.Equal(c2.Id, bf.CommitId);
+				Assert.NotEqual(c1.Number, bf.CommitNumber);
+				Assert.Equal(c2.Number, bf.CommitNumber);
 			}
 		}
 		[Fact]
@@ -177,7 +177,8 @@ namespace Repositorch.Data.Entities.Persistent
 		{
 			var commits = new Commit[]
 			{
-				new Commit(), new Commit(),
+				new Commit() { Number = 1 },
+				new Commit() { Number = 2 },
 			};
 			using (var s = data.OpenSession())
 			{

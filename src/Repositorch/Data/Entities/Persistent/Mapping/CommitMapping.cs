@@ -10,10 +10,11 @@ namespace Repositorch.Data.Entities.Persistent.Mapping
 		{
 			builder.ToTable("Commits");
 
-			builder.HasKey(c => c.Id);
+			builder.HasKey(c => c.Number);
 
-			builder.Property(c => c.OrderedNumber)
-				.IsRequired();
+			builder.Property(c => c.Number)
+				.IsRequired()
+				.ValueGeneratedNever();
 
 			builder.Property(c => c.Revision)
 				.HasMaxLength(40)

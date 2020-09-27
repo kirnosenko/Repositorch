@@ -40,7 +40,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			return Reselect(s =>
 				(from c in Selection<Commit>()
-				join m in Queryable<Modification>() on c.Id equals m.CommitId
+				join m in Queryable<Modification>() on c.Number equals m.CommitNumber
 				join f in s on m.FileId equals f.Id
 				where m.Action == TouchedFileAction.ADDED
 				select f).Distinct()
@@ -50,7 +50,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			return Reselect(s =>
 				(from c in Selection<Commit>()
-				join m in Queryable<Modification>() on c.Id equals m.CommitId
+				join m in Queryable<Modification>() on c.Number equals m.CommitNumber
 				join f in s on m.FileId equals f.Id
 				where m.Action == TouchedFileAction.REMOVED
 				select f).Distinct()
@@ -120,18 +120,18 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			var fileLastMod =
 				(from c in commits
-				join m in Queryable<Modification>() on c.Id equals m.CommitId
+				join m in Queryable<Modification>() on c.Number equals m.CommitNumber
 				group m by m.FileId into fileModifications
 				select new
 				{
 					FileId = fileModifications.Key,
-					ModId = fileModifications.Max(x => x.Id),
+					CommitNumber = fileModifications.Max(x => x.CommitNumber),
 				});
 
 			return Reselect(s =>
 				from f in s
 				join a in fileLastMod on f.Id equals a.FileId
-				join m in Queryable<Modification>() on a.ModId equals m.Id
+				join m in Queryable<Modification>() on new { a.FileId, a.CommitNumber } equals new { m.FileId, m.CommitNumber }
 				where m.Action != TouchedFileAction.REMOVED
 				select f);
 		}

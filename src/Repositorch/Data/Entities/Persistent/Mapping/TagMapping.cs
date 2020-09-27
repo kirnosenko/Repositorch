@@ -18,7 +18,7 @@ namespace Repositorch.Data.Entities.Persistent.Mapping
 
 			builder.HasOne(t => t.Commit)
 				.WithMany((string)null)
-				.HasForeignKey(t => t.CommitId)
+				.HasForeignKey(t => t.CommitNumber)
 				.IsRequired();
 		}
 	}

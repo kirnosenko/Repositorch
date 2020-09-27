@@ -134,15 +134,15 @@ namespace Repositorch
 				var modifications =
 					(from f in s.GetReadOnly<CodeFile>()
 					join m in s.GetReadOnly<Modification>() on f.Id equals m.FileId
-					join c in s.GetReadOnly<Commit>() on m.CommitId equals c.Id
+					join c in s.GetReadOnly<Commit>() on m.CommitNumber equals c.Number
 					join cb in s.GetReadOnly<CodeBlock>() on m.Id equals cb.ModificationId
 					where f.Path == path
-					group cb by new { m.Action, c.Revision, c.OrderedNumber, c.Date } into modCode
+					group cb by new { m.Action, c.Revision, c.Number, c.Date } into modCode
 					select new
 					{
 						Action = modCode.Key.Action,
 						Revision = modCode.Key.Revision,
-						Number = modCode.Key.OrderedNumber,
+						Number = modCode.Key.Number,
 						Date = modCode.Key.Date,
 						Added = modCode.Sum(
 							x => x.TargetCodeBlockId == null ? x.Size : 0),

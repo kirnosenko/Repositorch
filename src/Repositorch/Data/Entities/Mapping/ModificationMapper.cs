@@ -34,8 +34,7 @@ namespace Repositorch.Data.Entities.Mapping
 				var lastFileModification =
 					(from f in expression.Get<CodeFile>().Where(x => x.Path == filePath)
 					 join m in expression.Get<Modification>() on f.Id equals m.FileId
-					 join c in commitsToLookAt on m.CommitId equals c.Id
-					 orderby c.OrderedNumber descending
+					 orderby m.CommitNumber descending
 					 select m).FirstOrDefault();
 
 				if (lastFileModification == null)
@@ -74,7 +73,7 @@ namespace Repositorch.Data.Entities.Mapping
 						var branchMask = expression.CurrentEntity<Branch>().Mask;
 						touchedFile.SourceRevision = expression.SelectionDSL()
 							.Commits().OnBranchBack(branchMask)
-							.OrderByDescending(x => x.OrderedNumber).First().Revision;
+							.OrderByDescending(x => x.Number).First().Revision;
 					}
 					return SingleExpression(expression
 						.CopiedFrom(touchedFile.SourcePath, touchedFile.SourceRevision));

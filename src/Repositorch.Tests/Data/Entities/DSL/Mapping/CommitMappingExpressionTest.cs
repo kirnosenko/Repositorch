@@ -34,7 +34,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 
 			Assert.Equal(
 				new int[] { 1, 2, 3 },
-				Get<Commit>().Select(c => c.OrderedNumber));
+				Get<Commit>().Select(c => c.Number));
 		}
 	}
 }

@@ -21,7 +21,7 @@ namespace Repositorch.Data.Entities
 		/// Commit in which code was added in.
 		/// Not null for code addition.
 		/// </summary>
-		public int? AddedInitiallyInCommitId { get; set; }
+		public int? AddedInitiallyInCommitNumber { get; set; }
 		public Commit AddedInitiallyInCommit { get; set; }
 		/// <summary>
 		/// Modification code block was created in.

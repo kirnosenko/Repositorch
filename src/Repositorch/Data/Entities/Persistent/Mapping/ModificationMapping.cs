@@ -17,7 +17,7 @@ namespace Repositorch.Data.Entities.Persistent.Mapping
 
 			builder.HasOne(m => m.Commit)
 				.WithMany((string)null)
-				.HasForeignKey(m => m.CommitId)
+				.HasForeignKey(m => m.CommitNumber)
 				.IsRequired();
 			
 			builder.HasOne(m => m.File)
@@ -27,7 +27,7 @@ namespace Repositorch.Data.Entities.Persistent.Mapping
 
 			builder.HasOne(m => m.SourceCommit)
 				.WithMany((string)null)
-				.HasForeignKey(m => m.SourceCommitId)
+				.HasForeignKey(m => m.SourceCommitNumber)
 				.IsRequired(false);
 
 			builder.HasOne(m => m.SourceFile)

@@ -12,10 +12,15 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			mappingDSL
 				.AddCommit("1").OnBranch("1")
+			.Submit()
 				.AddCommit("2").OnBranch("1")
+			.Submit()
 				.AddCommit("3").OnBranch("11")
+			.Submit()
 				.AddCommit("4").OnBranch("101")
+			.Submit()
 				.AddCommit("5").OnBranch("101")
+			.Submit()
 				.AddCommit("6").OnBranch("11")
 			.Submit();
 			
@@ -31,10 +36,15 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			mappingDSL
 				.AddCommit("1").OnBranch("1")
+			.Submit()
 				.AddCommit("2").OnBranch("1")
+			.Submit()
 				.AddCommit("3").OnBranch("11")
+			.Submit()
 				.AddCommit("4").OnBranch("101")
+			.Submit()
 				.AddCommit("5").OnBranch("101")
+			.Submit()
 				.AddCommit("6").OnBranch("11")
 			.Submit();
 			
@@ -50,7 +60,9 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			mappingDSL
 				.AddCommit("100").OnBranch("1")
+			.Submit()
 				.AddCommit("200").OnBranch(("1", 40))
+			.Submit()
 				.AddCommit("300").OnBranch(("1", 80))
 			.Submit();
 
@@ -66,7 +78,9 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			mappingDSL
 				.AddCommit("100").OnBranch("1")
+			.Submit()
 				.AddCommit("200").OnBranch(("1", 40))
+			.Submit()
 				.AddCommit("300").OnBranch(("1", 80))
 			.Submit();
 
@@ -82,10 +96,15 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			mappingDSL
 				.AddCommit("100").OnBranch("00000001")
+			.Submit()
 				.AddCommit("110").OnBranch(("1", 7))
+			.Submit()
 				.AddCommit("200").OnBranch(("10001", 7))
+			.Submit()
 				.AddCommit("300").OnBranch(("1000001", 7))
+			.Submit()
 				.AddCommit("210").OnBranch(("100011", 11))
+			.Submit()
 				.AddCommit("310").OnBranch(("00100011", 11))
 			.Submit();
 
@@ -107,10 +126,15 @@ namespace Repositorch.Data.Entities.DSL.Selection
 		{
 			mappingDSL
 				.AddCommit("100").OnBranch("00000001")
+			.Submit()
 				.AddCommit("110").OnBranch(("1", 7))
+			.Submit()
 				.AddCommit("200").OnBranch(("10001", 7))
+			.Submit()
 				.AddCommit("300").OnBranch(("1000001", 7))
+			.Submit()
 				.AddCommit("210").OnBranch(("100011", 11))
+			.Submit()
 				.AddCommit("310").OnBranch(("00100011", 11))
 			.Submit();
 

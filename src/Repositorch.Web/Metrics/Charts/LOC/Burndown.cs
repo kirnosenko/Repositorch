@@ -67,10 +67,10 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 				label = slice.Label,
 				code = (
 					from c in repository.Get<Commit>()
-					join m in modifications on c.Id equals m.CommitId
+					join m in modifications on c.Number equals m.CommitNumber
 					join cb in repository.Get<CodeBlock>() on m.Id equals cb.ModificationId
 					join tcb in repository.Get<CodeBlock>() on cb.TargetCodeBlockId ?? cb.Id equals tcb.Id
-					join tcbc in repository.Get<Commit>().Where(slice.Check) on tcb.AddedInitiallyInCommitId equals tcbc.Id
+					join tcbc in repository.Get<Commit>().Where(slice.Check) on tcb.AddedInitiallyInCommitNumber equals tcbc.Number
 					group cb.Size by c.Date into cbc
 					select new
 					{
@@ -138,7 +138,7 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 		{
 			var tags = (
 				from t in repository.Get<Tag>()
-				join c in repository.Get<Commit>() on t.CommitId equals c.Id
+				join c in repository.Get<Commit>() on t.CommitNumber equals c.Number
 				select new
 				{
 					tag = t.Title,
