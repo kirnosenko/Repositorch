@@ -187,6 +187,63 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				.Select(f => f.Path));
 		}
 		[Fact]
+		public void Should_get_existent_files_based_on_commit_ordered_number()
+		{
+			var commits = new Commit[]
+			{
+				new Commit()
+				{
+					Revision = "2",
+					OrderedNumber = 2
+				},
+				new Commit()
+				{
+					Revision = "1",
+					OrderedNumber = 1
+				},
+			};
+			var branch = new Branch()
+			{
+				Commits = commits.ToList(),
+				Mask = new BranchMask()
+				{
+					Data = "1",
+					Offset = 0,
+				}
+			};
+			var file = new CodeFile()
+			{
+				Path = "file1"
+			};
+			var modifications = new Modification[]
+			{
+				new Modification()
+				{
+					Commit = commits[0],
+					File = file,
+					Action = TouchedFileAction.REMOVED
+				},
+				new Modification()
+				{
+					Commit = commits[1],
+					File = file,
+					Action = TouchedFileAction.ADDED
+				},
+			};
+			AddRange(commits);
+			Add(branch);
+			Add(file);
+			AddRange(modifications);
+			SubmitChanges();
+
+			Assert.Equal(new string[] { "file1" }, selectionDSL
+				.Files().ExistInRevision("1")
+				.Select(f => f.Path));
+			Assert.Equal(new string[] {}, selectionDSL
+				.Files().ExistInRevision("2")
+				.Select(f => f.Path));
+		}
+		[Fact]
 		public void Should_get_files_in_directory()
 		{
 			mappingDSL
