@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.SpaServices.ReactDevelopmentServer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,6 +36,10 @@ namespace Repositorch.Web
 			services.AddSignalR();
 			services.AddHostedService<MappingService>();
 			services.Configure<DataStoreOptionsCollection>(Configuration);
+			services.Configure<FormOptions>(o =>
+			{
+				o.MultipartBodyLengthLimit = long.MaxValue;
+			});
 			services.AddControllers().AddNewtonsoftJson();
 
 			// In production, the React files will be served from this directory

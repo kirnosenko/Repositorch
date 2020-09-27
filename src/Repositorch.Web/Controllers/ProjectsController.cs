@@ -72,6 +72,7 @@ namespace Repositorch.Web.Controllers
 
 		[HttpPost]
 		[Route("[action]")]
+		[DisableRequestSizeLimit]
 		public IActionResult Create()
 		{
 			var form = HttpContext.Request.Form;
