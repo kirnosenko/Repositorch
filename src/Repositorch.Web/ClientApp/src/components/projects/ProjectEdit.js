@@ -15,6 +15,7 @@ export default function ProjectEdit({ match }) {
 		useExtendedLog: true,
 		checkResult: "1"
 	});
+	const [file, setFile] = React.useState('')
 	const [validation, setValidation] = React.useState({});
 	const [readyToSave, setReadyToSave] = React.useState(true);
 
@@ -86,14 +87,16 @@ export default function ProjectEdit({ match }) {
 		event.preventDefault();
 
 		setReadyToSave(false);
-		var action = project === undefined ? "Create" : "Update"
-		var response = await fetch(`api/Projects/${action}`, {
+		const action = project === undefined ? "Create" : "Update";
+		const formData = new FormData();
+		formData.append('settings', JSON.stringify(settings));
+		formData.append('file', file);
+		const response = await fetch(`api/Projects/${action}`, {
 			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(settings)
+			body: formData
 		});
 		if (!response.ok) throw new Error(response.status);
-		var errors = await response.json();
+		const errors = await response.json();
 		if (Object.keys(errors).length === 0) {
 			setSettings(null);
 		}
@@ -101,6 +104,17 @@ export default function ProjectEdit({ match }) {
 			setValidation(errors);
 			setReadyToSave(true);
 		}
+	}
+
+	async function exportProject() {
+		var response = await fetch(`/api/Projects/Export/${project}`);
+		if (!response.ok) throw new Error(response.status);
+		var blob = await response.blob();
+		var blobUrl = window.URL.createObjectURL(blob);
+		var blobLink = document.createElement('a');
+		blobLink.href = blobUrl;
+		blobLink.setAttribute('download', `${project}.json`);
+		blobLink.click();
 	}
 
 	function validatedClass(name) {
@@ -143,7 +157,7 @@ export default function ProjectEdit({ match }) {
 					})
 				}
 			</select>
-	
+
 	return (
 		<form onSubmit={handleSubmit}>
 			<div className="form-group">
@@ -204,6 +218,16 @@ export default function ProjectEdit({ match }) {
 					'master' for git in most cases.
 				</small>
 			</div>
+			<div className="form-group" hidden={project !== undefined}>
+				<div className="heading">File to import data</div>
+				<input
+					type="file"
+					name="file"
+					onChange={e => setFile(e.target.files[0])}	/>
+				<small className="form-text text-muted">
+					File to import data from. Should be exported from Repositorch first.
+				</small>
+			</div>
 			<div className="form-group form-check">
 				<input
 					type="checkbox"
@@ -237,8 +261,16 @@ export default function ProjectEdit({ match }) {
 			<button
 				type="submit"
 				className="btn btn-outline-dark btn-sm"
-				disabled={!readyToSave} >
+				disabled={!readyToSave}>
 				{project === undefined ? "Create project..." : "Update project..."}
+			</button>
+			&nbsp;
+			<button
+				type="button"
+				className="btn btn-outline-dark btn-sm"
+				hidden={project === undefined}
+				onClick={() => exportProject()}>
+				Export
 			</button>
 		</form>
 	);

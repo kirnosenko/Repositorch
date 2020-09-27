@@ -3,7 +3,7 @@ using System.Linq;
 using Xunit;
 using FluentAssertions;
 
-namespace Repositorch.Web.Tests
+namespace Repositorch.Web
 {
 	public class MetricMenuTest
 	{

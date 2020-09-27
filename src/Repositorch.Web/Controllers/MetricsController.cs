@@ -5,6 +5,7 @@ using Autofac.Features.Indexed;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using Repositorch.Data.Entities;
+using Repositorch.Web.Projects;
 
 namespace Repositorch.Web.Controllers
 {

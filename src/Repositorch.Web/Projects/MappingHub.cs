@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.SignalR;
 
-namespace Repositorch.Web
+namespace Repositorch.Web.Projects
 {
 	public interface IMappingWatcher
 	{

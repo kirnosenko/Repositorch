@@ -12,6 +12,7 @@ using Autofac;
 using LiteDB;
 using Repositorch.Web.Middleware;
 using Repositorch.Web.Options;
+using Repositorch.Web.Projects;
 
 namespace Repositorch.Web
 {

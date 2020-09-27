@@ -9,7 +9,7 @@ using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using Repositorch.Data.Entities.Mapping;
 
-namespace Repositorch.Web
+namespace Repositorch.Web.Projects
 {
 	public class MappingService : BackgroundService
 	{

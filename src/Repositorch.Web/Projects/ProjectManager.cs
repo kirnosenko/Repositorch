@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Extensions.Options;
 using Microsoft.EntityFrameworkCore;
 using LiteDB;
@@ -7,24 +9,9 @@ using Repositorch.Data.VersionControl;
 using Repositorch.Data.Entities.Persistent;
 using Repositorch.Data.VersionControl.Git;
 using Repositorch.Web.Options;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace Repositorch.Web
+namespace Repositorch.Web.Projects
 {
-	public interface IProjectManager
-	{
-		IEnumerable<string> GetProjectNames();
-		ProjectSettings GetProject(string projectName);
-		void AddProject(ProjectSettings projectSettings);
-		void UpdateProject(ProjectSettings projectSettings);
-		void RemoveProject(string projectName);
-		IDataStore GetProjectDataStore(string projectName);
-		IDataStore GetProjectDataStore(ProjectSettings projectSettings);
-		IVcsData GetProjectVcsData(string projectName);
-		IVcsData GetProjectVcsData(ProjectSettings projectSettings);
-	}
-
 	public class ProjectManager : IProjectManager
 	{
 		private readonly ILiteCollection<ProjectSettings> projects;

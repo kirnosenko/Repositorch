@@ -5,7 +5,10 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Microsoft.Net.Http.Headers;
+using Newtonsoft.Json;
 using Repositorch.Web.Options;
+using Repositorch.Web.Projects;
 
 namespace Repositorch.Web.Controllers
 {
@@ -69,12 +72,31 @@ namespace Repositorch.Web.Controllers
 
 		[HttpPost]
 		[Route("[action]")]
-		public IActionResult Create(ProjectSettings settings)
+		public IActionResult Create()
 		{
+			var form = HttpContext.Request.Form;
+			var settings = JsonConvert.DeserializeObject<ProjectSettings>(form["settings"]);
+			ProjectData data = null;
+
+			if (form.Files.Count > 0)
+			{
+				var stream = new MemoryStream();
+				form.Files[0].CopyTo(stream);
+				stream.Seek(0, SeekOrigin.Begin);
+				data = ProjectData.FromStream(stream);
+
+				settings.Combine(data.Settings);
+				data.Settings = settings;
+			}
+
 			var errors = Validate(settings, false);
 			if (errors.Count == 0)
 			{
 				projectManager.AddProject(settings);
+				if (data != null)
+				{
+					projectManager.ImportProject(data);
+				}
 			}
 
 			return Ok(errors);
@@ -82,8 +104,11 @@ namespace Repositorch.Web.Controllers
 
 		[HttpPost]
 		[Route("[action]")]
-		public IActionResult Update(ProjectSettings settings)
+		public IActionResult Update()
 		{
+			var form = HttpContext.Request.Form;
+			var settings = JsonConvert.DeserializeObject<ProjectSettings>(form["settings"]);
+
 			var errors = Validate(settings, true);
 			if (errors.Count == 0)
 			{
@@ -100,6 +125,24 @@ namespace Repositorch.Web.Controllers
 			projectManager.RemoveProject(name);
 
 			return Ok();
+		}
+
+		[HttpGet]
+		[Route("[action]/{name}")]
+		public IActionResult Export([FromRoute] string name)
+		{
+			var project = projectManager.GetProject(name);
+			if (project == null)
+			{
+				return BadRequest();
+			}
+			var data = projectManager.ExportProject(project);
+			var stream = data.ToStream();
+
+			return new FileStreamResult(stream, new MediaTypeHeaderValue("application/json"))
+			{
+				FileDownloadName = $"{name}.json"
+			};
 		}
 
 		/// <summary>
