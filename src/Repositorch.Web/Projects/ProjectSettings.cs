@@ -20,29 +20,5 @@ namespace Repositorch.Web.Projects
 				EnvironmentExtensions.GetRepoPath(),
 				RepositoryPath);
 		}
-		public void Combine(ProjectSettings sourceSettings)
-		{
-			if (string.IsNullOrEmpty(Name))
-			{
-				Name = sourceSettings.Name;
-			}
-			if (string.IsNullOrEmpty(StoreName))
-			{
-				StoreName = sourceSettings.StoreName;
-			}
-			if (string.IsNullOrEmpty(VcsName))
-			{
-				VcsName = sourceSettings.VcsName;
-			}
-			if (string.IsNullOrEmpty(RepositoryPath))
-			{
-				RepositoryPath = sourceSettings.RepositoryPath;
-			}
-			if (string.IsNullOrEmpty(Branch))
-			{
-				Branch = sourceSettings.Branch;
-			}
-			UseExtendedLog = UseExtendedLog || sourceSettings.UseExtendedLog;
-		}
 	}
 }

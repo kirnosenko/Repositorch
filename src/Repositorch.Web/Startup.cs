@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Autofac;
 using LiteDB;
+using MediatR;
 using Repositorch.Web.Middleware;
 using Repositorch.Web.Options;
 using Repositorch.Web.Projects;
@@ -89,6 +90,7 @@ namespace Repositorch.Web
 
 		public void ConfigureContainer(ContainerBuilder builder)
 		{
+			RegisterMediatr(builder);
 			RegisterLiteDB(builder);
 			RegisterMetricsAndMenusForThem(builder);
 
@@ -100,6 +102,25 @@ namespace Repositorch.Web
 				.SingleInstance();
 		}
 
+		private void RegisterMediatr(ContainerBuilder builder)
+		{
+			builder
+				.RegisterType<Mediator>()
+				.As<IMediator>()
+				.InstancePerLifetimeScope();
+
+			builder.Register<ServiceFactory>(context =>
+			{
+				var c = context.Resolve<IComponentContext>();
+				return t => c.Resolve(t);
+			});
+
+			builder
+				.RegisterAssemblyTypes(typeof(Startup).GetTypeInfo().Assembly)
+				.AsClosedTypesOf(typeof(IRequestHandler<,>))
+				.AsImplementedInterfaces();
+		}
+
 		private void RegisterLiteDB(ContainerBuilder builder)
 		{
 			var dbPath = EnvironmentExtensions.GetDbPath();
@@ -109,6 +130,7 @@ namespace Repositorch.Web
 				return db;
 			}).As<LiteDatabase>().SingleInstance();
 		}
+
 		private void RegisterMetricsAndMenusForThem(ContainerBuilder builder)
 		{
 			var metrics = Assembly.GetExecutingAssembly().GetTypes()

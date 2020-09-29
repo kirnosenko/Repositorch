@@ -107,12 +107,8 @@ export default function ProjectEdit({ match }) {
 	}
 
 	async function exportProject() {
-		var response = await fetch(`/api/Projects/Export/${project}`);
-		if (!response.ok) throw new Error(response.status);
-		var blob = await response.blob();
-		var blobUrl = window.URL.createObjectURL(blob);
 		var blobLink = document.createElement('a');
-		blobLink.href = blobUrl;
+		blobLink.href = `/api/Projects/Export/${project}`;
 		blobLink.setAttribute('download', `${project}.json`);
 		blobLink.click();
 	}

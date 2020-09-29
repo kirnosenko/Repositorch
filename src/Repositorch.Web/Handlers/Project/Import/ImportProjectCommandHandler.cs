@@ -1,43 +1,37 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using Repositorch.Data.Entities;
+using System.Threading;
+using System.Threading.Tasks;
+using MediatR;
+using Repositorch.Web.Projects;
 
-namespace Repositorch.Web.Projects
+namespace Repositorch.Web.Handlers.Project.Import
 {
-	public static class ProjectManagerExtensions
+	public class ImportProjectCommandHandler : IRequestHandler<ImportProjectCommand>
 	{
-		public static ProjectData ExportProject(
-			this IProjectManager manager,
-			ProjectSettings settings)
+		private readonly IProjectManager projectManager;
+
+		public ImportProjectCommandHandler(IProjectManager projectManager)
 		{
-			var store = manager.GetProjectDataStore(settings);
-			using (var s = store.OpenSession())
-			{
-				return new ProjectData()
-				{
-					Settings = settings,
-					Commits = s.GetReadOnly<Commit>().OrderBy(x => x.Number).ToArray(),
-					Tags = s.GetReadOnly<Tag>().OrderBy(x => x.Id).ToArray(),
-					Authors = s.GetReadOnly<Author>().OrderBy(x => x.Id).ToArray(),
-					Branches = s.GetReadOnly<Branch>().OrderBy(x => x.Id).ToArray(),
-					Fixes = s.GetReadOnly<BugFix>().OrderBy(x => x.Id).ToArray(),
-					Files = s.GetReadOnly<CodeFile>().OrderBy(x => x.Id).ToArray(),
-					Modifications = s.GetReadOnly<Modification>().OrderBy(x => x.Id).ToArray(),
-					Blocks = s.GetReadOnly<CodeBlock>().OrderBy(x => x.Id).ToArray(),
-				};
-			}
+			this.projectManager = projectManager;
 		}
 
-		public static void ImportProject(
-			this IProjectManager manager,
-			ProjectData data)
+		public Task<Unit> Handle(ImportProjectCommand request, CancellationToken cancellationToken)
 		{
-			var store = manager.GetProjectDataStore(data.Settings);
+			var data = request.Data;
+			var commits = data.Commits.ToDictionary(x => x.Number, x => x);
+			var files = data.Files.ToDictionary(x => x.Id, x => x);
+			var modifications = data.Modifications.ToDictionary(x => x.Id, x => x);
+			var blocks = data.Blocks.ToDictionary(x => x.Id, x => x);
+
+			var store = projectManager.GetProjectDataStore(data.Settings);
 			using (var s = store.OpenSession())
 			{
 				foreach (var tag in data.Tags)
 				{
-					tag.Commit = data.Commits.Single(x => x.Number == tag.CommitNumber);
+					tag.Commit = commits[tag.CommitNumber];
 				}
 				foreach (var author in data.Authors)
 				{
@@ -51,38 +45,31 @@ namespace Repositorch.Web.Projects
 				}
 				foreach (var fix in data.Fixes)
 				{
-					fix.Commit = data.Commits.Single(x => x.Number == fix.CommitNumber);
+					fix.Commit = commits[fix.CommitNumber];
 				}
 				foreach (var modification in data.Modifications)
 				{
-					modification.Commit = data.Commits
-						.Single(x => x.Number == modification.CommitNumber);
-					modification.File = data.Files
-						.Single(x => x.Id == modification.FileId);
+					modification.Commit = commits[modification.CommitNumber];
+					modification.File = files[modification.FileId];
 					if (modification.SourceCommitNumber.GetValueOrDefault() != 0)
 					{
-						modification.SourceCommit = data.Commits
-							.Single(x => x.Number == modification.SourceCommitNumber);
+						modification.SourceCommit = commits[modification.SourceCommitNumber.Value];
 					}
 					if (modification.SourceFileId.GetValueOrDefault() != 0)
 					{
-						modification.SourceFile = data.Files
-							.Single(x => x.Id == modification.SourceFileId);
+						modification.SourceFile = files[modification.SourceFileId.Value];
 					}
 				}
 				foreach (var block in data.Blocks)
 				{
-					block.Modification = data.Modifications
-						.Single(x => x.Id == block.ModificationId);
+					block.Modification = modifications[block.ModificationId];
 					if (block.AddedInitiallyInCommitNumber.GetValueOrDefault() != 0)
 					{
-						block.AddedInitiallyInCommit = data.Commits
-							.Single(x => x.Number == block.AddedInitiallyInCommitNumber);
+						block.AddedInitiallyInCommit = commits[block.AddedInitiallyInCommitNumber.Value];
 					}
 					if (block.TargetCodeBlockId.GetValueOrDefault() != 0)
 					{
-						block.TargetCodeBlock = data.Blocks
-							.Single(x => x.Id == block.TargetCodeBlockId);
+						block.TargetCodeBlock = blocks[block.TargetCodeBlockId.Value];
 					}
 				}
 
@@ -140,6 +127,8 @@ namespace Repositorch.Web.Projects
 
 				s.SubmitChanges();
 			}
+
+			return Unit.Task;
 		}
 	}
 }

@@ -3,10 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using Microsoft.Net.Http.Headers;
+using MediatR;
 using Newtonsoft.Json;
+using Repositorch.Web.Handlers.Project.GetDataFromForm;
+using Repositorch.Web.Handlers.Project.Export;
+using Repositorch.Web.Handlers.Project.Import;
 using Repositorch.Web.Options;
 using Repositorch.Web.Projects;
 
@@ -19,13 +23,16 @@ namespace Repositorch.Web.Controllers
 	{
 		private static readonly string GitRepoDirName = ".git";
 		private static readonly Regex ProjectNameRegExp = new Regex(@"^[a-zA-Z0-9\-\._\~]*$");
+		private readonly IMediator mediator;
 		private readonly IProjectManager projectManager;
 		private readonly DataStoreOptionsCollection storeOptions;
 
 		public ProjectsController(
+			IMediator mediator,
 			IProjectManager projectManager,
 			IOptions<DataStoreOptionsCollection> storeOptions)
 		{
+			this.mediator = mediator;
 			this.projectManager = projectManager;
 			this.storeOptions = storeOptions.Value;
 		}
@@ -73,30 +80,27 @@ namespace Repositorch.Web.Controllers
 		[HttpPost]
 		[Route("[action]")]
 		[DisableRequestSizeLimit]
-		public IActionResult Create()
+		public async Task<IActionResult> Create()
 		{
+			var cancellationToken = HttpContext.RequestAborted;
 			var form = HttpContext.Request.Form;
 			var settings = JsonConvert.DeserializeObject<ProjectSettings>(form["settings"]);
-			ProjectData data = null;
-
-			if (form.Files.Count > 0)
+			var data = await mediator.Send(new GetProjectDataFromFormQuery()
 			{
-				var stream = new MemoryStream();
-				form.Files[0].CopyTo(stream);
-				stream.Seek(0, SeekOrigin.Begin);
-				data = ProjectData.FromStream(stream);
-
-				settings.Combine(data.Settings);
-				data.Settings = settings;
-			}
-
+				Settings = settings,
+				File = form.Files.Count > 0 ? form.Files[0].OpenReadStream() : null
+			}, cancellationToken);
+			
 			var errors = Validate(settings, false);
 			if (errors.Count == 0)
 			{
 				projectManager.AddProject(settings);
 				if (data != null)
 				{
-					projectManager.ImportProject(data);
+					await mediator.Send(new ImportProjectCommand()
+					{
+						Data = data
+					}, cancellationToken);
 				}
 			}
 
@@ -130,20 +134,17 @@ namespace Repositorch.Web.Controllers
 
 		[HttpGet]
 		[Route("[action]/{name}")]
-		public IActionResult Export([FromRoute] string name)
+		public async Task Export([FromRoute] string name)
 		{
-			var project = projectManager.GetProject(name);
-			if (project == null)
+			var cancellationToken = HttpContext.RequestAborted;
+			HttpContext.Response.ContentType = "application/json";
+			HttpContext.Response.StatusCode = 200;
+			await HttpContext.Response.StartAsync(cancellationToken);
+			await mediator.Send(new ExportProjectQuery()
 			{
-				return BadRequest();
-			}
-			var data = projectManager.ExportProject(project);
-			var stream = data.ToStream();
-
-			return new FileStreamResult(stream, new MediaTypeHeaderValue("application/json"))
-			{
-				FileDownloadName = $"{name}.json"
-			};
+				ProjectName = name,
+				Output = HttpContext.Response.BodyWriter.AsStream(),
+			}, cancellationToken);
 		}
 
 		/// <summary>
