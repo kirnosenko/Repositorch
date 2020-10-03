@@ -12,6 +12,9 @@ using Microsoft.Extensions.Hosting;
 using Autofac;
 using LiteDB;
 using MediatR;
+using MediatR.Pipeline;
+using Repositorch.Web.Handlers;
+using Repositorch.Web.Handlers.Project.Import;
 using Repositorch.Web.Middleware;
 using Repositorch.Web.Options;
 using Repositorch.Web.Projects;
@@ -109,16 +112,22 @@ namespace Repositorch.Web
 				.As<IMediator>()
 				.InstancePerLifetimeScope();
 
+			builder
+				.RegisterAssemblyTypes(typeof(Startup).GetTypeInfo().Assembly)
+				.AsClosedTypesOf(typeof(IRequestHandler<,>));
+			builder
+				.RegisterGeneric(typeof(LoggingBehaviour<,>))
+				.As(typeof(IPipelineBehavior<,>));
+			builder.RegisterGeneric(typeof(RequestExceptionProcessorBehavior<,>))
+				.As(typeof(IPipelineBehavior<,>));
+			builder.RegisterGeneric(typeof(ExceptionHandler<,,>))
+				.As(typeof(IRequestExceptionHandler<,,>));
+
 			builder.Register<ServiceFactory>(context =>
 			{
 				var c = context.Resolve<IComponentContext>();
 				return t => c.Resolve(t);
 			});
-
-			builder
-				.RegisterAssemblyTypes(typeof(Startup).GetTypeInfo().Assembly)
-				.AsClosedTypesOf(typeof(IRequestHandler<,>))
-				.AsImplementedInterfaces();
 		}
 
 		private void RegisterLiteDB(ContainerBuilder builder)
