@@ -62,7 +62,7 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 					.Files().PathContains(settings.path)
 					.Modifications().InFiles();
 
-			var remainingСodeByDate = slices.Select(slice => new
+			var remainingСodeByDay = slices.Select(slice => new
 			{
 				label = slice.Label,
 				code = (
@@ -71,40 +71,39 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 					join cb in repository.Get<CodeBlock>() on m.Id equals cb.ModificationId
 					join tcb in repository.Get<CodeBlock>() on cb.TargetCodeBlockId ?? cb.Id equals tcb.Id
 					join tcbc in repository.Get<Commit>().Where(slice.Check) on tcb.AddedInitiallyInCommitNumber equals tcbc.Number
-					group cb.Size by c.Date into cbc
+					group cb.Size by c.Date.Date into cbc
 					select new
 					{
-						date = cbc.Key,
+						day = cbc.Key,
 						locTotal = cbc.Sum()
 					}).ToArray()
 			}).ToArray();
 
-			var dates = remainingСodeByDate
-				.SelectMany(x => x.code.Select(c => c.date))
+			var days = remainingСodeByDay
+				.SelectMany(x => x.code.Select(c => c.day))
 				.Distinct()
 				.OrderBy(x => x)
 				.ToArray();
 
-			var loc = dates
-				.Select(date =>
+			var loc = days.Select(day =>
+			{
+				var data = new Dictionary<string, object>()
 				{
-					var data = new Dictionary<string, object>()
+					{ "date", new DateTimeOffset(day).ToUnixTimeSeconds() },
+				};
+				foreach (var slice in slices)
+				{
+					var codeSize = remainingСodeByDay
+						.Single(x => x.label == slice.Label).code
+						.Where(x => x.day <= day)
+						.Sum(x => x.locTotal);
+					if (codeSize > 0)
 					{
-						{ "date", new DateTimeOffset(date).ToUnixTimeSeconds() },
-					};
-					foreach (var slice in slices)
-					{
-						var codeSize = remainingСodeByDate
-							.Single(x => x.label == slice.Label).code
-							.Where(x => x.date <= date)
-							.Sum(x => x.locTotal);
-						if (codeSize > 0)
-						{
-							data.Add(slice.Label, codeSize);
-						}
+						data.Add(slice.Label, codeSize);
 					}
-					return data;
-				}).ToArray();
+				}
+				return data;
+			}).ToArray();
 
 			return new
 			{

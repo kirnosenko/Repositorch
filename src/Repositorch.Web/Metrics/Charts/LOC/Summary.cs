@@ -67,52 +67,48 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 					.Files().PathContains(settings.path)
 					.Modifications().InFiles();
 
-			var codeByDate = (
+			var codeByDay = (
 				from c in commits
 				join m in modifications on c.Number equals m.CommitNumber
 				join cb in repository.GetReadOnly<CodeBlock>() on m.Id equals cb.ModificationId
-				group cb.Size by c.Date into cbc
+				group cb.Size by c.Date.Date into cbc
 				select new
 				{
-					date = cbc.Key,
+					day = cbc.Key,
 					locTotal = cbc.Sum(),
 					locAdded = cbc.Sum(x => x > 0 ? x : 0),
 					locRemoved = cbc.Sum(x => x < 0 ? -x : 0),
 				}).ToArray();
 
-			var codeByDateForAuthor = authorId == null ? null : (
+			var codeByDayForAuthor = authorId == null ? null : (
 				from c in repository.GetReadOnly<Commit>()
 				join m in modifications on c.Number equals m.CommitNumber
 				join cb in repository.GetReadOnly<CodeBlock>() on m.Id equals cb.ModificationId
 				join tcb in repository.GetReadOnly<CodeBlock>() on cb.TargetCodeBlockId ?? cb.Id equals tcb.Id
 				join tcbc in repository.GetReadOnly<Commit>() on tcb.AddedInitiallyInCommitNumber equals tcbc.Number
 				where tcbc.AuthorId == authorId
-				group cb.Size by c.Date into cbc
+				group cb.Size by c.Date.Date into cbc
 				select new
 				{
-					date = cbc.Key,
+					day = cbc.Key,
 					locTotal = cbc.Sum()
 				}).ToArray();
 
-			var dates = repository.GetReadOnly<Commit>()
-				.Select(x => x.Date)
-				.ToArray();
-
-			var loc = dates.Select(date => new
+			var loc = codeByDay.Select(x => x.day).Select(day => new
 			{
-				date = new DateTimeOffset(date).ToUnixTimeSeconds(),
-				locTotal = codeByDateForAuthor != null
-					? codeByDateForAuthor
-						.Where(x => x.date <= date)
+				date = new DateTimeOffset(day).ToUnixTimeSeconds(),
+				locTotal = codeByDayForAuthor != null
+					? codeByDayForAuthor
+						.Where(x => x.day <= day)
 						.Sum(x => x.locTotal)
-					: codeByDate
-						.Where(x => x.date <= date)
+					: codeByDay
+						.Where(x => x.day <= day)
 						.Sum(x => x.locTotal),
-				locAdded = codeByDate
-					.Where(x => x.date <= date)
+				locAdded = codeByDay
+					.Where(x => x.day <= day)
 					.Sum(x => x.locAdded),
-				locRemoved = codeByDate
-					.Where(x => x.date <= date)
+				locRemoved = codeByDay
+					.Where(x => x.day <= day)
 					.Sum(x => x.locRemoved),
 			}).OrderBy(x => x.date).ToArray();
 

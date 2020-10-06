@@ -58,47 +58,46 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 					join tcb in repository.GetReadOnly<CodeBlock>() on cb.TargetCodeBlockId ?? cb.Id equals tcb.Id
 					join tcbc in repository.GetReadOnly<Commit>() on tcb.AddedInitiallyInCommitNumber equals tcbc.Number
 					where tcbc.AuthorId == author.Id
-					group cb.Size by c.Date into cbc
+					group cb.Size by c.Date.Date into cbc
 					select new
 					{
-						date = cbc.Key,
+						day = cbc.Key,
 						locTotal = cbc.Sum()
 					}).ToArray()
 			}).ToArray();
 
-			var dates = remainingСodeByAuthor
-				.SelectMany(x => x.code.Select(c => c.date))
+			var days = remainingСodeByAuthor
+				.SelectMany(x => x.code.Select(c => c.day))
 				.Distinct()
 				.OrderBy(x => x)
 				.ToArray();
 
 			var valuableAuthors = new HashSet<string>();
-			var loc = dates
-				.Select(date =>
+			var loc = days.Select(day =>
+			{
+				var data = new Dictionary<string, object>()
 				{
-					var data = new Dictionary<string, object>()
+					{ "date", new DateTimeOffset(day).ToUnixTimeSeconds() },
+				};
+				var dateCodeSize = remainingСodeByAuthor
+					.Sum(a => a.code.Where(x => x.day <= day).Sum(x => x.locTotal));
+				foreach (var author in authors)
+				{
+					var authorCodeSize = remainingСodeByAuthor
+						.Single(x => x.author == author).code
+						.Where(x => x.day <= day)
+						.Sum(x => x.locTotal);
+					if (authorCodeSize > 0)
 					{
-						{ "date", new DateTimeOffset(date).ToUnixTimeSeconds() },
-					};
-					var dateCodeSize = remainingСodeByAuthor
-						.Sum(a => a.code.Where(x => x.date <= date).Sum(x => x.locTotal));
-					foreach (var author in authors)
-					{
-						var authorCodeSize = remainingСodeByAuthor
-							.Single(x => x.author == author).code
-							.Where(x => x.date <= date)
-							.Sum(x => x.locTotal);
-						if (authorCodeSize > 0)
+						data.Add(author.Name, authorCodeSize);
+						if (authorCodeSize / dateCodeSize >= settings.minimalContribution)
 						{
-							data.Add(author.Name, authorCodeSize);
-							if (authorCodeSize / dateCodeSize >= settings.minimalContribution)
-							{
-								valuableAuthors.Add(author.Name);
-							}
+							valuableAuthors.Add(author.Name);
 						}
 					}
-					return data;
-				}).ToArray();
+				}
+				return data;
+			}).ToArray();
 
 			return new
 			{
