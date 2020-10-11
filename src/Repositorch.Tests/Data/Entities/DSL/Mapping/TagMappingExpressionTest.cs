@@ -8,7 +8,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 	public class TagMappingExpressionTest : BaseRepositoryTest
 	{
 		[Fact]
-		public void Should_add_tags()
+		public void Should_mark_commit_with_tags()
 		{
 			mappingDSL
 				.AddCommit("1")
@@ -18,9 +18,9 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 				.AddCommit("3").HasTags("1.1", "fix")
 			.Submit();
 
-			var tags = Get<Tag>().ToArray();
+			var tags = Get<CommitAttribute>().ToArray();
 			Assert.Equal(3, tags.Length);
-			tags.Select(x => x.Title)
+			tags.Select(x => x.Data)
 				.Should().BeEquivalentTo(new string[] { "1.0", "1.1", "fix" });
 			tags.Select(x => x.Commit.Revision)
 				.Should().BeEquivalentTo(new string[] { "2", "3", "3" });

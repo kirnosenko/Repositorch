@@ -30,10 +30,9 @@ namespace Repositorch.Web.Handlers.Project.Export
 				{
 					Settings = settings,
 					Commits = s.GetReadOnly<Commit>().OrderBy(x => x.Number).ToArray(),
-					Tags = s.GetReadOnly<Tag>().OrderBy(x => x.Id).ToArray(),
+					CommitAttributes = s.GetReadOnly<CommitAttribute>().OrderBy(x => x.Id).ToArray(),
 					Authors = s.GetReadOnly<Author>().OrderBy(x => x.Id).ToArray(),
 					Branches = s.GetReadOnly<Branch>().OrderBy(x => x.Id).ToArray(),
-					Fixes = s.GetReadOnly<BugFix>().OrderBy(x => x.Id).ToArray(),
 					Files = s.GetReadOnly<CodeFile>().OrderBy(x => x.Id).ToArray(),
 					Modifications = s.GetReadOnly<Modification>().OrderBy(x => x.Id).ToArray(),
 					Blocks = s.GetReadOnly<CodeBlock>().OrderBy(x => x.Id).ToArray(),

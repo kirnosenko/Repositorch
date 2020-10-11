@@ -179,7 +179,7 @@ namespace Repositorch.Data.Entities.Mapping
 						from nc in nullc.DefaultIfEmpty()
 						where nc == null
 						select a).ToArray();
-					var fixesToRemove = s.GetReadOnly<BugFix>()
+					var attributesToRemove = s.GetReadOnly<CommitAttribute>()
 						.Where(x => x.CommitNumber == commit.Number)
 						.ToArray();
 					var branchesToRemove =
@@ -194,7 +194,7 @@ namespace Repositorch.Data.Entities.Mapping
 					s.RemoveRange(codeToRemove);
 					s.RemoveRange(modificationsToRemove);
 					s.RemoveRange(filesToRemove);
-					s.RemoveRange(fixesToRemove);
+					s.RemoveRange(attributesToRemove);
 					s.Remove(commit);
 					s.RemoveRange(authorsToRemove);
 					s.RemoveRange(branchesToRemove);

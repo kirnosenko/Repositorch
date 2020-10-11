@@ -13,13 +13,14 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 	public interface IBugFixMappingExpression : ICommitMappingExpression
 	{}
 
-	public class BugFixMappingExpression : EntityMappingExpression<BugFix>, IBugFixMappingExpression
+	public class BugFixMappingExpression : EntityMappingExpression<CommitAttribute>, IBugFixMappingExpression
 	{
 		public BugFixMappingExpression(IRepositoryMappingExpression parentExp)
 			: base(parentExp)
 		{
-			entity = new BugFix()
+			entity = new CommitAttribute()
 			{
+				Type = CommitAttribute.FIX,
 				Commit = CurrentEntity<Commit>()
 			};
 			Add(entity);

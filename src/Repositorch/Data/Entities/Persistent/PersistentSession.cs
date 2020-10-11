@@ -19,10 +19,9 @@ namespace Repositorch.Data.Entities.Persistent
 			this.tables = new Dictionary<Type, object>();
 
 			tables.Add(typeof(Commit), Set<Commit>());
-			tables.Add(typeof(Tag), Set<Tag>());
+			tables.Add(typeof(CommitAttribute), Set<CommitAttribute>());
 			tables.Add(typeof(Author), Set<Author>());
 			tables.Add(typeof(Branch), Set<Branch>());
-			tables.Add(typeof(BugFix), Set<BugFix>());
 			tables.Add(typeof(CodeFile), Set<CodeFile>());
 			tables.Add(typeof(Modification), Set<Modification>());
 			tables.Add(typeof(CodeBlock), Set<CodeBlock>());
@@ -74,10 +73,9 @@ namespace Repositorch.Data.Entities.Persistent
 		protected override void OnModelCreating(ModelBuilder modelBuilder)
 		{
 			modelBuilder.ApplyConfiguration(new CommitMapping());
-			modelBuilder.ApplyConfiguration(new TagMapping());
+			modelBuilder.ApplyConfiguration(new CommitAttributeMapping());
 			modelBuilder.ApplyConfiguration(new AuthorMapping());
 			modelBuilder.ApplyConfiguration(new BranchMapping());
-			modelBuilder.ApplyConfiguration(new BugFixMapping());
 			modelBuilder.ApplyConfiguration(new CodeFileMapping());
 			modelBuilder.ApplyConfiguration(new ModificationMapping());
 			modelBuilder.ApplyConfiguration(new CodeBlockMapping());

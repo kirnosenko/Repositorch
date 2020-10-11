@@ -23,7 +23,7 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 					.File("file2").Added();
 
 			Assert.Equal("1", exp.CurrentEntity<Commit>().Revision);
-			Assert.Null(exp.CurrentEntity<BugFix>());
+			Assert.Null(exp.CurrentEntity<CommitAttribute>());
 			Assert.Equal("file2", exp.CurrentEntity<CodeFile>().Path);
 		}
 	}

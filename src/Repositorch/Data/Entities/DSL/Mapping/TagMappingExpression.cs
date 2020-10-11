@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace Repositorch.Data.Entities.DSL.Mapping
 {
@@ -26,14 +27,15 @@ namespace Repositorch.Data.Entities.DSL.Mapping
 	public interface ITagMappingExpression : ICommitMappingExpression
 	{}
 
-	public class TagMappingExpression : EntityMappingExpression<Tag>, ITagMappingExpression
+	public class TagMappingExpression : EntityMappingExpression<CommitAttribute>, ITagMappingExpression
 	{
 		public TagMappingExpression(IRepositoryMappingExpression parentExp, string title)
 			: base(parentExp)
 		{
-			entity = new Tag()
+			entity = new CommitAttribute()
 			{
-				Title = title,
+				Type = CommitAttribute.TAG,
+				Data = title,
 				Commit = CurrentEntity<Commit>()
 			};
 			Add(entity);

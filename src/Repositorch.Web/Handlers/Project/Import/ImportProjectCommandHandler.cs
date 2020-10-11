@@ -26,10 +26,9 @@ namespace Repositorch.Web.Handlers.Project.Import
 			using (var s = store.OpenSession())
 			{
 				s.AddRange(data.Commits);
-				s.AddRange(data.Tags);
+				s.AddRange(data.CommitAttributes);
 				s.AddRange(data.Authors);
 				s.AddRange(data.Branches);
-				s.AddRange(data.Fixes);
 				s.SubmitChanges();
 
 				s.AddRange(data.Files);
@@ -50,9 +49,9 @@ namespace Repositorch.Web.Handlers.Project.Import
 			var modifications = data.Modifications.ToDictionary(x => x.Id, x => x);
 			var blocks = data.Blocks.ToDictionary(x => x.Id, x => x);
 
-			foreach (var tag in data.Tags)
+			foreach (var attribute in data.CommitAttributes)
 			{
-				tag.Commit = commits[tag.CommitNumber];
+				attribute.Commit = commits[attribute.CommitNumber];
 			}
 			foreach (var author in data.Authors)
 			{
@@ -63,10 +62,6 @@ namespace Repositorch.Web.Handlers.Project.Import
 			{
 				branch.Commits = data.Commits
 					.Where(x => x.BranchId == branch.Id).ToList();
-			}
-			foreach (var fix in data.Fixes)
-			{
-				fix.Commit = commits[fix.CommitNumber];
 			}
 			foreach (var modification in data.Modifications)
 			{
@@ -102,10 +97,10 @@ namespace Repositorch.Web.Handlers.Project.Import
 				commit.AuthorId = 0;
 				commit.BranchId = 0;
 			}
-			foreach (var tag in data.Tags)
+			foreach (var attribute in data.CommitAttributes)
 			{
-				tag.Id = 0;
-				tag.CommitNumber = 0;
+				attribute.Id = 0;
+				attribute.CommitNumber = 0;
 			}
 			foreach (var author in data.Authors)
 			{
@@ -114,11 +109,6 @@ namespace Repositorch.Web.Handlers.Project.Import
 			foreach (var branch in data.Branches)
 			{
 				branch.Id = 0;
-			}
-			foreach (var fix in data.Fixes)
-			{
-				fix.Id = 0;
-				fix.CommitNumber = 0;
 			}
 			foreach (var file in data.Files)
 			{

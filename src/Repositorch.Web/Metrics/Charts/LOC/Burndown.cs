@@ -136,11 +136,11 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 		private Slice[] GetTagSlices(IRepository repository)
 		{
 			var tags = (
-				from t in repository.Get<Tag>()
+				from t in repository.Get<CommitAttribute>().Where(a => a.Type == CommitAttribute.TAG)
 				join c in repository.Get<Commit>() on t.CommitNumber equals c.Number
 				select new
 				{
-					tag = t.Title,
+					tag = t.Data,
 					date = c.Date
 				}).OrderBy(x => x.date).ToArray();
 				

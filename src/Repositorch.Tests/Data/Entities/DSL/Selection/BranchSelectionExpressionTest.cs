@@ -257,7 +257,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				.Select(c => c.Revision));
 		}
 		[Fact]
-		public void Should_ignore_invalid_values_for_commit_relative_selection()
+		public void Should_return_all_for_null_value_relative_commit_selection()
 		{
 			mappingDSL
 				.AddCommit("1")
@@ -268,15 +268,33 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			.Submit();
 
 			Assert.Equal(3, selectionDSL.Commits()
-				.AfterRevision(null)
-				.FromRevision(null)
-				.TillRevision(null)
-				.BeforeRevision(null)
-				.AfterRevision("5")
-				.FromRevision("5")
-				.TillRevision("5")
-				.BeforeRevision("5")
-				.Count());
+				.FromRevision(null).Count());
+			Assert.Equal(3, selectionDSL.Commits()
+				.TillRevision(null).Count());
+			Assert.Equal(3, selectionDSL.Commits()
+				.BeforeRevision(null).Count());
+			Assert.Equal(3, selectionDSL.Commits()
+				.AfterRevision(null).Count());
+		}
+		[Fact]
+		public void Should_return_nothing_for_invalid_value_relative_commit_selection()
+		{
+			mappingDSL
+				.AddCommit("1")
+			.Submit()
+				.AddCommit("2")
+			.Submit()
+				.AddCommit("3")
+			.Submit();
+
+			Assert.Equal(0, selectionDSL.Commits()
+				.FromRevision("5").Count());
+			Assert.Equal(0, selectionDSL.Commits()
+				.TillRevision("5").Count());
+			Assert.Equal(0, selectionDSL.Commits()
+				.BeforeRevision("5").Count());
+			Assert.Equal(0, selectionDSL.Commits()
+				.AfterRevision("5").Count());
 		}
 	}
 }

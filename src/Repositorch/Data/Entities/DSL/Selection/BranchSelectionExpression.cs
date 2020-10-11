@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Repositorch.Data.Entities.DSL.Selection
@@ -93,7 +94,7 @@ namespace Repositorch.Data.Entities.DSL.Selection
 				}).SingleOrDefault();
 			if (revisionData == null)
 			{
-				return parentExp;
+				return parentExp.Reselect(c => c.Take(0));
 			}
 
 			return parentExp

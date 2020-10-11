@@ -5,85 +5,84 @@ namespace Repositorch.Data.Entities.DSL.Selection
 {
 	public static class TagSelectionExtensions
 	{
-		public static TagSelectionExpression Tags(this IRepositorySelectionExpression parentExp)
+		public static CommitSelectionExpression AreTagged(
+			this CommitSelectionExpression parentExp)
 		{
-			return new TagSelectionExpression(parentExp);
+			return parentExp.HasAttribute(CommitAttribute.TAG);
 		}
-		public static CommitSelectionExpression WithTag(
-			this CommitSelectionExpression parentExp, string tag)
+		public static CommitSelectionExpression AreNotTagged(
+			this CommitSelectionExpression parentExp)
 		{
-			return parentExp.Reselect(s =>
-				from c in s
-				join t in parentExp.Selection<Tag>() on c.Number equals t.CommitNumber
-				where t.Title == tag
-				select c
-			);
+			return parentExp.HasNotAttribute(CommitAttribute.TAG);
 		}
 		public static CommitSelectionExpression WithTags(
-			this CommitSelectionExpression parentExp)
+			this CommitSelectionExpression parentExp, params string[] tags)
 		{
 			return parentExp.Reselect(s =>
 				(from c in s
-				join t in parentExp.Selection<Tag>() on c.Number equals t.CommitNumber
-				select c).Distinct()
+				 join ca in parentExp.Selection<CommitAttribute>() on c.Number equals ca.CommitNumber
+				 where
+					 ca.Type == CommitAttribute.TAG &&
+					 tags.Contains(ca.Data)
+				 select c).Distinct()
 			);
 		}
 		public static CommitSelectionExpression BeforeTag(
 			this CommitSelectionExpression parentExp, string tag)
 		{
-			var commitWithTag = parentExp.Fixed().WithTag(tag).SingleOrDefault();
+			var commitWithTag = parentExp.Fixed().WithTags(tag).SingleOrDefault();
+			if (commitWithTag == null)
+			{
+				return parentExp.Reselect(c => c.Take(0));
+			}
 
-			return parentExp.BeforeRevision(commitWithTag?.Revision);
+			return parentExp.BeforeRevision(commitWithTag.Revision);
 		}
 		public static CommitSelectionExpression TillTag(
 			this CommitSelectionExpression parentExp, string tag)
 		{
-			var commitWithTag = parentExp.Fixed().WithTag(tag).SingleOrDefault();
+			var commitWithTag = parentExp.Fixed().WithTags(tag).SingleOrDefault();
+			if (commitWithTag == null)
+			{
+				return parentExp.Reselect(c => c.Take(0));
+			}
 
-			return parentExp.TillRevision(commitWithTag?.Revision);
+			return parentExp.TillRevision(commitWithTag.Revision);
 		}
 		public static CommitSelectionExpression AfterTag(
 			this CommitSelectionExpression parentExp, string tag)
 		{
-			var commitWithTag = parentExp.Fixed().WithTag(tag).SingleOrDefault();
+			var commitWithTag = parentExp.Fixed().WithTags(tag).SingleOrDefault();
+			if (commitWithTag == null)
+			{
+				return parentExp.Reselect(c => c.Take(0));
+			}
 
-			return parentExp.AfterRevision(commitWithTag?.Revision);
+			return parentExp.AfterRevision(commitWithTag.Revision);
 		}
 		public static CommitSelectionExpression FromTag(
 			this CommitSelectionExpression parentExp, string tag)
 		{
-			var commitWithTag = parentExp.Fixed().WithTag(tag).SingleOrDefault();
+			var commitWithTag = parentExp.Fixed().WithTags(tag).SingleOrDefault();
+			if (commitWithTag == null)
+			{
+				return parentExp.Reselect(c => c.Take(0));
+			}
 
-			return parentExp.FromRevision(commitWithTag?.Revision);
+			return parentExp.FromRevision(commitWithTag.Revision);
 		}
 	}
 
-	public class TagSelectionExpression : EntitySelectionExpression<Tag, TagSelectionExpression>
+	public class TagSelectionExpression : EntitySelectionExpression<CommitAttribute, TagSelectionExpression>
 	{
-		public TagSelectionExpression(
+		private TagSelectionExpression(
 			IRepositorySelectionExpression parentExp,
-			IQueryable<Tag> selection = null)
+			IQueryable<CommitAttribute> selection = null)
 			: base(parentExp, selection)
 		{
 		}
-		public TagSelectionExpression OfCommits()
-		{
-			return Reselect((s) =>
-				from t in s
-				join c in Selection<Commit>() on t.CommitNumber equals c.Number
-				select t
-			);
-		}
-		public TagSelectionExpression WithTitles(params string[] titles)
-		{
-			return Reselect((s) =>
-				from t in s
-				where titles.Contains(t.Title)
-				select t
-			);
-		}
-
-		protected override TagSelectionExpression Recreate(IQueryable<Tag> selection)
+		
+		protected override TagSelectionExpression Recreate(IQueryable<CommitAttribute> selection)
 		{
 			return new TagSelectionExpression(this, selection);
 		}

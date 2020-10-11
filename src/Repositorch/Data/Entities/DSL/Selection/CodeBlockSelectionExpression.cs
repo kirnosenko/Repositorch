@@ -39,6 +39,15 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			: base(parentExp, selection)
 		{
 		}
+		public CodeBlockSelectionExpression InCommits()
+		{
+			return Reselect(s =>
+				from cb in s
+				join m in Queryable<Modification>() on cb.ModificationId equals m.Id
+				join c in Selection<Commit>() on m.CommitNumber equals c.Number
+				select cb
+			);
+		}
 		public CodeBlockSelectionExpression InModifications()
 		{
 			return Reselect(s =>
@@ -80,16 +89,6 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			return Reselect(s =>
 				from tcb in s
 				join cb in Queryable<CodeBlock>() on tcb.Id equals cb.TargetCodeBlockId
-				select cb
-			);
-		}
-		public CodeBlockSelectionExpression InBugFixes()
-		{
-			return Reselect(s =>
-				from cb in s
-				join m in Queryable<Modification>() on cb.ModificationId equals m.Id
-				join c in Queryable<Commit>() on m.CommitNumber equals c.Number
-				join bf in Selection<BugFix>() on c.Number equals bf.CommitNumber
 				select cb
 			);
 		}

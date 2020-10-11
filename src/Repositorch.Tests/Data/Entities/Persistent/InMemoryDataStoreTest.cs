@@ -56,14 +56,14 @@ namespace Repositorch.Data.Entities.Persistent
 			using (var s = data.OpenSession())
 			{
 				Commit c = new Commit();
-				BugFix bf = new BugFix();
+				CommitAttribute a = new CommitAttribute();
 
 				s.Add(c);
-				s.Add(bf);
-				bf.Commit = c;
+				s.Add(a);
+				a.Commit = c;
 				s.SubmitChanges();
 
-				Assert.Equal(c.Number, bf.CommitNumber);
+				Assert.Equal(c.Number, a.CommitNumber);
 			}
 		}
 		[Fact]
@@ -73,18 +73,18 @@ namespace Repositorch.Data.Entities.Persistent
 			{
 				Commit c1 = new Commit() { Number = 1 };
 				Commit c2 = new Commit() { Number = 2 };
-				BugFix bf = new BugFix();
+				CommitAttribute a = new CommitAttribute();
 
 				s.Add(c1);
-				s.Add(bf);
-				bf.Commit = c1;
+				s.Add(a);
+				a.Commit = c1;
 				s.SubmitChanges();
 
-				bf.Commit = c2;
+				a.Commit = c2;
 				s.SubmitChanges();
 
-				Assert.NotEqual(c1.Number, bf.CommitNumber);
-				Assert.Equal(c2.Number, bf.CommitNumber);
+				Assert.NotEqual(c1.Number, a.CommitNumber);
+				Assert.Equal(c2.Number, a.CommitNumber);
 			}
 		}
 		[Fact]

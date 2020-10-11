@@ -9,6 +9,33 @@ namespace Repositorch.Data.Entities.DSL.Selection
 	public class CodeBlockSelectionExpressionTest : BaseRepositoryTest
 	{
 		[Fact]
+		public void Should_select_codeblocks_for_commits()
+		{
+			mappingDSL
+				.AddCommit("1")
+					.File("file1").Added()
+						.Code(+100)
+					.File("file2").Added()
+						.Code(+50)
+			.Submit()
+				.AddCommit("2")
+					.File("file1").Modified()
+						.Code(+10)
+						.Code(-5).ForCodeAddedInitiallyInRevision("1")
+			.Submit();
+
+			selectionDSL
+				.Commits().RevisionIs("1")
+				.CodeBlocks().InCommits()
+				.Select(x => x.Size)
+					.Should().BeEquivalentTo(new double[] { 100, 50 });
+			selectionDSL
+				.Commits().RevisionIs("2")
+				.CodeBlocks().InCommits()
+				.Select(x => x.Size)
+					.Should().BeEquivalentTo(new double[] { 10, -5 });
+		}
+		[Fact]
 		public void Should_select_codeblocks_for_modifications()
 		{
 			mappingDSL
@@ -139,13 +166,13 @@ namespace Repositorch.Data.Entities.DSL.Selection
 			.Submit();
 
 			selectionDSL
-				.CodeBlocks().InBugFixes()
+				.Commits().AreBugFixes()
+				.CodeBlocks().InCommits()
 				.Select(x => x.Size)
 					.Should().BeEquivalentTo(new double[] { -5, 5, -3, 3 });
 			selectionDSL
-				.Commits().BeforeNumber(4)
-				.BugFixes().InCommits()
-				.CodeBlocks().InBugFixes()
+				.Commits().BeforeNumber(4).AreBugFixes()
+				.CodeBlocks().InCommits()
 				.Select(x => x.Size)
 					.Should().BeEquivalentTo(new double[] { -5, 5 });
 		}

@@ -289,7 +289,7 @@ namespace Repositorch.Data.Entities.Mapping
 				Assert.Equal(new string[] { "alan", "bob" },
 					s.Get<Author>().Select(x => x.Name));
 				Assert.Equal(2, s.Get<Branch>().Count());
-				Assert.Equal(1, s.Get<BugFix>().Count());
+				Assert.Equal(1, s.Get<CommitAttribute>().Count());
 				Assert.Equal(new string[] { "file1", "file2" },
 					s.Get<CodeFile>().Select(f => f.Path));
 				Assert.Equal(3, s.Get<Modification>().Count());
@@ -303,7 +303,7 @@ namespace Repositorch.Data.Entities.Mapping
 				Assert.Equal(new string[] { "alan" },
 					s.Get<Author>().Select(x => x.Name));
 				Assert.Equal(1, s.Get<Branch>().Count());
-				Assert.Equal(0, s.Get<BugFix>().Count());
+				Assert.Equal(0, s.Get<CommitAttribute>().Count());
 				Assert.Equal(new string[] { "file1" },
 					s.Get<CodeFile>().Select(f => f.Path));
 				Assert.Equal(1, s.Get<Modification>().Count());
