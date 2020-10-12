@@ -152,10 +152,11 @@ namespace Repositorch.Web.Projects
 			VcsDataMapper dataMapper = new VcsDataMapper(data, vcsData);
 			dataMapper.RegisterMapper(new CommitMapper(vcsData));
 			dataMapper.RegisterMapper(new TagMapper(vcsData));
-			dataMapper.RegisterMapper(new AuthorMapper(vcsData));
-			dataMapper.RegisterMapper(new BranchMapper(vcsData));
 			dataMapper.RegisterMapper(
 				new BugFixMapper(vcsData, new BugFixDetectorBasedOnLogMessage()));
+			dataMapper.RegisterMapper(new CommitAttributeMapper(vcsData));
+			dataMapper.RegisterMapper(new AuthorMapper(vcsData));
+			dataMapper.RegisterMapper(new BranchMapper(vcsData));
 			dataMapper.RegisterMapper(new CodeFileMapper(vcsData));
 			dataMapper.RegisterMapper(new ModificationMapper(vcsData));
 			dataMapper.RegisterMapper(new BlamePreLoader(vcsData), true);

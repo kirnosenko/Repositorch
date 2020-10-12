@@ -58,11 +58,13 @@ namespace Repositorch
 			dataMapper.RegisterMapper(
 				new TagMapper(vcsData));
 			dataMapper.RegisterMapper(
+				new BugFixMapper(vcsData, new BugFixDetectorBasedOnLogMessage()));
+			dataMapper.RegisterMapper(
+				new CommitAttributeMapper(vcsData));
+			dataMapper.RegisterMapper(
 				new AuthorMapper(vcsData));
 			dataMapper.RegisterMapper(
 				new BranchMapper(vcsData));
-			dataMapper.RegisterMapper(
-				new BugFixMapper(vcsData, new BugFixDetectorBasedOnLogMessage()));
 			dataMapper.RegisterMapper(
 				new CodeFileMapper(vcsData));
 			dataMapper.RegisterMapper(
