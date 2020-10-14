@@ -23,28 +23,23 @@ namespace Repositorch.Data.VersionControl.Git
 		{
 			TextReader reader = new StreamReader(log);
 
-			int infoLines = 5;
+			int infoLines = 6;
 			Revision = reader.ReadLine();
 			AuthorName = reader.ReadLine();
 			AuthorEmail = reader.ReadLine();
 			var messageText = new StringBuilder();
-			do
+			string line = reader.ReadLine();
+			while (infoLines == 6 || line != string.Empty)
 			{
-				var line = reader.ReadLine();
+				if (messageText.Length > 0)
+				{
+					messageText.AppendLine();
+				}
+				messageText.Append(line);
+
+				line = reader.ReadLine();
 				infoLines++;
-				if (line != string.Empty)
-				{
-					if (messageText.Length > 0)
-					{
-						messageText.AppendLine();
-					}
-					messageText.Append(line);
-				}
-				else
-				{
-					break;
-				}
-			} while (true);
+			}
 			Message = messageText.ToString();
 			Date = DateTime.Parse(reader.ReadLine()).ToUniversalTime();
 			var tags = reader.ReadLine();

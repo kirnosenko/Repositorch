@@ -179,6 +179,16 @@ A	src/installer/DependencyContextPaths.cs
 M	src/installer/Resolution/AppBaseCompilationAssemblyResolver.cs
 A	src/installer/TargetInfo.cs";
 
+private readonly string log_12 =
+@"296fdc53bdd75147121aa290b4de0eeb3b4e7074
+Peter Anvin
+hpa@tazenda.sc.orionmulti.com
+
+
+2005-09-28 16:53:56 -0700
+
+M	git.sh";
+
 		private GitLog log;
 		
 		[Fact]
@@ -357,13 +367,19 @@ A	src/installer/TargetInfo.cs";
 			Assert.Equal(new string[] { }, log.Tags);
 			Assert.Equal(new TouchedFile[] { }, log.TouchedFiles);
 		}
-
 		[Fact]
 		public void Should_parse_multiline_message()
 		{
 			log = new GitLog(log_11.ToStream(), null, null);
 
 			Assert.Equal("Move " + Environment.NewLine + "efs to shared runtime", log.Message);
+		}
+		[Fact]
+		public void Should_parse_empty_message()
+		{
+			log = new GitLog(log_12.ToStream(), null, null);
+
+			Assert.Equal(string.Empty, log.Message);
 		}
 	}
 }
