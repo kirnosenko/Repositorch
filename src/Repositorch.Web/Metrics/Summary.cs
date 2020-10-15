@@ -23,6 +23,9 @@ namespace Repositorch.Web.Metrics
 			int commitsRefactoringCount = repository.SelectionDSL()
 				.Commits().AreRefactorings().Count();
 			string commitsRefactoringPercent = ((double)commitsRefactoringCount / commitsCount * 100).ToString("F02");
+			int commitsMergeCount = repository.SelectionDSL()
+				.Commits().AreMerges().Count();
+			string commitsMergePercent = ((double)commitsMergeCount / commitsCount * 100).ToString("F02");
 
 			DateTime periodFrom = repository.GetReadOnly<Commit>().Min(x => x.Date);
 			DateTime periodTo = repository.GetReadOnly<Commit>().Max(x => x.Date);
@@ -50,6 +53,8 @@ namespace Repositorch.Web.Metrics
 				CommitsFixPercent = commitsFixPercent,
 				CommitsRefactoring = commitsRefactoringCount,
 				CommitsRefactoringPercent = commitsRefactoringPercent,
+				CommitsMerge = commitsMergeCount,
+				CommitsMergePercent = commitsMergePercent,
 
 				Files = filesExist,
 				FilesAdded = filesAll,

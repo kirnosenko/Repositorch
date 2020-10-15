@@ -9,6 +9,7 @@ function renderResult(result) {
 			<br />Number of commits: {result.commits}
 			<br />Number of fix commits: {result.commitsFix} ({result.commitsFixPercent} %)
 			<br />Number of refactoring commits: {result.commitsRefactoring} ({result.commitsRefactoringPercent} %)
+			<br />Number of merge commits: {result.commitsMerge} ({result.commitsMergePercent} %)
 			<br />Number of files: {result.files} ({result.filesAdded} added, {result.filesRemoved} removed)
 			<br />Number of LOC: {result.loc} ({result.locAdded} added, {result.locRemoved} removed)
 		</Fragment>
