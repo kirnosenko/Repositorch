@@ -204,6 +204,23 @@ HEAD -> master
 0	0	aaa bbb.txt => aaa bbb ccc.txt
  rename aaa bbb.txt => aaa bbb ccc.txt (100%)";
 
+private readonly string log_10 =
+@"1393e55d5346ce0683ebd44ead1bc2c5de404ed8
+Thomas Aylott
+aylott@fb.com
+include the built files for testling
+
+2013-11-06 15:30:49 -0500
+
+74	0	build/jasmine.js
+266	0	build/react-test.js
+14277	0	build/react.js
+62	0	test/the files to test.generated.js
+ create mode 100644 build/jasmine.js
+ create mode 100644 build/react-test.js
+ create mode 100644 build/react.js
+ create mode 100644 test/the files to test.generated.js";
+
 		private GitLogExtended log;
 
 		[Fact]
@@ -373,6 +390,17 @@ HEAD -> master
 					{
 						"/diffcore-pathspec.c",
 					});
+		}
+		[Fact]
+		public void Should_identify_file_action_correctly_for_path_with_spaces()
+		{
+			log = new GitLogExtended(log_10.ToStream(), null, null);
+
+			log.TouchedFiles.All(x => x.Action == TouchedFileAction.ADDED)
+				.Should().BeTrue();
+			log.TouchedFiles
+				.SingleOrDefault(x => x.Path == "/test/the files to test.generated.js")
+					.Should().NotBeNull();
 		}
 	}
 }

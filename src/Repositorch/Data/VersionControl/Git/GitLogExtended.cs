@@ -14,6 +14,8 @@ namespace Repositorch.Data.VersionControl.Git
 	/// </summary>
 	public class GitLogExtended : GitLog
 	{
+		private static readonly Regex AddOrDeleteExp = new Regex(
+			@"(create mode|delete mode) (?<mode>\d{6}) (?<fullpath>.*)$");
 		private static readonly Regex RenameOrCopyExp = new Regex(
 			@"(rename|copy) (?<fullpath>(((?<prefix>.*?){)?(?<old>.*?) => (?<new>.*?)(}(?<sufix>.*?))?)) \(\d+%\)");
 
@@ -72,35 +74,44 @@ namespace Repositorch.Data.VersionControl.Git
 						{
 							case TouchedFileGitAction.ADDED:
 							case TouchedFileGitAction.DELETED:
-								var mode = blocks[2];
-								var path = blocks[3];
-								if (!mode.EndsWith("0000"))
+								var addOrDeleteMatch = AddOrDeleteExp.Match(line);
+								if (addOrDeleteMatch.Success)
 								{
-									MapTouchedFile(
-										action,
-										path,
-										null,
-										binaryPaths.Contains(path)
-											? TouchedFile.ContentType.BINARY
-											: TouchedFile.ContentType.TEXT,
-										ModifyTouchedFile);
+									string fullpath = addOrDeleteMatch.Groups["fullpath"].Value;
+									string mode = addOrDeleteMatch.Groups["mode"].Value;
+
+									if (!mode.EndsWith("0000"))
+									{
+										MapTouchedFile(
+											action,
+											fullpath,
+											null,
+											binaryPaths.Contains(fullpath)
+												? TouchedFile.ContentType.BINARY
+												: TouchedFile.ContentType.TEXT,
+											ModifyTouchedFile);
+									}
+									else
+									{
+										// this is a symbolic link or gitlink
+										RemoveTouchedFile(fullpath);
+									}
 								}
 								else
 								{
-									// this is not a symbolic link or gitlink
-									RemoveTouchedFile(path);
+									throw new ArgumentException($"Bad log line {line}.");
 								}
 								break;
 							case TouchedFileGitAction.RENAMED:
 							case TouchedFileGitAction.COPIED:
-								var match = RenameOrCopyExp.Match(line);
-								if (match.Success)
+								var renameOrCopyMatch = RenameOrCopyExp.Match(line);
+								if (renameOrCopyMatch.Success)
 								{
-									string fullpath = match.Groups["fullpath"].Value;
-									string prefix = match.Groups["prefix"].Value;
-									string oldPart = match.Groups["old"].Value;
-									string newPart = match.Groups["new"].Value;
-									string sufix = match.Groups["sufix"].Value;
+									string fullpath = renameOrCopyMatch.Groups["fullpath"].Value;
+									string prefix = renameOrCopyMatch.Groups["prefix"].Value;
+									string oldPart = renameOrCopyMatch.Groups["old"].Value;
+									string newPart = renameOrCopyMatch.Groups["new"].Value;
+									string sufix = renameOrCopyMatch.Groups["sufix"].Value;
 
 									var oldPath = (prefix + oldPart + sufix).Replace("//", "/");
 									var newPath = (prefix + newPart + sufix).Replace("//", "/");
