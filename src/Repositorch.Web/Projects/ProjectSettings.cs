@@ -12,6 +12,7 @@ namespace Repositorch.Web.Projects
 		public string RepositoryPath { get; set; }
 		public string Branch { get; set; }
 		public bool UseExtendedLog { get; set; }
+		public bool FastMergeProcessing { get; set; }
 		public string CheckResult { get; set; }
 
 		public string GetFullRepositoryPath()

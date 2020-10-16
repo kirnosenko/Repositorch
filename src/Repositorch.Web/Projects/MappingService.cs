@@ -39,7 +39,7 @@ namespace Repositorch.Web.Projects
 			public string Time => time.Elapsed.ToFormatedTimeString();
 		}
 
-		private readonly IProjectManager projectFactory;
+		private readonly IProjectManager projectManager;
 		private readonly IMappingNotifier mappingNotifier;
 		
 		private readonly ConcurrentDictionary<string, MappingInfo> mappingInfo;
@@ -50,7 +50,7 @@ namespace Repositorch.Web.Projects
 			IProjectManager projectFactory,
 			IMappingNotifier mappingNotifier)
 		{
-			this.projectFactory = projectFactory;
+			this.projectManager = projectFactory;
 			this.mappingNotifier = mappingNotifier;
 			this.mappingInfo = new ConcurrentDictionary<string, MappingInfo>();
 			this.projectsToStart = new ConcurrentQueue<string>();
@@ -146,8 +146,9 @@ namespace Repositorch.Web.Projects
 
 		private VcsDataMapper CreateDataMapper(string projectName)
 		{
-			var data = projectFactory.GetProjectDataStore(projectName);
-			var vcsData = projectFactory.GetProjectVcsData(projectName);
+			var data = projectManager.GetProjectDataStore(projectName);
+			var settings = projectManager.GetProject(projectName);
+			var vcsData = projectManager.GetProjectVcsData(settings);
 
 			VcsDataMapper dataMapper = new VcsDataMapper(data, vcsData);
 			dataMapper.RegisterMapper(new CommitMapper(vcsData));
@@ -157,7 +158,10 @@ namespace Repositorch.Web.Projects
 			dataMapper.RegisterMapper(new CommitAttributeMapper(vcsData));
 			dataMapper.RegisterMapper(new AuthorMapper(vcsData));
 			dataMapper.RegisterMapper(new BranchMapper(vcsData));
-			dataMapper.RegisterMapper(new CodeFileMapper(vcsData));
+			dataMapper.RegisterMapper(new CodeFileMapper(vcsData)
+			{
+				FastMergeProcessing = settings.FastMergeProcessing
+			});
 			dataMapper.RegisterMapper(new ModificationMapper(vcsData));
 			dataMapper.RegisterMapper(new BlamePreLoader(vcsData), true);
 			dataMapper.RegisterMapper(new CodeBlockMapper(vcsData));

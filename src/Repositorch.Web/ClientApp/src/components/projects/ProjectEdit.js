@@ -13,6 +13,7 @@ export default function ProjectEdit({ match }) {
 		repositoryPath: "",
 		branch: "master",
 		useExtendedLog: true,
+		fastMergeProcessing: false,
 		checkResult: "1"
 	});
 	const [file, setFile] = React.useState('')
@@ -233,8 +234,22 @@ export default function ProjectEdit({ match }) {
 					onChange={handleChange} />
 				<label className="form-check-label">Use extended log</label>
 				<small className="form-text text-muted">
-					Whether to use extended log to allow mapping of repositories
-					with binary files, symbolic links and git links.
+					Allows mapping of repositories with binary files, 
+					symbolic links and git links.
+					Don't touch if you are not sure.
+				</small>
+			</div>
+			<div className="form-group form-check">
+				<input
+					type="checkbox"
+					className="form-check-input"
+					name="fastMergeProcessing"
+					checked={settings.fastMergeProcessing}
+					onChange={handleChange} />
+				<label className="form-check-label">Use fast merge processing</label>
+				<small className="form-text text-muted">
+					Allows to speed up merge processing, but will cause 
+					incorrect data mapping in some cases.
 					Don't touch if you are not sure.
 				</small>
 			</div>

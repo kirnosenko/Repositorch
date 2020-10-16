@@ -12,6 +12,11 @@ namespace Repositorch.Data.Entities.Mapping
 		public CodeFileMapper(IVcsData vcsData)
 			: base(vcsData)
 		{
+			FastMergeProcessing = false;
+		}
+		public bool FastMergeProcessing
+		{
+			get; set;
 		}
 
 		public override IEnumerable<ICodeFileMappingExpression> Map(ICommitMappingExpression expression)
@@ -22,18 +27,31 @@ namespace Repositorch.Data.Entities.Mapping
 			if (touchedFiles.Any(x => x.Type != TouchedFile.ContentType.UNKNOWN))
 			{
 				var allFiles = expression.GetReadOnly<CodeFile>()
-					.Select(x => x.Path).ToArray();
+					.Select(x => x.Path)
+					.ToArray();
 
-				touchedFiles = touchedFiles.Where(x =>
-					allFiles.Contains(x.Path) ||
-					(x.Action == TouchedFileAction.ADDED && x.Type == TouchedFile.ContentType.TEXT));
+				touchedFiles = touchedFiles
+					.Where(x =>
+						allFiles.Contains(x.Path) ||
+						(x.Action == TouchedFileAction.ADDED && x.Type == TouchedFile.ContentType.TEXT))
+					.ToArray();
 			}
 
 			var touchedPathes = touchedFiles.Select(x => x.Path);
 			if (log.IsMerge)
 			{
-				touchedPathes = touchedPathes.Union(
-					GetFilesTouchedOnParentBranches(expression, log));
+				if (!FastMergeProcessing)
+				{
+					touchedPathes = touchedPathes.Union(
+						GetFilesTouchedOnParentBranches(expression, log));
+				}
+				else
+				{
+					touchedPathes = touchedFiles
+						.Where(x => x.Action != TouchedFileAction.MODIFIED)
+						.Select(x => x.Path)
+						.Union(GetFilesTouchedOnDifferentParentBranches(expression, log));
+				}
 			}
 
 			if (PathSelectors != null)
