@@ -3,18 +3,14 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <LangVersion>7.3</LangVersion>
-    <Version>0.3.0</Version>
-    <Authors>Semyon Kirnosenko</Authors>
-    <Company />
-    <Description>Repositorch is a VCS repository analysis engine written in C#.</Description>
-    <Copyright>Semyon Kirnosenko 2020</Copyright>
-    <PackageProjectUrl>https://github.com/kirnosenko/Repositorch</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/kirnosenko/Repositorch</RepositoryUrl>
-    <RepositoryType>Git</RepositoryType>
-    <AssemblyVersion>0.3.0.0</AssemblyVersion>
+	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="GitInfo" Version="2.1.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="3.1.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.8" />

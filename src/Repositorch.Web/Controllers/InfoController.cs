@@ -1,4 +1,5 @@
-﻿using System;
+﻿using System.Reflection;
+using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Repositorch.Web.Controllers
@@ -11,8 +12,10 @@ namespace Repositorch.Web.Controllers
 		[Route("[action]")]
 		public IActionResult GetVersion()
 		{
-			var version = typeof(Repositorch.Data.IDataStore).Assembly.GetName().Version;
-			return Ok($"{version.Major}.{version.Minor}.{version.Build} alpha");
+			Assembly assembly = typeof(Repositorch.Data.IDataStore).Assembly;
+			FileVersionInfo fileVersionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
+			var version = fileVersionInfo.ProductVersion;
+			return Ok(version);
 		}
 
 		[Route("[action]")]
