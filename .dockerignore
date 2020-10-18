@@ -1,7 +1,6 @@
 **/.classpath
 **/.dockerignore
 **/.env
-**/.git
 **/.gitignore
 **/.project
 **/.settings
@@ -14,12 +13,12 @@
 **/azds.yaml
 **/bin
 **/charts
-**/docker-compose*
+**/docker*
 **/Dockerfile*
 **/node_modules
 **/npm-debug.log
 **/obj
 **/secrets.dev.yaml
 **/values.dev.yaml
-LICENSE
+LICENSE.md
 README.md
