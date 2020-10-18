@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using LiteDB;
+using Repositorch.Data.Entities.Mapping;
 
 namespace Repositorch.Web.Projects
 {
@@ -13,7 +14,7 @@ namespace Repositorch.Web.Projects
 		public string Branch { get; set; }
 		public bool UseExtendedLog { get; set; }
 		public bool FastMergeProcessing { get; set; }
-		public string CheckResult { get; set; }
+		public VcsDataMapper.CheckMode CheckMode { get; set; }
 
 		public string GetFullRepositoryPath()
 		{

@@ -14,7 +14,7 @@ export default function ProjectEdit({ match }) {
 		branch: "master",
 		useExtendedLog: true,
 		fastMergeProcessing: false,
-		checkResult: "1"
+		checkMode: 1
 	});
 	const [file, setFile] = React.useState('')
 	const [validation, setValidation] = React.useState({});
@@ -257,12 +257,12 @@ export default function ProjectEdit({ match }) {
 				<div className="heading">Check result</div>
 				<select
 					className="custom-select"
-					name="checkResult"
-					value={settings.checkResult}
+					name="checkMode"
+					value={settings.checkMode}
 					onChange={handleChange}>
-					<option value="0">Nothing</option>
-					<option value="1">Modified</option>
-					<option value="2">Everything</option>
+					<option value={0}>Nothing</option>
+					<option value={1}>Modified</option>
+					<option value={2}>Everything</option>
 				</select>
 				<small className="form-text text-muted">
 					Mapped data checking mode.

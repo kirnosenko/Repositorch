@@ -97,10 +97,11 @@ namespace Repositorch.Web.Projects
 					{
 						await mappingNotifier.Notify(
 							projectName, "Preparing for mapping...", null, null);
-						var mapper = CreateDataMapper(projectName);
+						var projectSettings = projectManager.GetProject(projectName);
+						var mapper = CreateDataMapper(projectSettings);
 						var mappingSettings = new VcsDataMapper.MappingSettings()
 						{
-							Check = VcsDataMapper.CheckMode.TOUCHED,
+							Check = projectSettings.CheckMode,
 						};
 						var result = mapper.MapRevisions(mappingSettings, mi.TokenSource.Token);
 						switch (result)
@@ -144,11 +145,11 @@ namespace Repositorch.Web.Projects
 			});
 		}
 
-		private VcsDataMapper CreateDataMapper(string projectName)
+		private VcsDataMapper CreateDataMapper(ProjectSettings projectSettings)
 		{
-			var data = projectManager.GetProjectDataStore(projectName);
-			var settings = projectManager.GetProject(projectName);
-			var vcsData = projectManager.GetProjectVcsData(settings);
+			var projectName = projectSettings.Name;
+			var data = projectManager.GetProjectDataStore(projectSettings);
+			var vcsData = projectManager.GetProjectVcsData(projectSettings);
 
 			VcsDataMapper dataMapper = new VcsDataMapper(data, vcsData);
 			dataMapper.RegisterMapper(new CommitMapper(vcsData));
@@ -160,7 +161,7 @@ namespace Repositorch.Web.Projects
 			dataMapper.RegisterMapper(new BranchMapper(vcsData));
 			dataMapper.RegisterMapper(new CodeFileMapper(vcsData)
 			{
-				FastMergeProcessing = settings.FastMergeProcessing
+				FastMergeProcessing = projectSettings.FastMergeProcessing
 			});
 			dataMapper.RegisterMapper(new ModificationMapper(vcsData));
 			dataMapper.RegisterMapper(new BlamePreLoader(vcsData), true);
