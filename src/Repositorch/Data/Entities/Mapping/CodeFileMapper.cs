@@ -33,7 +33,9 @@ namespace Repositorch.Data.Entities.Mapping
 				touchedFiles = touchedFiles
 					.Where(x =>
 						allFiles.Contains(x.Path) ||
-						(x.Action == TouchedFileAction.ADDED && x.Type == TouchedFile.ContentType.TEXT))
+						(x.Action == TouchedFileAction.ADDED && 
+						x.Type == TouchedFile.ContentType.TEXT &&
+						(x.SourcePath == null || allFiles.Contains(x.SourcePath))))
 					.ToArray();
 			}
 

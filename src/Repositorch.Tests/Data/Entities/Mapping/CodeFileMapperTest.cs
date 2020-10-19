@@ -323,5 +323,17 @@ namespace Repositorch.Data.Entities.Mapping
 
 			Assert.True(exp.Count() == 0);
 		}
+		[Fact]
+		public void Should_ignore_non_binary_files_if_they_were_not_added_as_binary_in_case_of_renaming()
+		{
+			log.FileRenamed("file2", "file1", TouchedFile.ContentType.TEXT);
+
+			var exp = mapper.Map(
+				mappingDSL.AddCommit("10")
+			);
+			SubmitChanges();
+
+			Assert.True(exp.Count() == 0);
+		}
 	}
 }
