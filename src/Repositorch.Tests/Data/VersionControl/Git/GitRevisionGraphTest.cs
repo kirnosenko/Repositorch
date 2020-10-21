@@ -3,8 +3,9 @@ using Xunit;
 
 namespace Repositorch.Data.VersionControl.Git
 {
-	public class GitRevisionsTest
+	public class GitRevisionGraphTest
 	{
+
 private string rev_list_1 =
 @"11111
 22222 11111
@@ -15,12 +16,12 @@ private string rev_list_1 =
 77777
 88888 66666";
 
-		private GitRevisions revList;
+		private GitRevisionGraph revList;
 
 		[Fact]
 		public void Should_get_all_revisions()
 		{
-			revList = new GitRevisions(rev_list_1.ToStream());
+			revList = new GitRevisionGraph(rev_list_1.ToStream());
 
 			Assert.Equal(8, revList.RevisionCount);
 			for (int i = 1; i <= 8; i++)
@@ -33,7 +34,7 @@ private string rev_list_1 =
 		[Fact]
 		public void Should_create_revisions_graph()
 		{
-			revList = new GitRevisions(rev_list_1.ToStream());
+			revList = new GitRevisionGraph(rev_list_1.ToStream());
 
 			Assert.Equal(new string[] { },
 				revList.GetRevisionNode("11111").Parents);

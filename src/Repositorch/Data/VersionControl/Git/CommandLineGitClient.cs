@@ -5,7 +5,7 @@ namespace Repositorch.Data.VersionControl.Git
 {
 	public class CommandLineGitClient : CommandLineTool, IVcsData
 	{
-		private GitRevisions revisions;
+		private GitRevisionGraph revisions;
 
 		public CommandLineGitClient(string repositoryPath)
 		{
@@ -19,7 +19,7 @@ namespace Repositorch.Data.VersionControl.Git
 		{
 			if (revisions == null)
 			{
-				revisions = new GitRevisions(GetRevList());
+				revisions = new GitRevisionGraph(GetRevList());
 			}
 
 			return revisions.GetRevisionByNumber(number);
@@ -28,7 +28,7 @@ namespace Repositorch.Data.VersionControl.Git
 		{
 			if (revisions == null)
 			{
-				revisions = new GitRevisions(GetRevList());
+				revisions = new GitRevisionGraph(GetRevList());
 			}
 
 			using (var log = GetLog(revision, ExtendedLog))

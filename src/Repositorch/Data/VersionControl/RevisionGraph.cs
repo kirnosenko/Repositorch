@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 
-namespace Repositorch.Data.VersionControl.Git
+namespace Repositorch.Data.VersionControl
 {
-	public class GitRevisions
+	/// <summary>
+	/// Revision graph requires adding revisions in topological order.
+	/// </summary>
+	public class RevisionGraph
 	{
 		public interface IRevisionNode
 		{
@@ -44,29 +45,19 @@ namespace Repositorch.Data.VersionControl.Git
 			}
 		}
 
-		private static readonly char[] lineSeparator = new char[] { ' ' };
 		private List<string> revisionsOrdered = new List<string>();
 		private Dictionary<string, RevisionNode> revisionsHashed = new Dictionary<string, RevisionNode>();
 
-		public GitRevisions(Stream revList)
+		public void AddRevision(string revision, params string[] parents)
 		{
-			TextReader reader = new StreamReader(revList);
-			
-			string line;
-			while ((line = reader.ReadLine()) != null)
+			revisionsOrdered.Add(revision);
+			foreach (var p in parents)
 			{
-				var lineRevisions = line.Split(lineSeparator);
-				var revision = lineRevisions.First();
-				revisionsOrdered.Add(revision);
-				var parents = lineRevisions.Skip(1);
-				foreach (var p in parents)
-				{
-					revisionsHashed[p].AddChild(revision);
-				}
-				var node = new RevisionNode();
-				node.AddParents(parents);
-				revisionsHashed.Add(revision, node);
+				revisionsHashed[p].AddChild(revision);
 			}
+			var node = new RevisionNode();
+			node.AddParents(parents);
+			revisionsHashed.Add(revision, node);
 		}
 		public int RevisionCount
 		{
