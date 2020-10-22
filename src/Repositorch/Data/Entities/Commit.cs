@@ -8,7 +8,7 @@ namespace Repositorch.Data.Entities
 	public class Commit
 	{
 		/// <summary>
-		/// Commit number in topologically ordered commit list.
+		/// Commit number in topologically ordered commit list (count from 1).
 		/// </summary>
 		public int Number { get; set; }
 		/// <summary>

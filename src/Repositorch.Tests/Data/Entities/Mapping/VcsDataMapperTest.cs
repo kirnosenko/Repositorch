@@ -414,5 +414,46 @@ namespace Repositorch.Data.Entities.Mapping
 				Assert.Equal(0, s.Get<Commit>().Count());
 			});
 		}
+
+		[Fact]
+		public void Should_not_return_lost_split_on_empty_db()
+		{
+			mapper.GetFirstLostSplit()
+				.Should().BeNull();
+
+			vcsData.GetSplitRevisionsTillRevision(Arg.Any<string>())
+				.DidNotReceiveWithAnyArgs();
+		}
+		[Theory]
+		[InlineData(new string[] { "1", "3" }, null)]
+		[InlineData(new string[] { "1", "3", "4" }, "4")]
+		[InlineData(new string[] { "1", "3", "4", "7" }, "4")]
+		[InlineData(new string[] { "1", "3", "7" }, "7")]
+		public void Should_return_first_lost_split(
+			string[] repoSplitRevisions, string resultRevision)
+		{
+			vcsData.GetSplitRevisionsTillRevision(Arg.Any<string>())
+				.Returns(repoSplitRevisions);
+			data.UsingSession(s =>
+				s.MappingDSL()
+					.AddCommit("1").IsSplit()
+				.Submit()
+					.AddCommit("2")
+				.Submit()
+					.AddCommit("3").IsSplit()
+				.Submit()
+					.AddCommit("4").IsMerge()
+				.Submit()
+					.AddCommit("5")
+				.Submit()
+					.AddCommit("6")
+				.Submit()
+					.AddCommit("7").IsMerge()
+				.Submit()
+			);
+
+			mapper.GetFirstLostSplit()?.Revision
+				.Should().Be(resultRevision);
+		}
 	}
 }

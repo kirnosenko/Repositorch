@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Repositorch.Data.VersionControl
 {
@@ -72,9 +73,27 @@ namespace Repositorch.Data.VersionControl
 			}
 			return revisionsOrdered[index];
 		}
+		public string GetLastRevision()
+		{
+			return revisionsOrdered.Last();
+		}
 		public IRevisionNode GetRevisionNode(string revision)
 		{
 			return revisionsHashed[revision];
+		}
+		public IEnumerable<string> GetSplitRevisionsTillRevision(string revisionToStop)
+		{
+			foreach (var revison in revisionsOrdered)
+			{
+				if (GetRevisionNode(revison).Children.Count() > 1)
+				{
+					yield return revison;
+					if (revison == revisionToStop)
+					{
+						yield break;
+					}
+				}
+			}
 		}
 	}
 }

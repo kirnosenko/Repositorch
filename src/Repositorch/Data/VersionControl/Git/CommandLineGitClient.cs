@@ -1,12 +1,12 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.IO;
 
 namespace Repositorch.Data.VersionControl.Git
 {
 	public class CommandLineGitClient : CommandLineTool, IVcsData
 	{
-		private GitRevisionGraph revisions;
-
+		private GitRevisionGraph revisionGraph;
+		
 		public CommandLineGitClient(string repositoryPath)
 		{
 			RepositoryPath = repositoryPath;
@@ -17,23 +17,29 @@ namespace Repositorch.Data.VersionControl.Git
 
 		public string GetRevisionByNumber(int number)
 		{
-			if (revisions == null)
-			{
-				revisions = new GitRevisionGraph(GetRevList());
-			}
+			CreateRevisionGraph();
 
-			return revisions.GetRevisionByNumber(number);
+			return revisionGraph.GetRevisionByNumber(number);
+		}
+		public string GetLastRevision()
+		{
+			CreateRevisionGraph();
+
+			return revisionGraph.GetLastRevision();
+		}
+		public IEnumerable<string> GetSplitRevisionsTillRevision(string revisionToStop)
+		{
+			CreateRevisionGraph();
+
+			return revisionGraph.GetSplitRevisionsTillRevision(revisionToStop);
 		}
 		public Log Log(string revision)
 		{
-			if (revisions == null)
-			{
-				revisions = new GitRevisionGraph(GetRevList());
-			}
+			CreateRevisionGraph();
 
 			using (var log = GetLog(revision, ExtendedLog))
 			{
-				var revisionNode = revisions.GetRevisionNode(revision);
+				var revisionNode = revisionGraph.GetRevisionNode(revision);
 				if (!ExtendedLog)
 				{
 					return new GitLog(log, revisionNode.Parents, revisionNode.Children);
@@ -102,6 +108,13 @@ namespace Repositorch.Data.VersionControl.Git
 		private string ToGitPath(string path)
 		{
 			return path.Remove(0, 1);
+		}
+		private void CreateRevisionGraph()
+		{
+			if (revisionGraph == null)
+			{
+				revisionGraph = new GitRevisionGraph(GetRevList());
+			}
 		}
 	}
 }

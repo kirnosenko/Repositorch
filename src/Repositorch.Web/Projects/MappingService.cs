@@ -7,6 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
+using Repositorch.Data;
+using Repositorch.Data.VersionControl;
 using Repositorch.Data.Entities.Mapping;
 
 namespace Repositorch.Web.Projects
@@ -98,7 +100,17 @@ namespace Repositorch.Web.Projects
 						await mappingNotifier.Notify(
 							projectName, "Preparing for mapping...", null, null);
 						var projectSettings = projectManager.GetProject(projectName);
-						var mapper = CreateDataMapper(projectSettings);
+						var data = projectManager.GetProjectDataStore(projectSettings);
+						var vcsData = projectManager.GetProjectVcsData(projectSettings);
+						var mapper = CreateDataMapper(projectSettings, data, vcsData);
+						var lastRepositoryRevision = vcsData.GetLastRevision();
+
+						if (projectSettings.LastRepositoryRevision != lastRepositoryRevision)
+						{
+							mapper.TruncateToContinue();
+							projectSettings.LastRepositoryRevision = lastRepositoryRevision;
+							projectManager.UpdateProject(projectSettings);
+						}
 						var mappingSettings = new VcsDataMapper.MappingSettings()
 						{
 							Check = projectSettings.CheckMode,
@@ -145,12 +157,10 @@ namespace Repositorch.Web.Projects
 			});
 		}
 
-		private VcsDataMapper CreateDataMapper(ProjectSettings projectSettings)
+		private VcsDataMapper CreateDataMapper(
+			ProjectSettings projectSettings, IDataStore data, IVcsData vcsData)
 		{
 			var projectName = projectSettings.Name;
-			var data = projectManager.GetProjectDataStore(projectSettings);
-			var vcsData = projectManager.GetProjectVcsData(projectSettings);
-
 			VcsDataMapper dataMapper = new VcsDataMapper(data, vcsData);
 			dataMapper.RegisterMapper(new CommitMapper(vcsData));
 			dataMapper.RegisterMapper(new TagMapper(vcsData));

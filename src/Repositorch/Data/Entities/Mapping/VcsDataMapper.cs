@@ -27,7 +27,13 @@ namespace Repositorch.Data.Entities.Mapping
 		}
 		public struct MappingSettings
 		{
+			/// <summary>
+			/// Number of revisions to limit mapping.
+			/// </summary>
 			public int? RevisionLimit { get; set; }
+			/// <summary>
+			/// Mode to check files after mapping.
+			/// </summary>
 			public CheckMode Check { get; set; }
 		}
 
@@ -200,6 +206,50 @@ namespace Repositorch.Data.Entities.Mapping
 					s.RemoveRange(branchesToRemove);
 					s.SubmitChanges();
 				}
+			}
+		}
+		public void TruncateToContinue()
+		{
+			var firstLostSplit = GetFirstLostSplit();
+			if (firstLostSplit != null)
+			{
+				Truncate(firstLostSplit.Number - 1);
+			}
+		}
+		public Commit GetFirstLostSplit()
+		{
+			using (var s = data.OpenSession())
+			{
+				var lastCommit = s.Get<Commit>()
+					.OrderByDescending(x => x.Number)
+					.FirstOrDefault();
+				if (lastCommit == null)
+				{
+					return null;
+				}
+
+				var splitRevisions = vcsData
+					.GetSplitRevisionsTillRevision(lastCommit.Revision)
+					.ToArray();
+				var mappedSplitCount = s.SelectionDSL()
+					.Commits().AreSplits().Count();
+				if (splitRevisions.Length == mappedSplitCount)
+				{
+					return null;
+				}
+				var mappedSplitRevisions = s.SelectionDSL()
+					.Commits().AreSplits()
+					.Select(x => x.Revision)
+					.ToArray();
+				var lostSplitRevisions = splitRevisions
+					.Except(mappedSplitRevisions)
+					.ToArray();
+				var firstLostSplit = s.SelectionDSL()
+					.Commits().RevisionIsIn(lostSplitRevisions)
+					.OrderBy(x => x.Number)
+					.FirstOrDefault();
+
+				return firstLostSplit;
 			}
 		}
 		public void Check(int revisionsToSkip, CheckMode mode)

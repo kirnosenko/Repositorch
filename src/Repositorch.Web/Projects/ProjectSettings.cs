@@ -16,6 +16,13 @@ namespace Repositorch.Web.Projects
 		public bool FastMergeProcessing { get; set; }
 		public VcsDataMapper.CheckMode CheckMode { get; set; }
 
+		/// <summary>
+		/// Last revision in repository on considered branch.
+		/// We need to track this to continue mapping after 
+		/// repository update.
+		/// </summary>
+		public string LastRepositoryRevision { get; set; }
+
 		public string GetFullRepositoryPath()
 		{
 			return Path.Combine(

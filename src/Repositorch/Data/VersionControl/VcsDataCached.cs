@@ -31,7 +31,15 @@ namespace Repositorch.Data.VersionControl
 		{
 			return innerData.GetRevisionByNumber(number);
 		}
-		
+		public string GetLastRevision()
+		{
+			return innerData.GetLastRevision();
+		}
+		public IEnumerable<string> GetSplitRevisionsTillRevision(string revisionToStop)
+		{
+			return innerData.GetSplitRevisionsTillRevision(revisionToStop);
+		}
+
 		public Log Log(string revision)
 		{
 			return logs.GetData(revision);
