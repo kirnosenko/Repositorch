@@ -364,22 +364,17 @@ namespace Repositorch.Data.Entities.Mapping
 				}
 			}
 
-			if (currentLOC != fileBlame.Count)
+			if (currentLOC != fileBlame.Values.Sum())
 			{
 				OnError?.Invoke(string.Format("Incorrect number of lines in file {0}. {1} should be {2}",
-					file.Path, currentLOC, fileBlame.Count));
+					file.Path, currentLOC, fileBlame.Values.Sum()));
 			}
 
-			var linesByRevision =
-			(
-				from line in fileBlame
-				group line by line.Value into g
-				select new
-				{
-					Revision = g.Key,
-					CodeSize = g.Count()
-				}
-			).ToArray();
+			var linesByRevision = fileBlame.Select(x => new
+			{
+				Revision = x.Key,
+				CodeSize = x.Value
+			}).ToArray();
 			
 			var codeBySourceRevision =
 			(
@@ -432,7 +427,7 @@ namespace Repositorch.Data.Entities.Mapping
 					error.RealCodeSize));
 			}
 
-			return currentLOC == fileBlame.Count && incorrectCode.Count == 0;
+			return currentLOC == fileBlame.Values.Sum() && incorrectCode.Count == 0;
 		}
 
 		private string GetRevisionName(string revision, int number)

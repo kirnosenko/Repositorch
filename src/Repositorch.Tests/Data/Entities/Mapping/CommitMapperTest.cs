@@ -2,6 +2,7 @@
 using System.Linq;
 using Xunit;
 using NSubstitute;
+using Repositorch.Data.VersionControl;
 
 namespace Repositorch.Data.Entities.Mapping
 {

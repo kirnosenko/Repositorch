@@ -1,10 +1,10 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 using FluentAssertions;
 using NSubstitute;
 using Repositorch.Data.Entities.DSL.Mapping;
+using Repositorch.Data.VersionControl;
 
 namespace Repositorch.Data.Entities.Mapping
 {

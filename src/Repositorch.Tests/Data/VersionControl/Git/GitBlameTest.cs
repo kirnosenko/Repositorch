@@ -46,13 +46,12 @@ filename decorate.h
 		{
 			blame = GitBlame.Parse(blame0.ToStream());
 
-			blame.Where(x => x.Value == "a59b276e18f3d4a548caf549e05188cb1bd3a709").Count()
+			blame["a59b276e18f3d4a548caf549e05188cb1bd3a709"]
 				.Should().Be(15);
-			blame.Where(x => x.Value == "54988bdad7dc3f09e40752221c144bf470d73aa7").Count()
+			blame["54988bdad7dc3f09e40752221c144bf470d73aa7"]
 				.Should().Be(3);
-			blame.Where(x => x.Value == "54988bdad7dc3f09e40752221c144bf470d73aa7")
-				.Select(x => x.Key)
-					.Should().BeEquivalentTo(new int[] { 5, 15, 16 });
+			blame["54988bdad7dc3f09e40752221c144bf470d73aa7"]
+				.Should().Be(3);
 		}
 		[Fact]
 		public void Should_return_null_for_invalid_path()

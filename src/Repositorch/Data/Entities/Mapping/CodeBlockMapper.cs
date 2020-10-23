@@ -29,20 +29,17 @@ namespace Repositorch.Data.Entities.Mapping
 
 			if (blame != null)
 			{
-				var linesByRevision = (
-					from l in blame
-					group l.Key by l.Value into g
-					select new
-					{
-						Revision = g.Key,
-						Size = g.Count(),
-					}).ToList();
-
+				var linesByRevision = blame.Select(x => new
+				{
+					Revision = x.Key,
+					CodeSize = x.Value
+				}).ToList();
+				
 				void CopyCode()
 				{
 					foreach (var linesForRevision in linesByRevision)
 					{
-						var newExp = expression.Code(linesForRevision.Size);
+						var newExp = expression.Code(linesForRevision.CodeSize);
 						if (linesForRevision.Revision != revision)
 						{
 							newExp.CopiedFrom(linesForRevision.Revision);
@@ -63,7 +60,7 @@ namespace Repositorch.Data.Entities.Mapping
 					{
 						linesByRevision.Remove(addedCode);
 						codeBlockExpressions.Add(
-							expression.Code(addedCode.Size)
+							expression.Code(addedCode.CodeSize)
 						);
 					}
 
@@ -75,7 +72,7 @@ namespace Repositorch.Data.Entities.Mapping
 						{
 							linesByRevision.Remove(linesForRevision);
 						}
-						double realCodeSize = linesForRevision == null ? 0 : linesForRevision.Size;
+						double realCodeSize = linesForRevision == null ? 0 : linesForRevision.CodeSize;
 						if ((size > realCodeSize) ||
 							(size < realCodeSize && isMerge))
 						{

@@ -7,7 +7,7 @@ namespace Repositorch.Data.VersionControl.Git
 	/// <summary>
 	/// Keeps for each line the revision of the last modification.
 	/// </summary>
-	public class GitBlame : Dictionary<int,string>, IBlame
+	public class GitBlame : Dictionary<string, double>, IBlame
 	{
 		private GitBlame()
 		{
@@ -28,12 +28,13 @@ namespace Repositorch.Data.VersionControl.Git
 					string[] parts = line.Split(' ');
 					if ((parts.Length == 4) && (parts[0].Length == 40))
 					{
+						string revision = parts[0];
 						int lines = Convert.ToInt32(parts[3]);
-						int startLine = Convert.ToInt32(parts[2]);
-						for (int i = 0; i < lines; i++)
+						if (!result.ContainsKey(revision))
 						{
-							result.Add(startLine + i, parts[0]);
+							result.Add(revision, 0);
 						}
+						result[revision] += lines;
 					}
 				}
 			}
