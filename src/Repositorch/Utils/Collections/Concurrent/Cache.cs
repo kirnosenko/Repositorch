@@ -1,14 +1,14 @@
-﻿namespace System.Collections.Generic
+﻿namespace System.Collections.Concurrent
 {
 	public class Cache<K, V>
 	{
 		private Func<K, V> source;
-		protected Dictionary<K, V> data;
+		protected ConcurrentDictionary<K, V> data;
 		
 		public Cache(Func<K, V> source, int initialCacheCapacity = 1000)
 		{
 			this.source = source;
-			this.data = new Dictionary<K, V>(initialCacheCapacity);
+			this.data = new ConcurrentDictionary<K, V>(16, initialCacheCapacity);
 		}
 
 		public virtual V GetData(K key)
@@ -19,12 +19,16 @@
 			}
 
 			value = source(key);
-			data.Add(key, value);
+			data.TryAdd(key, value);
 			return value;
 		}
 		public void Clear()
 		{
 			data.Clear();
+		}
+		public int Count
+		{
+			get { return data.Count; }
 		}
 	}
 }

@@ -1,15 +1,15 @@
-﻿namespace System.Collections.Generic
+﻿namespace System.Collections.Concurrent
 {
 	public class SizeLimitedCache<K, V> : Cache<K, V>
 	{
 		private int sizeLimit;
-		private Queue<K> keys;
+		private ConcurrentQueue<K> keys;
 
 		public SizeLimitedCache(Func<K, V> source, int sizeLimit)
 			: base(source, sizeLimit + 1)
 		{
 			this.sizeLimit = sizeLimit;
-			this.keys = new Queue<K>(sizeLimit + 1);
+			this.keys = new ConcurrentQueue<K>();
 		}
 
 		public override V GetData(K key)
@@ -22,8 +22,10 @@
 				keys.Enqueue(key);
 				while (data.Count > sizeLimit)
 				{
-					var keyToRemove = keys.Dequeue();
-					data.Remove(keyToRemove);
+					if (keys.TryDequeue(out var keyToRemove))
+					{
+						data.TryRemove(keyToRemove, out _);
+					}
 				}
 			}
 			
