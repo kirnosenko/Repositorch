@@ -160,7 +160,7 @@ namespace Repositorch
 				{
 					var linesCount = (m.Action == TouchedFileAction.REMOVED)
 						? 0
-						: vcsData.Blame(m.Revision, path).Count();
+						: vcsData.Blame(m.Revision, path).Values.Sum();
 					Console.WriteLine(string.Format("{0} ({1}) {2} {3} +{4} -{5} +{6} loc: {7}",
 						m.Revision,
 						m.Number,
