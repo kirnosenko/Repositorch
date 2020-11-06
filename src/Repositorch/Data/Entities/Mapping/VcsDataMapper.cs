@@ -338,6 +338,29 @@ namespace Repositorch.Data.Entities.Mapping
 				Truncate(revisions);
 			}
 		}
+		public static VcsDataMapper ConstructDataMapper(
+			IDataStore data,
+			IVcsData vcsData,
+			bool fastMergeProcessing)
+		{
+			VcsDataMapper dataMapper = new VcsDataMapper(data, vcsData);
+			dataMapper.RegisterMapper(new CommitMapper(vcsData));
+			dataMapper.RegisterMapper(new TagMapper(vcsData));
+			dataMapper.RegisterMapper(
+				new BugFixMapper(vcsData, new BugFixDetectorBasedOnLogMessage()));
+			dataMapper.RegisterMapper(new CommitAttributeMapper(vcsData));
+			dataMapper.RegisterMapper(new AuthorMapper(vcsData));
+			dataMapper.RegisterMapper(new BranchMapper(vcsData));
+			dataMapper.RegisterMapper(new CodeFileMapper(vcsData)
+			{
+				FastMergeProcessing = fastMergeProcessing
+			});
+			dataMapper.RegisterMapper(new ModificationMapper(vcsData));
+			dataMapper.RegisterMapper(new BlamePreLoader(vcsData), true);
+			dataMapper.RegisterMapper(new CodeBlockMapper(vcsData));
+
+			return dataMapper;
+		}
 
 		private bool CheckLinesContent(ISession s, string revision, CodeFile file)
 		{

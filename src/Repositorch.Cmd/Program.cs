@@ -28,7 +28,7 @@ namespace Repositorch
 				//ExtendedLog = true,
 			};
 			var vcsData = new VcsDataCached(gitClient, 1000, 1000);
-			var mapper = CreateDataMapper(data, vcsData);
+			var mapper = ConstructDataMapper(data, vcsData);
 			
 			using (ConsoleTimeLogger.Start("time"))
 			{
@@ -50,29 +50,12 @@ namespace Repositorch
 
 			Console.ReadKey();
 		}
-		static VcsDataMapper CreateDataMapper(IDataStore data, IVcsData vcsData)
+		static VcsDataMapper ConstructDataMapper(IDataStore data, IVcsData vcsData)
 		{
-			VcsDataMapper dataMapper = new VcsDataMapper(data, vcsData);
-			dataMapper.RegisterMapper(
-				new CommitMapper(vcsData));
-			dataMapper.RegisterMapper(
-				new TagMapper(vcsData));
-			dataMapper.RegisterMapper(
-				new BugFixMapper(vcsData, new BugFixDetectorBasedOnLogMessage()));
-			dataMapper.RegisterMapper(
-				new CommitAttributeMapper(vcsData));
-			dataMapper.RegisterMapper(
-				new AuthorMapper(vcsData));
-			dataMapper.RegisterMapper(
-				new BranchMapper(vcsData));
-			dataMapper.RegisterMapper(
-				new CodeFileMapper(vcsData));
-			dataMapper.RegisterMapper(
-				new ModificationMapper(vcsData));
-			dataMapper.RegisterMapper(
-				new BlamePreLoader(vcsData), true);
-			dataMapper.RegisterMapper(
-				new CodeBlockMapper(vcsData));
+			var dataMapper = VcsDataMapper.ConstructDataMapper(
+				data,
+				vcsData,
+				false);
 			dataMapper.OnMapRevision += revision =>
 			{
 				Console.WriteLine("mapping of revision {0}", revision);

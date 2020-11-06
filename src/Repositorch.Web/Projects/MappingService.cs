@@ -102,7 +102,7 @@ namespace Repositorch.Web.Projects
 						var projectSettings = projectManager.GetProject(projectName);
 						var data = projectManager.GetProjectDataStore(projectSettings);
 						var vcsData = projectManager.GetProjectVcsData(projectSettings);
-						var mapper = CreateDataMapper(projectSettings, data, vcsData);
+						var mapper = ConstructDataMapper(projectSettings, data, vcsData);
 						var lastRepositoryRevision = vcsData.GetLastRevision();
 
 						if (projectSettings.LastRepositoryRevision != lastRepositoryRevision)
@@ -157,25 +157,14 @@ namespace Repositorch.Web.Projects
 			});
 		}
 
-		private VcsDataMapper CreateDataMapper(
+		private VcsDataMapper ConstructDataMapper(
 			ProjectSettings projectSettings, IDataStore data, IVcsData vcsData)
 		{
 			var projectName = projectSettings.Name;
-			VcsDataMapper dataMapper = new VcsDataMapper(data, vcsData);
-			dataMapper.RegisterMapper(new CommitMapper(vcsData));
-			dataMapper.RegisterMapper(new TagMapper(vcsData));
-			dataMapper.RegisterMapper(
-				new BugFixMapper(vcsData, new BugFixDetectorBasedOnLogMessage()));
-			dataMapper.RegisterMapper(new CommitAttributeMapper(vcsData));
-			dataMapper.RegisterMapper(new AuthorMapper(vcsData));
-			dataMapper.RegisterMapper(new BranchMapper(vcsData));
-			dataMapper.RegisterMapper(new CodeFileMapper(vcsData)
-			{
-				FastMergeProcessing = projectSettings.FastMergeProcessing
-			});
-			dataMapper.RegisterMapper(new ModificationMapper(vcsData));
-			dataMapper.RegisterMapper(new BlamePreLoader(vcsData), true);
-			dataMapper.RegisterMapper(new CodeBlockMapper(vcsData));
+			var dataMapper = VcsDataMapper.ConstructDataMapper(
+				data,
+				vcsData,
+				projectSettings.FastMergeProcessing);
 			dataMapper.OnMapRevision += async revision =>
 			{
 				if (mappingInfo.TryGetValue(projectName, out var mi))
