@@ -9,6 +9,7 @@ function renderResult(result) {
 		{ header: 'Commits (total)', key: 'commits' },
 		{ header: 'Authors (total)', key: 'authors' },
 		{ header: 'Files', key: 'files' },
+		{ header: 'Defects fixed (total)', key: 'defectsFixed' },
 		{ header: 'Added LOC (total)', key: 'locAdded' },
 		{ header: 'Removed LOC (total)', key: 'locRemoved' },
 		{ header: 'Remain LOC', key: 'locRemain' }

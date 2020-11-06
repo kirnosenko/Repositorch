@@ -9,6 +9,7 @@ function renderResult(result) {
 		{ header: 'Commits (%)', key: 'commits' },
 		{ header: 'Fix commits (%)', key: 'fixes' },
 		{ header: 'Refactoring commits (%)', key: 'refactorings' },
+		{ header: 'Defects per KLOC', key: 'dd' },
 		{ header: 'Added LOC', key: 'locAdded' },
 		{ header: 'Removed LOC', key: 'locRemoved' },
 		{ header: 'Remain LOC', key: 'locRemain' },

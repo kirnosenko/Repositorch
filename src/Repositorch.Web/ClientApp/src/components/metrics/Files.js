@@ -7,6 +7,7 @@ function renderResult(result) {
 	const columnsExts = [
 		{ header: 'Extension', key: 'name' },
 		{ header: 'Number of files (%)', key: 'files' },
+		{ header: 'Defects per KLOC', key: 'dd' },
 		{ header: 'Added LOC', key: 'locAdded' },
 		{ header: 'Removed LOC', key: 'locRemoved' },
 		{ header: 'Remain LOC', key: 'locRemain' }
@@ -15,6 +16,7 @@ function renderResult(result) {
 	const columnsDirs = [
 		{ header: 'Directory', key: 'name' },
 		{ header: 'Number of files (%)', key: 'files' },
+		{ header: 'Defects per KLOC', key: 'dd' },
 		{ header: 'Added LOC', key: 'locAdded' },
 		{ header: 'Removed LOC', key: 'locRemoved' },
 		{ header: 'Remain LOC', key: 'locRemain' }

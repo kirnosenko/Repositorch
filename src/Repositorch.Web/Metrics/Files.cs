@@ -40,6 +40,7 @@ namespace Repositorch.Web.Metrics
 					 files = string.Format("{0} ({1})",
 							 extFilesCount,
 							 ((double)extFilesCount / filesCount * 100).ToString("F02")),
+					 dd = (code.CalculateDefectDensity() * 1000).ToString("F03"),
 					 locAdded = code.Added().CalculateLOC(),
 					 locRemoved = -code.Removed().CalculateLOC(),
 					 locRemain = code.Added().CalculateLOC() + code.ModifiedBy().CalculateLOC()
@@ -59,6 +60,7 @@ namespace Repositorch.Web.Metrics
 						 dirFilesCount,
 						 ((double)dirFilesCount / filesCount * 100).ToString("F02")
 					 ),
+					 dd = (code.CalculateDefectDensity() * 1000).ToString("F03"),
 					 locAdded = code.Added().CalculateLOC(),
 					 locRemoved = -code.Removed().CalculateLOC(),
 					 locRemain = code.Added().CalculateLOC() + code.ModifiedBy().CalculateLOC()

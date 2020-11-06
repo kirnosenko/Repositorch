@@ -57,6 +57,10 @@ namespace Repositorch.Web.Metrics
 					 ),
 					 files = totalCommits.Files().AddedInCommits().Count() -
 						totalCommits.Files().RemovedInCommits().Count(),
+					 defectsFixed = string.Format("{0} ({1})",
+						 commits.AreBugFixes().Count(),
+						 totalCommits.AreBugFixes().Count()
+					 ),
 					 locAdded = string.Format("{0} ({1})",
 						 code.Added().CalculateLOC(),
 						 totalCode.Added().CalculateLOC()

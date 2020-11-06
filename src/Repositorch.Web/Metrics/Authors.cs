@@ -62,6 +62,7 @@ namespace Repositorch.Web.Metrics
 					 commits = string.Format("{0} ({1})", authorCommits, (((double)authorCommits / commits) * 100).ToString("F02")),
 					 fixes = string.Format("{0} ({1})", authorFixes, (((double)authorFixes / authorCommits) * 100).ToString("F02")),
 					 refactorings = string.Format("{0} ({1})", authorRefactorings, (((double)authorRefactorings / authorCommits) * 100).ToString("F02")),
+					 dd = (a.AddedCode.CalculateDefectDensity() * 1000).ToString("F03"),
 					 locAdded = a.AddedCode.CalculateLOC(),
 					 locRemoved = -a.RemovedCode.CalculateLOC(),
 					 locRemain = authorCurrentLoc,
