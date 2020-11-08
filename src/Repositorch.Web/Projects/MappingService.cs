@@ -102,7 +102,7 @@ namespace Repositorch.Web.Projects
 						var projectSettings = projectManager.GetProject(projectName);
 						var data = projectManager.GetProjectDataStore(projectSettings);
 						var vcsData = projectManager.GetProjectVcsData(projectSettings);
-						var mapper = ConstructDataMapper(projectSettings, data, vcsData);
+						var mapper = ConstructDataMapper(data, vcsData, projectSettings);
 						var lastRepositoryRevision = vcsData.GetLastRevision();
 
 						if (projectSettings.LastRepositoryRevision != lastRepositoryRevision)
@@ -111,11 +111,7 @@ namespace Repositorch.Web.Projects
 							projectSettings.LastRepositoryRevision = lastRepositoryRevision;
 							projectManager.UpdateProject(projectSettings);
 						}
-						var mappingSettings = new VcsDataMapper.MappingSettings()
-						{
-							Check = projectSettings.CheckMode,
-						};
-						var result = mapper.MapRevisions(mappingSettings, mi.TokenSource.Token);
+						var result = mapper.MapRevisions(mi.TokenSource.Token);
 						switch (result)
 						{
 							case VcsDataMapper.MappingResult.SUCCESS:
@@ -158,13 +154,13 @@ namespace Repositorch.Web.Projects
 		}
 
 		private VcsDataMapper ConstructDataMapper(
-			ProjectSettings projectSettings, IDataStore data, IVcsData vcsData)
+			IDataStore data, IVcsData vcsData, ProjectSettings projectSettings)
 		{
 			var projectName = projectSettings.Name;
 			var dataMapper = VcsDataMapper.ConstructDataMapper(
 				data,
 				vcsData,
-				projectSettings.FastMergeProcessing);
+				projectSettings);
 			dataMapper.OnMapRevision += async revision =>
 			{
 				if (mappingInfo.TryGetValue(projectName, out var mi))

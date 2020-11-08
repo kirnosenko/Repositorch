@@ -28,16 +28,15 @@ namespace Repositorch
 				//ExtendedLog = true,
 			};
 			var vcsData = new VcsDataCached(gitClient, 1000, 1000);
-			var mapper = ConstructDataMapper(data, vcsData);
+			var mapper = ConstructDataMapper(data, vcsData, new VcsDataMapper.MappingSettings()
+			{
+				RevisionLimit = 6000,
+				CheckMode = VcsDataMapper.CheckMode.TOUCHED,
+			});
 			
 			using (ConsoleTimeLogger.Start("time"))
 			{
-				var settings = new VcsDataMapper.MappingSettings()
-				{
-					RevisionLimit = 6000,
-					Check = VcsDataMapper.CheckMode.TOUCHED,
-				};
-				mapper.MapRevisions(settings);
+				mapper.MapRevisions();
 				//mapper.Truncate(1000);
 				//mapper.Check(2309, DataMapper.CheckMode.ALL);
 				//mapper.CheckAndTruncate("/test-delta.c");
@@ -50,12 +49,13 @@ namespace Repositorch
 
 			Console.ReadKey();
 		}
-		static VcsDataMapper ConstructDataMapper(IDataStore data, IVcsData vcsData)
+		static VcsDataMapper ConstructDataMapper(
+			IDataStore data, IVcsData vcsData, VcsDataMapper.MappingSettings settings)
 		{
 			var dataMapper = VcsDataMapper.ConstructDataMapper(
 				data,
 				vcsData,
-				false);
+				settings);
 			dataMapper.OnMapRevision += revision =>
 			{
 				Console.WriteLine("mapping of revision {0}", revision);

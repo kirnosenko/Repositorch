@@ -25,16 +25,19 @@ namespace Repositorch.Data.Entities.Mapping
 			TOUCHED,
 			ALL
 		}
-		public struct MappingSettings
+		public class MappingSettings
 		{
 			/// <summary>
 			/// Number of revisions to limit mapping.
 			/// </summary>
 			public int? RevisionLimit { get; set; }
+			public bool FastMergeProcessing { get; set; }
+			public string FixMessageKeyWords { get; set; }
+			public string FixMessageStopWords { get; set; }
 			/// <summary>
 			/// Mode to check files after mapping.
 			/// </summary>
-			public CheckMode Check { get; set; }
+			public CheckMode CheckMode { get; set; }
 		}
 
 		public event Action<string> OnMapRevision;
@@ -42,16 +45,21 @@ namespace Repositorch.Data.Entities.Mapping
 		public event Action<string> OnCheckRevision;
 		public event Action<string> OnError;
 
-		private IDataStore data;
-		private IVcsData vcsData;
+		private readonly IDataStore data;
+		private readonly IVcsData vcsData;
+		private readonly MappingSettings settings;
 
-		private List<Func<IEnumerable<IRepositoryMappingExpression>, IEnumerable<IRepositoryMappingExpression>>> mappers =
+		private readonly List<Func<IEnumerable<IRepositoryMappingExpression>, IEnumerable<IRepositoryMappingExpression>>> mappers =
 			new List<Func<IEnumerable<IRepositoryMappingExpression>, IEnumerable<IRepositoryMappingExpression>>>();
 
-		public VcsDataMapper(IDataStore data, IVcsData vcsData)
+		public VcsDataMapper(
+			IDataStore data,
+			IVcsData vcsData,
+			MappingSettings settings)
 		{
 			this.data = data;
 			this.vcsData = vcsData;
+			this.settings = settings;
 		}
 		public void RegisterMapper<IME, OME>(Mapper<IME, OME> mapper, bool parallel = false)
 			where IME : class, IRepositoryMappingExpression
@@ -99,7 +107,7 @@ namespace Repositorch.Data.Entities.Mapping
 				}
 			});
 		}
-		public MappingResult MapRevisions(MappingSettings settings, CancellationToken stopToken = default)
+		public MappingResult MapRevisions(CancellationToken stopToken = default)
 		{
 			int nextRevisionNumber = data.UsingSession(s =>
 				s.Get<Commit>().Count() + 1);
@@ -113,7 +121,7 @@ namespace Repositorch.Data.Entities.Mapping
 				}
 				OnMapRevision?.Invoke(GetRevisionName(nextRevision, nextRevisionNumber));
 				MapRevision(nextRevision);
-				if (!CheckRevision(nextRevision, settings.Check, true))
+				if (!CheckRevision(nextRevision, settings.CheckMode, true))
 				{
 					Truncate(nextRevisionNumber - 1);
 					return MappingResult.ERROR;
@@ -341,19 +349,23 @@ namespace Repositorch.Data.Entities.Mapping
 		public static VcsDataMapper ConstructDataMapper(
 			IDataStore data,
 			IVcsData vcsData,
-			bool fastMergeProcessing)
+			MappingSettings settings)
 		{
-			VcsDataMapper dataMapper = new VcsDataMapper(data, vcsData);
+			VcsDataMapper dataMapper = new VcsDataMapper(data, vcsData, settings);
 			dataMapper.RegisterMapper(new CommitMapper(vcsData));
 			dataMapper.RegisterMapper(new TagMapper(vcsData));
 			dataMapper.RegisterMapper(
-				new BugFixMapper(vcsData, new BugFixDetectorBasedOnLogMessage()));
+				new BugFixMapper(vcsData, new BugFixDetectorBasedOnLogMessage()
+				{
+					KeyWords = settings.FixMessageKeyWords.Split(' '),
+					StopWords = settings.FixMessageStopWords.Split(' ')
+				}));
 			dataMapper.RegisterMapper(new CommitAttributeMapper(vcsData));
 			dataMapper.RegisterMapper(new AuthorMapper(vcsData));
 			dataMapper.RegisterMapper(new BranchMapper(vcsData));
 			dataMapper.RegisterMapper(new CodeFileMapper(vcsData)
 			{
-				FastMergeProcessing = fastMergeProcessing
+				FastMergeProcessing = settings.FastMergeProcessing
 			});
 			dataMapper.RegisterMapper(new ModificationMapper(vcsData));
 			dataMapper.RegisterMapper(new BlamePreLoader(vcsData), true);

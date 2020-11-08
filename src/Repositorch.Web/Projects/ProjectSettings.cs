@@ -4,7 +4,7 @@ using Repositorch.Data.Entities.Mapping;
 
 namespace Repositorch.Web.Projects
 {
-	public class ProjectSettings
+	public class ProjectSettings : VcsDataMapper.MappingSettings
 	{
 		[BsonId]
 		public string Name { get; set; }
@@ -13,8 +13,6 @@ namespace Repositorch.Web.Projects
 		public string RepositoryPath { get; set; }
 		public string Branch { get; set; }
 		public bool UseExtendedLog { get; set; }
-		public bool FastMergeProcessing { get; set; }
-		public VcsDataMapper.CheckMode CheckMode { get; set; }
 
 		/// <summary>
 		/// Last revision in repository on considered branch.

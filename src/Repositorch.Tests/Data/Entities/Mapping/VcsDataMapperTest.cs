@@ -23,8 +23,8 @@ namespace Repositorch.Data.Entities.Mapping
 		public VcsDataMapperTest()
 		{
 			data = new InMemoryDataStore(Guid.NewGuid().ToString());
-			mapper = new VcsDataMapper(data, vcsData);
 			settings = new VcsDataMapper.MappingSettings();
+			mapper = new VcsDataMapper(data, vcsData, settings);
 			commitMapper = Substitute.For<CommitMapper>((IVcsData)null);
 			bugFixMapper = Substitute.For<BugFixMapper>(null, null);
 			fileMapper = Substitute.For<CodeFileMapper>((IVcsData)null);
@@ -183,7 +183,7 @@ namespace Repositorch.Data.Entities.Mapping
 				
 			mapper.OnMapRevision += (r) => revisions.Add(r);
 			settings.RevisionLimit = 5;
-			var result = mapper.MapRevisions(settings);
+			var result = mapper.MapRevisions();
 
 			result.Should().Be(VcsDataMapper.MappingResult.SUCCESS);
 			Assert.Equal(new string[] { "1", "2", "3", "4", "5" }, revisions);
@@ -198,7 +198,7 @@ namespace Repositorch.Data.Entities.Mapping
 				.Returns(x => (int)x[0] == 6 ? null : x[0].ToString());
 			
 			mapper.OnMapRevision += (r) => revisions.Add(r);
-			var result = mapper.MapRevisions(settings);
+			var result = mapper.MapRevisions();
 
 			result.Should().Be(VcsDataMapper.MappingResult.SUCCESS);
 			Assert.Equal(new string[] { "1", "2", "3", "4", "5" }, revisions);
@@ -213,7 +213,7 @@ namespace Repositorch.Data.Entities.Mapping
 				.Returns(x => null);
 
 			mapper.OnMapRevision += (r) => revisions.Add(r);
-			var result = mapper.MapRevisions(settings);
+			var result = mapper.MapRevisions();
 
 			result.Should().Be(VcsDataMapper.MappingResult.SUCCESS);
 			revisions.Count.Should().Be(0);
@@ -232,7 +232,7 @@ namespace Repositorch.Data.Entities.Mapping
 				cts.Cancel();
 
 				mapper.OnMapRevision += (r) => revisions.Add(r);
-				var result = mapper.MapRevisions(settings, cts.Token);
+				var result = mapper.MapRevisions(cts.Token);
 
 				result.Should().Be(VcsDataMapper.MappingResult.STOPPED);
 				revisions.Count.Should().Be(0);
@@ -405,8 +405,8 @@ namespace Repositorch.Data.Entities.Mapping
 				.Returns(x => x[0].ToString());
 
 			settings.RevisionLimit = 1;
-			settings.Check = VcsDataMapper.CheckMode.ALL;
-			var result = mapper.MapRevisions(settings);
+			settings.CheckMode = VcsDataMapper.CheckMode.ALL;
+			var result = mapper.MapRevisions();
 
 			result.Should().Be(VcsDataMapper.MappingResult.ERROR);
 			data.UsingSession(s =>

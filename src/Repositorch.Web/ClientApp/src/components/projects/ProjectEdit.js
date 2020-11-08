@@ -14,6 +14,8 @@ export default function ProjectEdit({ match }) {
 		branch: "master",
 		useExtendedLog: true,
 		fastMergeProcessing: false,
+		fixMessageKeyWords: "fix fixes bug bugs bugfix bugfixes fixed",
+		fixMessageStopWords: "warning typo grammar",
 		checkMode: 1
 	});
 	const [file, setFile] = React.useState('')
@@ -251,6 +253,32 @@ export default function ProjectEdit({ match }) {
 					Allows to speed up merge processing, but will cause 
 					incorrect data mapping in some cases.
 					Don't touch if you are not sure.
+				</small>
+			</div>
+			<div className="form-group">
+				<div className="heading">Fix key words</div>
+				<input
+					className={`form-control ${validatedClass('FixMessageKeyWords')}`}
+					title={validatedTitle('FixMessageKeyWords')}
+					type="text"
+					name="fixMessageKeyWords"
+					value={settings.fixMessageKeyWords}
+					onChange={handleChange} />
+				<small className="form-text text-muted">
+					Allows to identify bug fixes based on commit message.
+				</small>
+			</div>
+			<div className="form-group">
+				<div className="heading">Fix stop words</div>
+				<input
+					className={`form-control ${validatedClass('FixMessageStopWords')}`}
+					title={validatedTitle('FixMessageStopWords')}
+					type="text"
+					name="fixMessageStopWords"
+					value={settings.fixMessageStopWords}
+					onChange={handleChange} />
+				<small className="form-text text-muted">
+					Allows to identify bug fixes based on commit message.
 				</small>
 			</div>
 			<div className="form-group">
