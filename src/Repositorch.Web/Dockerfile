@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
+FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS build
 RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
 RUN apt-get install -y nodejs
 WORKDIR "/build"
@@ -11,7 +11,7 @@ COPY . .
 WORKDIR "/build/src/Repositorch.Web"
 RUN dotnet publish "Repositorch.Web.csproj" -c Release -o /app
 
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-alpine AS deploy
+FROM mcr.microsoft.com/dotnet/aspnet:5.0-alpine AS deploy
 RUN apk add --no-cache git \
 	icu-libs
 RUN git config --global core.quotepath off && \
