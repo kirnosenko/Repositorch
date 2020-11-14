@@ -1,14 +1,10 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Debug;
 
 namespace Repositorch.Data.Entities.Persistent
 {
 	public abstract class NamedDataStore : IDataStore
 	{
-		private static readonly ILoggerFactory loggerFactory = new LoggerFactory(
-			new[] { new DebugLoggerProvider() });
 		private ISession session;
 		protected readonly string name;
 
@@ -24,7 +20,7 @@ namespace Repositorch.Data.Entities.Persistent
 		{
 			get; set;
 		}
-		public bool Logging
+		public Action<string> Logger
 		{
 			get; set;
 		}
@@ -36,10 +32,11 @@ namespace Repositorch.Data.Entities.Persistent
 			return new PersistentSession(c =>
 			{
 				Configure(c);
-				if (Logging)
+				if (Logger != null)
 				{
 					c.EnableSensitiveDataLogging();
-					c.UseLoggerFactory(loggerFactory);
+					c.EnableDetailedErrors();
+					c.LogTo(Logger);
 				}
 			});
 		}

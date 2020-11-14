@@ -354,12 +354,16 @@ namespace Repositorch.Data.Entities.Mapping
 			VcsDataMapper dataMapper = new VcsDataMapper(data, vcsData, settings);
 			dataMapper.RegisterMapper(new CommitMapper(vcsData));
 			dataMapper.RegisterMapper(new TagMapper(vcsData));
-			dataMapper.RegisterMapper(
-				new BugFixMapper(vcsData, new BugFixDetectorBasedOnLogMessage()
-				{
-					KeyWords = settings.FixMessageKeyWords.Split(' '),
-					StopWords = settings.FixMessageStopWords.Split(' ')
-				}));
+			var bugFixDetector = new BugFixDetectorBasedOnLogMessage();
+			if (settings.FixMessageKeyWords != null)
+			{
+				bugFixDetector.KeyWords = settings.FixMessageKeyWords.Split(' ');
+			}
+			if (settings.FixMessageStopWords != null)
+			{
+				bugFixDetector.StopWords = settings.FixMessageStopWords.Split(' ');
+			}
+			dataMapper.RegisterMapper(new BugFixMapper(vcsData, bugFixDetector));
 			dataMapper.RegisterMapper(new CommitAttributeMapper(vcsData));
 			dataMapper.RegisterMapper(new AuthorMapper(vcsData));
 			dataMapper.RegisterMapper(new BranchMapper(vcsData));

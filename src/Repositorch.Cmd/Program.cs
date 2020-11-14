@@ -17,9 +17,8 @@ namespace Repositorch
 		static void Main(string[] args)
 		{
 			var data = new SqlServerDataStore("git", "localhost", "1433", "sa", "QWEqwe123")
-			//var data = new PostgreSqlDataStore("git", "localhost", "5432", "postgres", "postgres")
 			{
-				//Logging = true,
+				//Logger = Console.WriteLine,
 				//SingletonSession = true,
 			};
 			var gitClient = new CommandLineGitClient("D:/src/git/.git")
