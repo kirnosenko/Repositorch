@@ -82,7 +82,7 @@ namespace Repositorch.Data.VersionControl.Git
 		private Stream GetLog(string revision, bool extended)
 		{
 			return RunCommand(
-				"log -n 1 -C -m --format=format:%H%n%cn%n%ce%n%s%n%n%ci%n%D --encoding=UTF-8 {0} {1}",
+				"log -n 1 -C -m --format=format:%H%n%an%n%ae%n%s%n%n%ai%n%D --encoding=UTF-8 {0} {1}",
 				extended ? "--numstat --summary" : "--name-status",
 				revision
 			);
