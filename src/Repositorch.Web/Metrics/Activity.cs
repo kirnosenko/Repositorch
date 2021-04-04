@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using Newtonsoft.Json.Linq;
 using Repositorch.Data;
 using Repositorch.Data.Entities;
@@ -11,6 +12,15 @@ namespace Repositorch.Web.Metrics
 {
 	public class Activity : Metric
 	{
+		private enum SliceType
+		{
+			DAY,
+			WEEK,
+			MONTH,
+			YEAR,
+			TAG
+		}
+
 		public override object Calculate(IRepository repository, JObject settings)
 		{
 			double totalLoc = repository.SelectionDSL()

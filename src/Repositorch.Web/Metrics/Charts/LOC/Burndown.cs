@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using Newtonsoft.Json.Linq;
 using Repositorch.Data;
 using Repositorch.Data.Entities;
+using Repositorch.Data.Entities.Selection;
 using Repositorch.Data.Entities.DSL.Selection;
 
 namespace Repositorch.Web.Metrics.Charts.LOC
@@ -13,14 +13,9 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 	{
 		private enum SliceType
 		{
+			MONTH,
 			YEAR,
 			TAG
-		}
-
-		private struct Slice
-		{
-			public string Label;
-			public Expression<Func<Commit,bool>> Check;
 		}
 
 		private class SettingsIn
@@ -53,8 +48,10 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 		{
 			var settings = jsettings.ToObject<SettingsIn>();
 			var slices = settings.slice == SliceType.YEAR
-				? GetYearSlices(repository)
-				: GetTagSlices(repository);
+				? repository.GetYearSlices()
+				: settings.slice == SliceType.MONTH
+					? repository.GetMonthSlices()
+					: repository.GetTagSlices();
 
 			var modifications = string.IsNullOrEmpty(settings.path)
 				? repository.GetReadOnly<Modification>()
@@ -110,54 +107,6 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 				keys = slices.Select(x => x.Label).ToArray(),
 				values = loc,
 			};
-		}
-
-		private Slice[] GetYearSlices(IRepository repository)
-		{
-			var dateStart = repository.Get<Commit>().Min(x => x.Date);
-			var dateStop = repository.Get<Commit>().Max(x => x.Date);
-
-			List<Slice> slices = new List<Slice>();
-			while (dateStart < dateStop)
-			{
-				var dateFrom = dateStart;
-				var dateTo = new DateTime(dateStart.Year + 1, 1, 1, 0, 0, 0);
-				slices.Add(new Slice()
-				{
-					Label = dateStart.Year.ToString(),
-					Check = c => c.Date.Year == dateFrom.Year
-				});
-				dateStart = dateTo;
-			}
-
-			return slices.ToArray();
-		}
-
-		private Slice[] GetTagSlices(IRepository repository)
-		{
-			var tags = (
-				from t in repository.Get<CommitAttribute>().Where(a => a.Type == CommitAttribute.TAG)
-				join c in repository.Get<Commit>() on t.CommitNumber equals c.Number
-				select new
-				{
-					tag = t.Data,
-					date = c.Date
-				}).OrderBy(x => x.date).ToArray();
-				
-			List<Slice> slices = new List<Slice>();
-			DateTime from = DateTime.MinValue;
-			foreach (var tag in tags)
-			{
-				var tagFrom = from;
-				slices.Add(new Slice()
-				{
-					Label = tag.tag,
-					Check = c => c.Date > tagFrom && c.Date <= tag.date
-				});
-				from = tag.date;
-			}
-
-			return slices.ToArray();
 		}
 	}
 }
