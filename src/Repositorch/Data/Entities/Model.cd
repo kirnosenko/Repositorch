@@ -1,0 +1,105 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="Repositorch.Data.Entities.Author">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAACAAAAAAAAAAAAQAAAIAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\Entities\Author.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Commits" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Repositorch.Data.Entities.BranchMask">
+    <Position X="5.25" Y="0.5" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>IAQAAAAAAAAAAAgAAAACAAAAAAAAgFAgACAAAAAAgAA=</HashCode>
+      <FileName>Data\Entities\Branch.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Repositorch.Data.Entities.Branch">
+    <Position X="2.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAAAAAAAAAAAAAIAAAAAAACAAAAAAAA=</HashCode>
+      <FileName>Data\Entities\Branch.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Mask" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="Commits" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="Repositorch.Data.Entities.Commit">
+    <Position X="2.25" Y="2.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAEABAAAAAEAAAAABABAAIAAAAAA=</HashCode>
+      <FileName>Data\Entities\Commit.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Repositorch.Data.Entities.Modification">
+    <Position X="5.75" Y="2.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAACAEAQIAAAAAAAAAAAggAAAAAEAAAAAAAAAEIAAAQ=</HashCode>
+      <FileName>Data\Entities\Modification.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Commit" />
+      <Property Name="File" />
+      <Property Name="SourceFile" />
+      <Property Name="SourceCommit" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Repositorch.Data.Entities.CodeFile">
+    <Position X="9" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\Entities\CodeFile.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Repositorch.Data.Entities.CodeBlock">
+    <Position X="5.25" Y="5.5" Width="3" />
+    <AssociationLine Name="TargetCodeBlock" Type="Repositorch.Data.Entities.CodeBlock" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="5.25" Y="6.938" />
+        <Point X="4.875" Y="6.938" />
+        <Point X="4.875" Y="7.748" />
+        <Point X="7.21" Y="7.748" />
+        <Point X="7.21" Y="7.373" />
+      </Path>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAACAAAAAAABgAAAAAAAAAAIAIAAAEkAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\Entities\CodeBlock.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Modification" />
+      <Property Name="AddedInitiallyInCommit" />
+      <Property Name="TargetCodeBlock" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="Repositorch.Data.Entities.CommitAttribute">
+    <Position X="0.5" Y="5.5" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <AssociationLine Name="Commit" Type="Repositorch.Data.Entities.Commit" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="1.25" Y="5.5" />
+        <Point X="1.25" Y="4.33" />
+        <Point X="2.25" Y="4.33" />
+      </Path>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AgACCEAAAAEAAAAAAAAAAAAAAAAAABAAAQAAEEAAAAA=</HashCode>
+      <FileName>Data\Entities\CommitAttribute.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Commit" />
+    </ShowAsAssociation>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
