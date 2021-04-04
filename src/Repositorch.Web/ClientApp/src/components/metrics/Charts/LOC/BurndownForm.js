@@ -16,8 +16,9 @@ export default function BurndownForm(props) {
 						name="slice"
 						value={settings.slice}
 						onChange={handleChange} >
-						<option value="0">Year</option>
-						<option value="1">Tag</option>
+						<option value="0">Month</option>
+						<option value="1">Year</option>
+						<option value="2">Tag</option>
 					</select>
 				</div>
 				<PathText
