@@ -7,8 +7,9 @@ using Microsoft.Extensions.Logging;
 
 namespace Repositorch.Web.Handlers
 {
-	public interface ILogged
+	public interface ICustomLogObject
 	{
+		object CustomLogObject { get; }
 	}
 
 	public class LoggingBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : IRequest<TResponse>
@@ -24,16 +25,24 @@ namespace Repositorch.Web.Handlers
 			CancellationToken cancellationToken,
 			RequestHandlerDelegate<TResponse> next)
 		{
-			if (typeof(ILogged).IsAssignableFrom(typeof(TRequest)))
+			var requestToLog = typeof(ICustomLogObject).IsAssignableFrom(typeof(TRequest))
+				? (request as ICustomLogObject).CustomLogObject
+				: request;
+			if (requestToLog != null)
 			{
-				logger.LogInformation("Request: {0}", JsonConvert.SerializeObject(request));
+				logger.LogInformation($"{typeof(TRequest)}: {JsonConvert.SerializeObject(requestToLog)}");
 			}
+			
 			var response = await next();
-			if (typeof(ILogged).IsAssignableFrom(typeof(TResponse)))
-			{
-				logger.LogInformation("Response: {0}", JsonConvert.SerializeObject(response));
-			}
 
+			var responseToLog = typeof(ICustomLogObject).IsAssignableFrom(typeof(TResponse))
+				? (response as ICustomLogObject).CustomLogObject
+				: response;
+			if (responseToLog != null)
+			{
+				logger.LogInformation($"{typeof(TResponse)}: {JsonConvert.SerializeObject(responseToLog)}");
+			}
+			
 			return response;
 		}
 	}
