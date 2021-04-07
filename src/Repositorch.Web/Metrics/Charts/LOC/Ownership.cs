@@ -81,20 +81,25 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 				};
 				var dateCodeSize = remainingСodeByAuthor
 					.Sum(a => a.code.Where(x => x.day <= day).Sum(x => x.locTotal));
+				var undetalizedDateCodeSize = dateCodeSize;
 				foreach (var author in authors)
 				{
 					var authorCodeSize = remainingСodeByAuthor
 						.Single(x => x.author == author).code
 						.Where(x => x.day <= day)
 						.Sum(x => x.locTotal);
-					if (authorCodeSize > 0)
+					if (authorCodeSize > 0 &&
+						authorCodeSize / dateCodeSize >= settings.minimalContribution)
 					{
 						data.Add(author.Name, authorCodeSize);
-						if (authorCodeSize / dateCodeSize >= settings.minimalContribution)
-						{
-							valuableAuthors.Add(author.Name);
-						}
+						valuableAuthors.Add(author.Name);
+						undetalizedDateCodeSize -= authorCodeSize;
 					}
+				}
+				if (undetalizedDateCodeSize > 0)
+				{
+					data.Add("Others", undetalizedDateCodeSize);
+					valuableAuthors.Add("Others");
 				}
 				return data;
 			}).ToArray();
