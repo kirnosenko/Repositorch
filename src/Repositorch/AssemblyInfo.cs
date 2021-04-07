@@ -14,6 +14,6 @@ using System.Reflection;
   ThisAssembly.Git.BaseVersion.Patch + "-" +
   ThisAssembly.Git.Commit + " alpha")]
 [assembly: AssemblyCompany("Semyon Kirnosenko")]
-[assembly: AssemblyCopyright("Semyon Kirnosenko 2020")]
+[assembly: AssemblyCopyright("Semyon Kirnosenko 2019-2021")]
 [assembly: AssemblyTitle("Repositorch")]
 [assembly: AssemblyDescription("Repositorch is a VCS repository analysis engine written in C#.")]
