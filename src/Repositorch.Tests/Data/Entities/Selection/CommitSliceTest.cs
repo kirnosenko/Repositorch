@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Linq;
 using Xunit;
 using FluentAssertions;
@@ -25,7 +24,7 @@ namespace Repositorch.Data.Entities.Selection
 
 			slices.Select(x => x.Label)
 				.Should().BeEquivalentTo(new string[] { "2020-01-10", "2020-01-11", "2020-01-12", "2020-01-13" });
-			slices.Select(x => commits.Where(x.Check.Compile()).Count())
+			slices.Select(x => commits.Where(x.Condition.Compile()).Count())
 				.Should().BeEquivalentTo(new int[] { 1, 0, 1, 1 });
 		}
 
@@ -47,7 +46,7 @@ namespace Repositorch.Data.Entities.Selection
 
 			slices.Select(x => x.Label)
 				.Should().BeEquivalentTo(new string[] { "2019-53", "2020-01", "2020-02" });
-			slices.Select(x => commits.Where(x.Check.Compile()).Count())
+			slices.Select(x => commits.Where(x.Condition.Compile()).Count())
 				.Should().BeEquivalentTo(new int[] { 1, 1, 2 });
 		}
 
@@ -69,7 +68,7 @@ namespace Repositorch.Data.Entities.Selection
 
 			slices.Select(x => x.Label)
 				.Should().BeEquivalentTo(new string[] { "2019-12", "2020-01", "2020-02", "2020-03" });
-			slices.Select(x => commits.Where(x.Check.Compile()).Count())
+			slices.Select(x => commits.Where(x.Condition.Compile()).Count())
 				.Should().BeEquivalentTo(new int[] { 1, 2, 0, 1 });
 		}
 
@@ -93,8 +92,34 @@ namespace Repositorch.Data.Entities.Selection
 
 			slices.Select(x => x.Label)
 				.Should().BeEquivalentTo(new string[] { "2018", "2019", "2020", "2021" });
-			slices.Select(x => commits.Where(x.Check.Compile()).Count())
+			slices.Select(x => commits.Where(x.Condition.Compile()).Count())
 				.Should().BeEquivalentTo(new int[] { 1, 0, 2, 2 });
+		}
+
+		[Fact]
+		public void Should_select_tag_slices()
+		{
+			mappingDSL
+				.AddCommit("1").At(new DateTime(2021, 01, 01))
+			.Submit()
+				.AddCommit("2").At(new DateTime(2021, 01, 01)).HasTag("1")
+			.Submit()
+				.AddCommit("3").At(new DateTime(2021, 01, 01)).HasTag("2")
+			.Submit()
+				.AddCommit("4").At(new DateTime(2021, 01, 01))
+			.Submit()
+				.AddCommit("5").At(new DateTime(2021, 01, 01)).HasTag("3")
+			.Submit()
+				.AddCommit("6").At(new DateTime(2021, 01, 01))
+			.Submit();
+
+			var commits = GetReadOnly<Commit>().ToArray();
+			var slices = this.GetTagSlices();
+
+			slices.Select(x => x.Label)
+				.Should().BeEquivalentTo(new string[] { "1", "2", "3" });
+			slices.Select(x => String.Join('-', commits.Where(x.Condition.Compile()).Select(x => x.Revision)))
+				.Should().BeEquivalentTo(new string[] { "1-2", "3", "4-5" });
 		}
 	}
 }

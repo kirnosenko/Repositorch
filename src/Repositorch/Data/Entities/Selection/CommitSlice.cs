@@ -6,10 +6,31 @@ using System.Linq.Expressions;
 
 namespace Repositorch.Data.Entities.Selection
 {
-	public struct CommitSlice
+	public class CommitSlice
 	{
-		public string Label;
-		public Expression<Func<Commit, bool>> Check;
+		private CommitSlice()
+		{
+		}
+
+		public string Label { get; init; }
+		public Expression<Func<Commit, bool>> Condition { get; init; }
+		public Expression<Func<Commit, bool>> BeginCondition { get; init; }
+		public Expression<Func<Commit, bool>> EndCondition { get; init; }
+
+		public static CommitSlice Create(
+			string label,
+			Expression<Func<Commit, bool>> condition,
+			Expression<Func<Commit, bool>> beginCondition,
+			Expression<Func<Commit, bool>> endCondition)
+		{
+			return new CommitSlice()
+			{
+				Label = label,
+				Condition = condition,
+				BeginCondition = beginCondition,
+				EndCondition = endCondition,
+			};
+		}
 	}
 
 	public static class SliceExtensions
@@ -77,11 +98,12 @@ namespace Repositorch.Data.Entities.Selection
 			{
 				var dateFrom = dateStart;
 				var dateTo = nextSliceDate(dateFrom);
-				slices.Add(new CommitSlice()
-				{
-					Label = sliceLabel(dateFrom),
-					Check = c => c.Date >= dateFrom && c.Date < dateTo
-				});
+				var slice = CommitSlice.Create(
+					sliceLabel(dateFrom),
+					c => c.Date >= dateFrom && c.Date < dateTo,
+					c => c.Date >= dateFrom,
+					c => c.Date < dateTo);
+				slices.Add(slice);
 				dateStart = dateTo;
 			}
 
@@ -96,20 +118,21 @@ namespace Repositorch.Data.Entities.Selection
 				select new
 				{
 					tag = t.Data,
-					date = c.Date
-				}).OrderBy(x => x.date).ToArray();
+					number = c.Number
+				}).OrderBy(x => x.number).ToArray();
 
 			List<CommitSlice> slices = new List<CommitSlice>();
-			DateTime from = DateTime.MinValue;
+			int from = 0;
 			foreach (var tag in tags)
 			{
 				var tagFrom = from;
-				slices.Add(new CommitSlice()
-				{
-					Label = tag.tag,
-					Check = c => c.Date > tagFrom && c.Date <= tag.date
-				});
-				from = tag.date;
+				slices.Add(CommitSlice.Create(
+					tag.tag,
+					c => c.Number > tagFrom && c.Number <= tag.number,
+					c => c.Number > tagFrom,
+					c => c.Number <= tag.number
+				));
+				from = tag.number;
 			}
 
 			return slices.ToArray();

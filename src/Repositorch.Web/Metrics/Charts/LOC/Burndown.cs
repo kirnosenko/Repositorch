@@ -67,7 +67,7 @@ namespace Repositorch.Web.Metrics.Charts.LOC
 					join m in modifications on c.Number equals m.CommitNumber
 					join cb in repository.Get<CodeBlock>() on m.Id equals cb.ModificationId
 					join tcb in repository.Get<CodeBlock>() on cb.TargetCodeBlockId ?? cb.Id equals tcb.Id
-					join tcbc in repository.Get<Commit>().Where(slice.Check) on tcb.AddedInitiallyInCommitNumber equals tcbc.Number
+					join tcbc in repository.Get<Commit>().Where(slice.Condition) on tcb.AddedInitiallyInCommitNumber equals tcbc.Number
 					group cb.Size by c.Date.Date into cbc
 					select new
 					{
