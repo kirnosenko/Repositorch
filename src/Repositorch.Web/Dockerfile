@@ -3,6 +3,7 @@ RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
 RUN apt-get install -y nodejs
 WORKDIR "/build"
 COPY ["src/Repositorch/Repositorch.csproj", "src/Repositorch/"]
+COPY ["src/Repositorch.Data.Entities.Persistent/Repositorch.Data.Entities.Persistent.csproj", "src/Repositorch.Data.Entities.Persistent/"]
 COPY ["src/Repositorch.Data.Entities.Persistent.SqlServer/Repositorch.Data.Entities.Persistent.SqlServer.csproj", "src/Repositorch.Data.Entities.Persistent.SqlServer/"]
 COPY ["src/Repositorch.Data.Entities.Persistent.PostgreSql/Repositorch.Data.Entities.Persistent.PostgreSql.csproj", "src/Repositorch.Data.Entities.Persistent.PostgreSql/"]
 COPY ["src/Repositorch.Web/Repositorch.Web.csproj", "src/Repositorch.Web/"]
