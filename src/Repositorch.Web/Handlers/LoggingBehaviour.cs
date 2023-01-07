@@ -22,8 +22,8 @@ namespace Repositorch.Web.Handlers
 		}
 		public async Task<TResponse> Handle(
 			TRequest request,
-			CancellationToken cancellationToken,
-			RequestHandlerDelegate<TResponse> next)
+			RequestHandlerDelegate<TResponse> next,
+			CancellationToken cancellationToken)
 		{
 			var requestToLog = typeof(ICustomLogObject).IsAssignableFrom(typeof(TRequest))
 				? (request as ICustomLogObject).CustomLogObject

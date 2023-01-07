@@ -20,9 +20,10 @@ namespace Repositorch.Data.Entities.Persistent
 				? $"user id={user};password={password}"
 				: "Trusted_Connection=True";
 		}
+
 		protected override void Configure(DbContextOptionsBuilder options)
 		{
-			var cs = $"server={address};database={name};{credentials};MultipleActiveResultSets=true;";
+			var cs = $"server={address};database={name};{credentials};TrustServerCertificate=True;MultipleActiveResultSets=true;";
 
 			options.UseSqlServer(cs);
 		}

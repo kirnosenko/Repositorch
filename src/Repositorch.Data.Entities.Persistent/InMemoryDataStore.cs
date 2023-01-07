@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Repositorch.Data.Entities.Persistent
 {
@@ -11,7 +10,7 @@ namespace Repositorch.Data.Entities.Persistent
 		}
 		protected override void Configure(DbContextOptionsBuilder options)
 		{
-			options.UseInMemoryDatabase(name);
+			options.UseInMemoryDatabase(name, o => o.EnableNullChecks(false));
 		}
 	}
 }
