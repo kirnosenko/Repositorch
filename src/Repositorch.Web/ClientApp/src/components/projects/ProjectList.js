@@ -1,6 +1,6 @@
 ﻿import React from 'react'
 import { Redirect } from 'react-router-dom'
-import * as signalR from '@aspnet/signalr';
+import * as signalR from '@microsoft/signalr';
 import { useDispatch } from 'react-redux';
 import { updateMapping } from '../../state/mappingActions';
 import ContentToLoad from '../ContentToLoad'

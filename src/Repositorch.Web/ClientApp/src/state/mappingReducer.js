@@ -6,7 +6,7 @@
 				errors: action.errors,
 				time: action.time
 			};
-			break;
+			return Object.assign({}, state)
 		default:
 			return state;
 	}
