@@ -72,7 +72,7 @@ namespace Repositorch.Web.Controllers
 		{
 			List<string> repoDirs = new List<string>();
 			var repoRoot = EnvironmentExtensions.GetRepoPath();
-			GetRepoDirs(repoRoot, repoRoot, repoDirs);
+			GetRepoDirs(repoRoot, repoRoot, repoDirs, 0, 1);
 
 			return Ok(repoDirs);
 		}
@@ -150,7 +150,7 @@ namespace Repositorch.Web.Controllers
 		/// <summary>
 		/// Return unix-styled relative pathes.
 		/// </summary>
-		private void GetRepoDirs(string rootDir, string currentDir, List<string> repoDirs)
+		private void GetRepoDirs(string rootDir, string currentDir, List<string> repoDirs, int depth, int depthMax)
 		{
 			var innerDirs = Directory.GetDirectories(currentDir);
 			var repoDir = innerDirs.SingleOrDefault(x => x.EndsWith(GitRepoDirName) &&
@@ -163,9 +163,12 @@ namespace Repositorch.Web.Controllers
 				return;
 			}
 
-			foreach (var dir in innerDirs)
+			if (depth < depthMax)
 			{
-				GetRepoDirs(rootDir, dir, repoDirs);
+				foreach (var dir in innerDirs)
+				{
+					GetRepoDirs(rootDir, dir, repoDirs, depth + 1, depthMax);
+				}
 			}
 		}
 

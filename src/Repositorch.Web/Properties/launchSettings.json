@@ -13,7 +13,7 @@
       "launchBrowser": true,
       "environmentVariables": {
         "REPOSITORCH_HOME_PATH": "d:\\appdata\\YandexDisk\\repositorch",
-        "REPOSITORCH_REPO_PATH": "d:\\dev",
+        "REPOSITORCH_REPO_PATH": "e:\\src",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
@@ -22,7 +22,7 @@
       "launchBrowser": true,
       "environmentVariables": {
         "REPOSITORCH_HOME_PATH": "d:\\appdata\\YandexDisk\\repositorch",
-        "REPOSITORCH_REPO_PATH": "d:\\dev",
+        "REPOSITORCH_REPO_PATH": "e:\\src",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:5000"
