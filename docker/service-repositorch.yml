@@ -4,6 +4,7 @@ services:
   
   repositorch:
     image: kirnosenko/repositorch
+    init: true
     container_name: repositorch
     deploy:
       restart_policy:
