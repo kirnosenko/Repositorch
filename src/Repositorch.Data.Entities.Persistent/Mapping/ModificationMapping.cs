@@ -14,6 +14,7 @@ namespace Repositorch.Data.Entities.Persistent.Mapping
 
 			builder.Property(m => m.Action)
 				.IsRequired();
+			builder.HasIndex(m => m.Action);
 
 			builder.HasOne(m => m.Commit)
 				.WithMany((string)null)

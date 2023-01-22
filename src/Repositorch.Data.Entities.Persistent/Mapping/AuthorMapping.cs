@@ -15,6 +15,7 @@ namespace Repositorch.Data.Entities.Persistent.Mapping
 			builder.Property(a => a.Name)
 				.HasMaxLength(255)
 				.IsRequired();
+			builder.HasIndex(a => a.Name);
 
 			builder.Property(a => a.Email)
 				.HasMaxLength(255)

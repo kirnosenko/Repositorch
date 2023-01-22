@@ -14,7 +14,6 @@ namespace Repositorch.Data.Entities.Persistent.Mapping
 
 			builder.Property(cf => cf.Path)
 				.IsRequired();
-
 			builder.HasIndex(cf => cf.Path)
 				.IsUnique();
 		}

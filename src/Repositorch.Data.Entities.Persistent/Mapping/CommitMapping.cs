@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Repositorch.Data.Entities.Persistent.Mapping
@@ -20,15 +19,15 @@ namespace Repositorch.Data.Entities.Persistent.Mapping
 				.HasMaxLength(40)
 				.IsUnicode(false)
 				.IsRequired();
+			builder.HasIndex(c => c.Revision)
+				.IsUnique();
 
 			builder.Property(c => c.Message)
 				.IsRequired(false);
 
 			builder.Property(c => c.Date)
 				.IsRequired();
-
-			builder.HasIndex(c => c.Revision)
-				.IsUnique();
+			builder.HasIndex(c => c.Date);
 		}
 	}
 }

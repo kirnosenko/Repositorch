@@ -14,6 +14,7 @@ namespace Repositorch.Data.Entities.Persistent.Mapping
 
 			builder.Property(cb => cb.Size)
 				.IsRequired();
+			builder.HasIndex(cb => cb.Size);
 
 			builder.HasOne(cb => cb.Modification)
 				.WithMany((string)null)

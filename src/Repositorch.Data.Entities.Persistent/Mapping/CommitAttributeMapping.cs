@@ -15,6 +15,7 @@ namespace Repositorch.Data.Entities.Persistent.Mapping
 			builder.Property(ca => ca.Type)
 				.HasMaxLength(255)
 				.IsRequired();
+			builder.HasIndex(ca => ca.Type);
 
 			builder.Property(ca => ca.Data)
 				.IsRequired(false);
