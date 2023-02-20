@@ -16,7 +16,7 @@ namespace Repositorch.Web.Handlers.Project.Import
 			this.projectManager = projectManager;
 		}
 
-		public Task<Unit> Handle(ImportProjectCommand request, CancellationToken cancellationToken)
+		public Task Handle(ImportProjectCommand request, CancellationToken cancellationToken)
 		{
 			var data = request.Data;
 			LinkEntities(data);
@@ -39,7 +39,7 @@ namespace Repositorch.Web.Handlers.Project.Import
 				s.SubmitChanges();
 			}
 
-			return Unit.Task;
+			return Task.CompletedTask;
 		}
 
 		private void LinkEntities(ProjectData data)

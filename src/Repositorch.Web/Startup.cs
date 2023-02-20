@@ -121,12 +121,6 @@ namespace Repositorch.Web
 				.As(typeof(IPipelineBehavior<,>));
 			builder.RegisterGeneric(typeof(ExceptionHandler<,,>))
 				.As(typeof(IRequestExceptionHandler<,,>));
-
-			builder.Register<ServiceFactory>(context =>
-			{
-				var c = context.Resolve<IComponentContext>();
-				return t => c.Resolve(t);
-			});
 		}
 
 		private void RegisterLiteDB(ContainerBuilder builder)

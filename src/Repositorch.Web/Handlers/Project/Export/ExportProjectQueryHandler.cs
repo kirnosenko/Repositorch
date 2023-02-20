@@ -20,7 +20,7 @@ namespace Repositorch.Web.Handlers.Project.Export
 			this.projectManager = projectManager;
 		}
 
-		public Task<Unit> Handle(ExportProjectQuery request, CancellationToken cancellationToken)
+		public Task Handle(ExportProjectQuery request, CancellationToken cancellationToken)
 		{
 			var settings = projectManager.GetProject(request.ProjectName);
 			var store = projectManager.GetProjectDataStore(settings);
@@ -49,7 +49,7 @@ namespace Repositorch.Web.Handlers.Project.Export
 				}
 			}
 
-			return Unit.Task;
+			return Task.CompletedTask;
 		}
 	}
 }
