@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System;
+using Microsoft.EntityFrameworkCore;
 
 namespace Repositorch.Data.Entities.Persistent
 {
@@ -22,11 +23,13 @@ namespace Repositorch.Data.Entities.Persistent
 			this.address = $"Server={address};Port={port}";
 			this.credentials = $"User ID={user};Password={password}";
 		}
+
 		protected override void Configure(DbContextOptionsBuilder options)
 		{
 			var cs = $"{credentials};{address};Database={name};Integrated Security=true;Pooling=true;";
 
 			options.UseNpgsql(cs);
+			AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 		}
 	}
 }
