@@ -20,7 +20,7 @@ namespace Repositorch.Web.Handlers.Project.Export
 			this.projectManager = projectManager;
 		}
 
-		public Task Handle(ExportProjectQuery request, CancellationToken cancellationToken)
+		public async Task Handle(ExportProjectQuery request, CancellationToken cancellationToken)
 		{
 			var settings = projectManager.GetProject(request.ProjectName);
 			var store = projectManager.GetProjectDataStore(settings);
@@ -47,9 +47,8 @@ namespace Repositorch.Web.Handlers.Project.Export
 				{
 					serializer.Serialize(jsonWriter, data);
 				}
+				await request.Output.FlushAsync();
 			}
-
-			return Task.CompletedTask;
 		}
 	}
 }

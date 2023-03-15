@@ -13,6 +13,7 @@ using Repositorch.Web.Handlers.Project.Export;
 using Repositorch.Web.Handlers.Project.Import;
 using Repositorch.Web.Options;
 using Repositorch.Web.Projects;
+using System.Threading;
 
 namespace Repositorch.Web.Controllers
 {
@@ -134,9 +135,8 @@ namespace Repositorch.Web.Controllers
 
 		[HttpGet]
 		[Route("[action]/{name}")]
-		public async Task Export([FromRoute] string name)
+		public async Task Export([FromRoute] string name, CancellationToken cancellationToken)
 		{
-			var cancellationToken = HttpContext.RequestAborted;
 			HttpContext.Response.ContentType = "application/json";
 			HttpContext.Response.StatusCode = 200;
 			await HttpContext.Response.StartAsync(cancellationToken);
@@ -145,6 +145,7 @@ namespace Repositorch.Web.Controllers
 				ProjectName = name,
 				Output = HttpContext.Response.BodyWriter.AsStream(),
 			}, cancellationToken);
+			await HttpContext.Response.CompleteAsync();
 		}
 
 		/// <summary>

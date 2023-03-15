@@ -12,14 +12,17 @@ namespace Repositorch.Web.Handlers
 		object CustomLogObject { get; }
 	}
 
-	public class LoggingBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse> where TRequest : IRequest<TResponse>
+	public class LoggingBehaviour<TRequest, TResponse> :
+		IPipelineBehavior<TRequest, TResponse>
+		where TRequest : notnull
 	{
-		private readonly ILogger<LoggingBehaviour<TRequest, TResponse>> logger;
+		private readonly ILogger logger;
 
 		public LoggingBehaviour(ILogger<LoggingBehaviour<TRequest, TResponse>> logger)
 		{
 			this.logger = logger;
 		}
+
 		public async Task<TResponse> Handle(
 			TRequest request,
 			RequestHandlerDelegate<TResponse> next,
@@ -28,9 +31,9 @@ namespace Repositorch.Web.Handlers
 			var requestToLog = typeof(ICustomLogObject).IsAssignableFrom(typeof(TRequest))
 				? (request as ICustomLogObject).CustomLogObject
 				: request;
-			if (requestToLog != null)
+			if (logger.IsEnabled(LogLevel.Trace) && requestToLog != null)
 			{
-				logger.LogInformation($"{typeof(TRequest)}: {JsonConvert.SerializeObject(requestToLog)}");
+				logger.LogTrace($"{typeof(TRequest)}: {JsonConvert.SerializeObject(requestToLog)}");
 			}
 			
 			var response = await next();
@@ -38,9 +41,9 @@ namespace Repositorch.Web.Handlers
 			var responseToLog = typeof(ICustomLogObject).IsAssignableFrom(typeof(TResponse))
 				? (response as ICustomLogObject).CustomLogObject
 				: response;
-			if (responseToLog != null)
+			if (logger.IsEnabled(LogLevel.Trace) && responseToLog != null)
 			{
-				logger.LogInformation($"{typeof(TResponse)}: {JsonConvert.SerializeObject(responseToLog)}");
+				logger.LogTrace($"{typeof(TResponse)}: {JsonConvert.SerializeObject(responseToLog)}");
 			}
 			
 			return response;

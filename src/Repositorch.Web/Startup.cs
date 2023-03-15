@@ -11,8 +11,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Autofac;
 using LiteDB;
-using MediatR;
-using MediatR.Pipeline;
 using Repositorch.Web.Handlers;
 using Repositorch.Web.Middleware;
 using Repositorch.Web.Options;
@@ -37,6 +35,11 @@ namespace Repositorch.Web
 		public void ConfigureServices(IServiceCollection services)
 		{
 			services.AddSignalR();
+			services.AddMediatR(c =>
+			{
+				c.RegisterServicesFromAssembly(typeof(Startup).Assembly);
+				c.AddOpenBehavior(typeof(LoggingBehaviour<,>));
+			});
 			services.AddHostedService<MappingService>();
 			services.Configure<DataStoreOptionsCollection>(Configuration);
 			services.Configure<FormOptions>(o =>
@@ -92,7 +95,6 @@ namespace Repositorch.Web
 
 		public void ConfigureContainer(ContainerBuilder builder)
 		{
-			RegisterMediatr(builder);
 			RegisterLiteDB(builder);
 			RegisterMetricsAndMenusForThem(builder);
 
@@ -102,25 +104,6 @@ namespace Repositorch.Web
 			builder.RegisterType<ProjectManager>()
 				.As<IProjectManager>()
 				.SingleInstance();
-		}
-
-		private void RegisterMediatr(ContainerBuilder builder)
-		{
-			builder
-				.RegisterType<Mediator>()
-				.As<IMediator>()
-				.InstancePerLifetimeScope();
-
-			builder
-				.RegisterAssemblyTypes(typeof(Startup).GetTypeInfo().Assembly)
-				.AsClosedTypesOf(typeof(IRequestHandler<,>));
-			builder
-				.RegisterGeneric(typeof(LoggingBehaviour<,>))
-				.As(typeof(IPipelineBehavior<,>));
-			builder.RegisterGeneric(typeof(RequestExceptionProcessorBehavior<,>))
-				.As(typeof(IPipelineBehavior<,>));
-			builder.RegisterGeneric(typeof(ExceptionHandler<,,>))
-				.As(typeof(IRequestExceptionHandler<,,>));
 		}
 
 		private void RegisterLiteDB(ContainerBuilder builder)
