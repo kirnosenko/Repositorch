@@ -20,7 +20,7 @@ namespace Repositorch.Web.Middleware
 				context.Response.OnStarting(state =>
 				{
 					var httpContext = (HttpContext)state;
-					httpContext.Response.Headers.Add("Time", time.FormatedTime);
+					httpContext.Response.Headers["Time"] = time.FormatedTime;
 					return Task.CompletedTask;
 				}, context);
 

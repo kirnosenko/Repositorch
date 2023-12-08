@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:7.0-bullseye-slim AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0-bookworm-slim AS build
 RUN curl -sL https://deb.nodesource.com/setup_18.x | bash -
 RUN apt-get install -y nodejs
 WORKDIR "/build"
@@ -12,7 +12,7 @@ COPY . .
 WORKDIR "/build/src/Repositorch.Web"
 RUN dotnet publish "Repositorch.Web.csproj" -c Release -o /app
 
-FROM mcr.microsoft.com/dotnet/aspnet:7.0-alpine AS deploy
+FROM mcr.microsoft.com/dotnet/aspnet:8.0-alpine AS deploy
 RUN apk add --no-cache git \
 	icu-libs
 RUN git config --global core.quotepath off && \

@@ -12,7 +12,7 @@
       "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
-        "REPOSITORCH_HOME_PATH": "d:\\appdata\\YandexDisk\\repositorch",
+        "REPOSITORCH_HOME_PATH": "d:\\appdata\\gdrive\\repositorch",
         "REPOSITORCH_REPO_PATH": "e:\\src",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
@@ -21,7 +21,7 @@
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
-        "REPOSITORCH_HOME_PATH": "d:\\appdata\\YandexDisk\\repositorch",
+        "REPOSITORCH_HOME_PATH": "d:\\appdata\\gdrive\\repositorch",
         "REPOSITORCH_REPO_PATH": "e:\\src",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

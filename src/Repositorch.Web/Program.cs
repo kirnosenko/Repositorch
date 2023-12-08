@@ -1,10 +1,11 @@
 using System;
 using System.IO;
+using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NLog;
 using NLog.Web;
-using Autofac.Extensions.DependencyInjection;
 
 namespace Repositorch.Web
 {
@@ -12,7 +13,7 @@ namespace Repositorch.Web
 	{
 		public static void Main(string[] args)
 		{
-			var logger = NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
+			var logger = LogManager.Setup().LoadConfigurationFromFile("nlog.config").GetCurrentClassLogger();
 			try
 			{
 				var host = Host.CreateDefaultBuilder(args)
@@ -27,7 +28,7 @@ namespace Repositorch.Web
 					.ConfigureLogging(logging =>
 					{
 						logging.ClearProviders();
-						logging.SetMinimumLevel(LogLevel.Trace);
+						logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Information);
 					})
 					.UseNLog()
 					.Build();
@@ -41,7 +42,7 @@ namespace Repositorch.Web
 			}
 			finally
 			{
-				NLog.LogManager.Shutdown();
+				LogManager.Shutdown();
 			}
 		}
 	}
